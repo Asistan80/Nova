@@ -26,7 +26,8 @@
     "play_url": "/oyna/rise-of-the-bosses",
     "download_url": null,
     "updated_at": "2026-07-13",
-    "changelog": []
+    "changelog": [],
+    "has_game_files": true
   },
   {
     "slug": "bench",

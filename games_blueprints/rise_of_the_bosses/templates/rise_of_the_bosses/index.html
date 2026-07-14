@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Snake Evolution: Rise of the Bosses</title>
+<link rel="stylesheet" href="{{ url_for('rise_of_the_bosses.static', filename='style.css') }}">
+</head>
+<body>
+<div class="app">
+
+  <div class="title">🐍 SNAKE EVOLUTION</div>
+  <div class="subtitle">Rise of the Bosses</div>
+
+  <!-- MENU SCREEN -->
+  <div id="menu-screen" class="panel">
+    <div class="menu-grid">
+      <div>
+        <div class="field-row">
+          <label data-i18n="playerNameLabel">Oyuncu Adı</label>
+          <input type="text" id="player-name" maxlength="20" placeholder="İsmini gir..." data-i18n-placeholder="playerNamePlaceholder">
+        </div>
+
+        <div class="field-row">
+          <label data-i18n="modeLabel">Oyun Modu</label>
+          <div class="mode-grid" id="mode-grid">
+            <div class="mode-btn" data-mode="60" data-i18n="mode1">1 Dakika</div>
+            <div class="mode-btn" data-mode="120" data-i18n="mode2">2 Dakika</div>
+            <div class="mode-btn" data-mode="180" data-i18n="mode3">3 Dakika</div>
+            <div class="mode-btn" data-mode="300" data-i18n="mode5">5 Dakika</div>
+            <div class="mode-btn" data-mode="0" data-i18n="modeEndless">Sonsuz Mod</div>
+          </div>
+        </div>
+
+        <div class="field-row">
+          <label data-i18n="difficultyLabel">Zorluk</label>
+          <div class="mode-grid" id="difficulty-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="mode-btn" data-difficulty="easy" data-i18n="diffEasy">Kolay</div>
+            <div class="mode-btn" data-difficulty="normal" data-i18n="diffNormal">Normal</div>
+            <div class="mode-btn" data-difficulty="hard" data-i18n="diffHard">Zor</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="start-btn" data-i18n="startBtn">▶ OYUNA BAŞLA</button>
+
+        <div class="btn-row" style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+          <button class="btn-secondary" id="open-market-btn" data-i18n="marketBtn">🛒 Market</button>
+          <button class="btn-secondary" id="open-quests-btn" data-i18n="questsBtn">📅 Görevler</button>
+          <button class="btn-secondary" id="open-achievements-btn" data-i18n="achievementsBtn">🏆 Başarımlar</button>
+          <button class="btn-secondary" id="open-stats-btn" data-i18n="statsBtn">📊 İstatistikler</button>
+          <button class="btn-secondary" id="open-daily-btn" style="position:relative;"><span data-i18n="dailyBtn">🎁 Günlük Ödül</span><span id="daily-dot" class="ping-dot hidden"></span></button>
+          <button class="btn-secondary" id="open-bosses-btn" data-i18n="bossesBtn">🧩 Boss Koleksiyonu</button>
+          <button class="btn-secondary" id="open-settings-btn" data-i18n="settingsBtn">⚙ Ayarlar</button>
+          <button class="btn-secondary" id="open-chests-btn" style="position:relative;"><span data-i18n="chestsBtn">🎰 Boss Sandıkları</span><span id="chest-dot" class="ping-dot hidden"></span></button>
+          <button class="btn-secondary" id="open-skins-btn" style="position:relative;"><span data-i18n="skinsBtn">🎨 Skinler</span><span class="new-badge" data-i18n="newBadge">YENİ</span></button>
+          <button class="btn-secondary" id="open-leaderboard-btn" data-i18n="leaderboardBtn">📋 Skor Tablosu</button>
+          <button class="btn-secondary" id="open-arenas-btn" style="position:relative;"><span data-i18n="arenasBtn">🗺 Arena Seç</span><span class="new-badge" data-i18n="newBadge">YENİ</span></button>
+        </div>
+
+        <div style="margin-top:14px; color:var(--text-dim); font-size:12px; line-height:1.6;" data-i18n="helpText">
+          Fare ile yönünü kontrol et. Yem topla, seviye atla, senden küçük yılanları ye.
+          Süre bitince (veya sonsuz modda periyodik olarak) bir <b style="color:var(--accent2)">Final Boss</b> karşına çıkar —
+          leveline göre kazanır ya da kaybedersin.
+        </div>
+      </div>
+
+      <div>
+        <div class="panel profile-box" style="padding:14px;">
+          <div class="row"><span class="label" data-i18n="playerLabel">Oyuncu</span><span class="value" id="p-name">Oyuncu</span></div>
+          <div class="row"><span class="label" data-i18n="arenaLabel">🗺 Arenan</span><span class="value" id="p-arena-name">Çayır</span></div>
+          <div class="row"><span class="label" data-i18n="appearanceLabel">🎨 Görünümün</span><span class="value" style="display:flex; align-items:center; gap:8px;"><span id="p-skin-swatch" style="width:16px; height:16px; border-radius:50%; background:#39ff88; display:inline-block; border:1px solid rgba(255,255,255,0.3);"></span><span id="p-skin-name" data-i18n="defaultSkinName">Varsayılan</span></span></div>
+          <div class="row"><span class="label" data-i18n="totalGoldLabel">Toplam Altın</span><span class="value" id="p-gold">0</span></div>
+          <div class="row"><span class="label" data-i18n="bestLevelLabel">En Yüksek Level</span><span class="value" id="p-level">1</span></div>
+          <div class="row"><span class="label" data-i18n="longestSnakeLabel">En Uzun Yılan</span><span class="value" id="p-snake">0</span></div>
+          <div class="row"><span class="label" data-i18n="bossWinsLabel">Boss Galibiyeti</span><span class="value" id="p-bosswins">0</span></div>
+          <div class="row"><span class="label" data-i18n="totalGamesLabel">Toplam Oyun / Galibiyet</span><span class="value" id="p-games">0 / 0</span></div>
+          <div style="margin-top:8px; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;" data-i18n="medalsLabel">🏅 Madalyalar</div>
+          <div class="medal-row" id="medal-row"></div>
+          <div style="margin-top:8px; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;" data-i18n="bossCollectionLabel">Boss Koleksiyonu</div>
+          <div class="boss-list" id="boss-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKET SCREEN -->
+  <div id="market-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="marketTitle">🛒 Market</div>
+        <div class="screen-sub" data-i18n="marketSub">Altınını kalıcı geliştirmelere harca — her seviye biraz daha pahalı olur.</div>
+      </div>
+      <div class="gold-badge">💰 <span id="market-gold">0</span></div>
+    </div>
+    <div class="upgrade-grid" id="upgrade-grid"></div>
+    <div class="prestige-box" id="prestige-box"></div>
+    <button class="btn-secondary" id="market-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- QUESTS SCREEN -->
+  <div id="quests-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="questsTitle">📅 Günlük Görevler</div>
+        <div class="screen-sub" data-i18n="questsSub">Görevler her gün sıfırlanır. Tamamlayınca ödülünü almayı unutma!</div>
+      </div>
+      <div class="gold-badge">💰 <span id="quests-gold">0</span></div>
+    </div>
+    <div class="quest-list" id="quest-list"></div>
+    <button class="btn-secondary" id="quests-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- ACHIEVEMENTS SCREEN -->
+  <div id="achievements-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="achievementsTitle">🏆 Başarımlar</div>
+        <div class="screen-sub" data-i18n="achievementsSub">Kalıcı hedefler — bir kez tamamlanır, bir kez ödül verir.</div>
+      </div>
+      <div class="gold-badge">💰 <span id="ach-gold">0</span></div>
+    </div>
+    <div class="quest-list" id="achievement-list"></div>
+    <button class="btn-secondary" id="achievements-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- STATS SCREEN -->
+  <div id="stats-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="statsTitle">📊 İstatistikler</div>
+        <div class="screen-sub" data-i18n="statsSub">Tüm zamanlar boyunca topladığın veriler.</div>
+      </div>
+    </div>
+    <div class="stat-grid" id="stat-grid"></div>
+    <button class="btn-secondary" id="stats-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- DAILY LOGIN SCREEN -->
+  <div id="daily-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="dailyTitle">🎁 Günlük Giriş Ödülü</div>
+        <div class="screen-sub" data-i18n="dailySub">Her gün giriş yap, ödülünü al. 7. gün özel Boss Sandığı! Bir gün kaçırırsan seri sıfırlanır.</div>
+      </div>
+      <div class="gold-badge" id="daily-streak-badge">🔥 0 gün</div>
+    </div>
+    <div class="daily-grid" id="daily-grid"></div>
+    <button class="btn-primary" id="daily-claim-btn" style="margin-top:16px;" data-i18n="claimBtn">Ödülü Al</button>
+    <button class="btn-secondary" id="daily-back-btn" style="margin-top:10px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- BOSS COLLECTION SCREEN -->
+  <div id="bosses-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="bossesTitle">🧩 Boss Koleksiyonu</div>
+        <div class="screen-sub" data-i18n="bossesSub">İlk galibiyet skin açar. Sonraki galibiyetler Boss Parçası verir — 100 parça ile Legendary (sadece görsel) versiyon açılır.</div>
+      </div>
+    </div>
+    <div class="boss-frag-grid" id="boss-frag-grid"></div>
+    <button class="btn-secondary" id="bosses-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- SETTINGS SCREEN -->
+  <div id="settings-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="settingsTitle">⚙ Ayarlar</div>
+        <div class="screen-sub" data-i18n="settingsSub">Değişiklikler anında uygulanır ve kaydedilir.</div>
+      </div>
+    </div>
+    <div class="settings-list" id="settings-list">
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="soundLabel">🔊 Ses Efektleri</div>
+        <label class="switch"><input type="checkbox" id="set-sound"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="musicLabel">🎵 Müzik</div>
+        <label class="switch"><input type="checkbox" id="set-music"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="musicTrackLabel">🎼 Müzik Türü</div>
+        <select id="set-music-track" class="setting-select">
+          <option value="yumusak" data-i18n="trackSoft">Yumuşak</option>
+          <option value="ambient" data-i18n="trackAmbient">Ambient</option>
+          <option value="enerjik" data-i18n="trackEnergetic">Enerjik</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="graphicsLabel">🎨 Grafik Kalitesi</div>
+        <select id="set-graphics" class="setting-select">
+          <option value="dusuk" data-i18n="graphicsLow">Düşük</option>
+          <option value="orta" data-i18n="graphicsMed">Orta</option>
+          <option value="yuksek" data-i18n="graphicsHigh">Yüksek</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">🖥 FPS</div>
+        <select id="set-fps" class="setting-select">
+          <option value="30">30</option>
+          <option value="60">60</option>
+          <option value="120">120</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="vibrationLabel">📳 Titreşim <span class="setting-note" data-i18n="vibrationNote">(mobil cihazlarda)</span></div>
+        <label class="switch"><input type="checkbox" id="set-vibration"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="notificationsLabel">🔔 Bildirimler <span class="setting-note" data-i18n="notificationsNote">(tarayıcı izni gerekir)</span></div>
+        <label class="switch"><input type="checkbox" id="set-notifications"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label" data-i18n="langLabel">🌐 Dil</div>
+        <select id="set-language" class="setting-select">
+          <option value="tr">Türkçe</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-secondary" id="settings-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- CHESTS SCREEN -->
+  <div id="chests-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="chestsTitle">🎰 Boss Sandıkları</div>
+        <div class="screen-sub" data-i18n="chestsSub">Boss yenince nadire göre sandık düşer: Bronz, Gümüş, Altın, Elmas, Efsanevi. Sandıklardan altın, boss parçası ve nadir kozmetikler çıkabilir.</div>
+      </div>
+      <button class="btn-primary" id="open-all-chests-btn" style="width:auto; padding:10px 18px; white-space:nowrap;" data-i18n="openAllBtn">Tümünü Aç</button>
+    </div>
+    <div class="chest-grid" id="chest-grid"></div>
+    <div class="cosmetics-section">
+      <div class="screen-sub" style="margin-bottom:8px;" data-i18n="cosmeticsLabel">🎨 Kozmetik Koleksiyonu</div>
+      <div class="boss-list" id="cosmetics-list"></div>
+    </div>
+    <button class="btn-secondary" id="chests-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- SKINS SCREEN -->
+  <div id="skins-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="skinsTitle">🎨 Skinler</div>
+        <div class="screen-sub" data-i18n="skinsSub">Oyun parasıyla renk satın al veya boss yenerek açtığın görünümleri seç. Seçili skin oyunda yılanının rengi olur.</div>
+      </div>
+      <div class="gold-badge" id="skins-gold">💰 0</div>
+    </div>
+    <div class="screen-sub" style="margin:12px 0 6px;" data-i18n="purchasableLabel">Satın Alınabilir Renkler</div>
+    <div class="skin-grid" id="skin-catalog-grid"></div>
+    <div class="screen-sub" style="margin:18px 0 6px;" data-i18n="bossSkinsLabel">Boss Skinleri</div>
+    <div class="skin-grid" id="skin-boss-grid"></div>
+    <button class="btn-secondary" id="skins-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- LEADERBOARD SCREEN -->
+  <div id="leaderboard-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="leaderboardTitle">📋 Skor Tablosu</div>
+        <div class="screen-sub" data-i18n="leaderboardSub">Maç sonunda hesaplanan skorunla kaydolabilirsin. Skor = level×10 + yenilen yılan×6 + boss galibiyeti bonusu + yem/altın bonusu.</div>
+      </div>
+      <button class="btn-secondary" id="clear-leaderboard-btn" style="width:auto; padding:10px 16px; white-space:nowrap;" data-i18n="clearAllBtn">🗑 Tümünü Temizle</button>
+    </div>
+    <div class="leaderboard-list" id="leaderboard-list"></div>
+    <button class="btn-secondary" id="leaderboard-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- ARENA SCREEN -->
+  <div id="arenas-screen" class="panel hidden">
+    <div class="screen-header">
+      <div>
+        <div class="screen-title" data-i18n="arenasTitle">🗺 Arena Seç</div>
+        <div class="screen-sub" data-i18n="arenasSub">Level yükseldikçe yeni arenaların kilidi açılır. Her arenanın kendine has bir atmosferi var.</div>
+      </div>
+    </div>
+    <div class="arena-grid" id="arena-grid"></div>
+    <button class="btn-secondary" id="arenas-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game-screen" class="hidden">
+    <div id="game-wrap">
+      <canvas id="game-canvas" width="1200" height="750"></canvas>
+
+      <div class="hud-overlay">
+        <div class="hud">
+          <div>
+            <span class="pill level">Lv <span id="hud-level">1</span></span>
+            <span class="pill gold">💰 <span id="hud-gold">0</span></span>
+          </div>
+          <div>
+            <span class="pill timer" id="hud-timer">⏱ --:--</span>
+            <button class="pill fs-btn" id="fullscreen-btn" title="Tam Ekran">⛶</button>
+            <button class="pill fs-btn" id="quit-to-menu-btn" title="Ana Menüye Dön">🏠</button>
+          </div>
+        </div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill"></div></div>
+        <div class="buff-row" id="buff-row"></div>
+      </div>
+
+      <div id="event-banner" class="event-banner hidden"></div>
+      <div id="overlay" class="overlay hidden"></div>
+    </div>
+  </div>
+
+</div>
+
+<script src="{{ url_for('rise_of_the_bosses.static', filename='game.js') }}"></script>
+</body>
+</html>

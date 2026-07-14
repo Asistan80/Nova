@@ -88,17 +88,30 @@ set SECRET_KEY=rastgeleuzunmetin
 python app.py
 ```
 
+## Rise of the Bosses artık gerçekten bağlı! 🐍
+"Tarayıcıda Oyna" butonu artık gerçek oyunu açıyor. Nasıl çalışıyor:
+
+- Oyunun tüm kodu `games_blueprints/rise_of_the_bosses/` altında bir Flask
+  **Blueprint** olarak entegre edildi (`app.py` içinde `register_blueprint` ile
+  bağlanıyor).
+- **Her ziyaretçinin kendi kaydı var** — çerez tabanlı bir kimlikle, herkesin
+  ilerlemesi (`games_blueprints/rise_of_the_bosses/data/players/<id>.json`)
+  ayrı ayrı saklanıyor. Yani biri oynarken bir başkasının kaydını
+  etkilemiyor. Liderlik tablosu (`leaderboard.json`) ise ortak ve herkese açık,
+  bu tasarım gereği.
+- Oturum çerezi 365 gün kalıcı — bir ziyaretçi bir hafta sonra tekrar gelse
+  bile aynı kaydını görür (tarayıcısını/çerezlerini silmediği sürece).
+
+**Bilinmesi gereken:** Oyuncu kayıtları da diğer admin panel dosyaları gibi
+Render'ın ücretsiz katmanında kalıcı değil — bir redeploy'da tüm oyuncu
+kayıtları sıfırlanabilir. Bu şimdilik GitHub'a otomatik yedeklenmiyor (her
+oyun hamlesinde commit atmak çok fazla olurdu); ciddi bir oyuncu kitlesi
+oluşursa, bunun için ayrı bir çözüm (örn. gerçek bir veritabanı) konuşabiliriz.
+
+**Yeni bir oyun/uygulama gelince aynı şekilde bağlamak** için: kodunu
+paylaş, yapısına göre (Blueprint veya iframe) aynı yöntemle entegre ederiz.
+
 ## Yeni bir oyun/uygulama eklemek (elle, admin panel olmadan)
 `data/projects.json` dosyasını doğrudan düzenleyip yeni bir obje ekleyebilirsin,
 format admin panelin ürettiğiyle aynıdır.
 
-## Rise of the Bosses'ı gerçekten bağlamak
-`app.py` içindeki `play()` fonksiyonunun yanına not düştüm. İki seçenek var:
-
-1. **Blueprint (önerilen):** Oyunun kendi `app.py`'sini bir Flask Blueprint'e
-   çevirip burada `app.register_blueprint(...)` ile bağlarsın.
-2. **iframe:** Oyunu ayrı bir process/port'ta çalıştırıp `play.html` içine
-   `<iframe src="http://localhost:PORT">` koyarsın.
-
-Oyunun dosyalarını admin panelden yüklediğinde (`games/<slug>/` altına
-kaydediliyor) bu entegrasyonu birlikte yaparız.

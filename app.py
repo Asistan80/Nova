@@ -1,5 +1,6 @@
 import os
 from functools import wraps
+from datetime import timedelta
 
 from flask import (
     Flask, render_template, send_from_directory, abort, request,
@@ -9,9 +10,14 @@ from werkzeug.utils import secure_filename
 
 import store
 import github_sync
+from games_blueprints.rise_of_the_bosses import bp as rise_of_the_bosses_bp
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-degistir-bunu")
+# Oyun ilerlemesinin (ziyaretçi bazlı kayıt) uzun süre hatırlanması için
+app.permanent_session_lifetime = timedelta(days=365)
+
+app.register_blueprint(rise_of_the_bosses_bp)
 
 # Render'da Environment sekmesinden ADMIN_PASSWORD değişkenini ayarla.
 # Ayarlamazsan bu varsayılan şifre kullanılır -- güvenlik için mutlaka değiştir.
