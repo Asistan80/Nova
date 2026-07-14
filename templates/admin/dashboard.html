@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Yönetim Paneli — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Yönetim Paneli</h1>
+      <div style="display:flex; gap:12px;">
+        <a href="{{ url_for('admin_new') }}" class="btn btn-primary">+ Yeni Proje</a>
+        <a href="{{ url_for('admin_logout') }}" class="btn btn-ghost">Çıkış yap</a>
+      </div>
+    </div>
+
+    <p class="stat-badge" style="margin-bottom:24px;">Toplam ziyaret: {{ stats.visits }}</p>
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin-bottom:14px;">Oyunlar</h2>
+    <table class="admin-table">
+      <thead><tr><th>Ad</th><th>Durum</th><th>Oynama</th><th></th></tr></thead>
+      <tbody>
+        {% for p in games %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.status }}</td>
+          <td>{{ stats.plays.get(p.slug, 0) }}</td>
+          <td class="admin-actions">
+            <a href="{{ url_for('admin_edit', slug=p.slug) }}">Düzenle</a>
+            <form method="POST" action="{{ url_for('admin_delete', slug=p.slug) }}" onsubmit="return confirm('{{ p.name }} silinsin mi?');">
+              <button type="submit" class="danger">Sil</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="color:var(--text-dim);">Henüz oyun eklenmedi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin:36px 0 14px;">Uygulamalar</h2>
+    <table class="admin-table">
+      <thead><tr><th>Ad</th><th>Durum</th><th>İndirme</th><th></th></tr></thead>
+      <tbody>
+        {% for p in apps %}
+        <tr>
+          <td>{{ p.name }}</td>
+          <td>{{ p.status }}</td>
+          <td>{{ stats.downloads.get(p.slug, 0) }}</td>
+          <td class="admin-actions">
+            <a href="{{ url_for('admin_edit', slug=p.slug) }}">Düzenle</a>
+            <form method="POST" action="{{ url_for('admin_delete', slug=p.slug) }}" onsubmit="return confirm('{{ p.name }} silinsin mi?');">
+              <button type="submit" class="danger">Sil</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" style="color:var(--text-dim);">Henüz uygulama eklenmedi.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

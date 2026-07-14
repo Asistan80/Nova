@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }} — Oyna{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">{{ p.name }}</h1>
+
+    {# Rise of the Bosses'ın kendi app.py'si buraya blueprint olarak bağlanınca
+       bu placeholder <div>'in yerine gerçek oyunun şablonu / iframe'i gelecek. #}
+    <div class="play-frame">
+      "{{ p.name }}" bu sayfaya henüz bağlanmadı.<br><br>
+      Oyunun kendi Flask uygulamasını Blueprint'e çevirip app.py içindeki
+      <code>play()</code> fonksiyonuna bağladığında burada gerçek oyun açılacak.
+    </div>
+
+    <div class="hero-cta">
+      <a href="{{ url_for('game_detail', slug=p.slug) }}" class="btn btn-ghost">Detaylara dön</a>
+    </div>
+  </div>
+</header>
+
+{% endblock %}

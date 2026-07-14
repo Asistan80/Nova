@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Giriş — Murnova Dünyası{% endblock %}
+{% block content %}
+<div class="wrap">
+  <div class="login-box reveal in">
+    <h1>Yönetim Paneli</h1>
+    <form method="POST" class="form-grid">
+      <div class="form-field">
+        <label for="password">Şifre</label>
+        <input type="password" id="password" name="password" autofocus required
+               style="width:100%; padding:12px 14px; border-radius:9px; border:1px solid var(--line); background:var(--bg-deep); color:var(--text);">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Giriş yap</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

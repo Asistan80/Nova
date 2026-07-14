@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>Aktif geliştirme — yeni kartuşlar yolda</div>
+    <h1 class="title">Kendi yaptığın oyunlar ve programlar, <span class="hl">tek rafta.</span></h1>
+    <p class="hero-sub">MuBiKu'nun geliştirdiği tüm oyun ve uygulamaların toplandığı kişisel vitrin. Bazılarını tarayıcıda direkt oyna, bazılarını indirip bilgisayarına kur.</p>
+    <div class="hero-cta">
+      <a href="#oyunlar" class="btn btn-primary">Rafa göz at</a>
+      <a href="#hakkinda" class="btn btn-ghost">Bu site nedir?</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">{{ games|length + apps|length }}</div><div class="stat-label">yayınlanan proje</div></div>
+      <div><div class="stat-num">{{ games|selectattr('status','equalto','playable')|list|length }}</div><div class="stat-label">oynanabilir oyun</div></div>
+      <div><div class="stat-num">{{ stats.visits }}</div><div class="stat-label">ziyaret</div></div>
+    </div>
+  </div>
+</header>
+
+<section class="shelf" id="oyunlar">
+  <div class="wrap">
+    <div class="shelf-head">
+      <div>
+        <h2>Oyun Rafı</h2>
+        <p>Tarayıcıda oynanabilen, kendi motorlarıyla geliştirilmiş oyunlar.</p>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <button class="chip-btn active" data-filter="all">Tümü</button>
+        <button class="chip-btn" data-filter="oyun">Oyunlar</button>
+        <button class="chip-btn" data-filter="uygulama">Uygulamalar</button>
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" placeholder="Proje veya etiket ara...">
+      </div>
+    </div>
+
+    <div class="rack">
+      {% for p in games %}
+      <article class="cart reveal" tabindex="0" data-kind="oyun" data-search="{{ (p.name ~ ' ' ~ (p.tags|join(' ')) ~ ' ' ~ p.tagline)|lower }}">
+        <div class="cart-cover kind-oyun-cover">
+          {% if p.cover %}
+            <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
+          {% else %}
+            <span class="cover-fallback">{{ p.name[:2]|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="cart-top">
+          <span class="cart-kind kind-oyun">Oyun</span>
+          <span class="cart-status">
+            <span class="pip {% if p.status != 'playable' %}off{% endif %}"></span>
+            {% if p.status == 'playable' %}Oynanabilir{% elif p.status == 'coming' %}Yakında{% else %}İndirilebilir{% endif %}
+          </span>
+        </div>
+        <div class="cart-label">{{ p.name }}</div>
+        <div class="cart-desc">{{ p.desc }}</div>
+        <div class="cart-tags">
+          {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        <div class="stat-badge" style="margin-bottom:14px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          {{ stats.plays.get(p.slug, 0) }} kez oynandı
+        </div>
+        <div class="cart-actions">
+          {% if p.status == 'playable' %}
+            <a href="{{ p.play_url }}" class="mini-btn primary">Tarayıcıda Oyna</a>
+          {% endif %}
+          <a href="{{ url_for('game_detail', slug=p.slug) }}" class="mini-btn">Detaylar</a>
+        </div>
+      </article>
+      {% endfor %}
+
+      <article class="cart coming reveal" tabindex="0" data-kind="oyun" data-search="yakında planlanıyor">
+        <div class="cart-cover kind-oyun-cover"><span class="cover-fallback">?</span></div>
+        <div class="cart-top">
+          <span class="cart-kind kind-oyun">Oyun</span>
+          <span class="cart-status"><span class="pip off"></span>Yakında</span>
+        </div>
+        <div class="cart-label">???</div>
+        <div class="cart-desc">Rafta bir sonraki kartuş için yer ayrıldı — yeni bir oyun geliştirildikçe burada görünecek.</div>
+        <div class="cart-tags"><span class="tag">Planlanıyor</span></div>
+        <div class="cart-actions"><span class="mini-btn">Yakında</span></div>
+      </article>
+    </div>
+    <p class="empty-msg">Aramanla eşleşen bir proje bulunamadı.</p>
+  </div>
+</section>
+
+<section class="shelf" id="uygulamalar">
+  <div class="wrap">
+    <div class="shelf-head">
+      <div>
+        <h2>Uygulama Rafı</h2>
+        <p>İndirip kurarak kullanılan araçlar ve program projeleri.</p>
+      </div>
+    </div>
+    <div class="rack">
+      {% for p in apps %}
+      <article class="cart reveal" tabindex="0" data-kind="uygulama" data-search="{{ (p.name ~ ' ' ~ (p.tags|join(' ')) ~ ' ' ~ p.tagline)|lower }}">
+        <div class="cart-cover kind-uygulama-cover">
+          {% if p.cover %}
+            <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
+          {% else %}
+            <span class="cover-fallback">{{ p.name[:2]|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="cart-top">
+          <span class="cart-kind kind-uygulama">Uygulama</span>
+          <span class="cart-status"><span class="pip"></span>İndirilebilir</span>
+        </div>
+        <div class="cart-label">{{ p.name }}</div>
+        <div class="cart-desc">{{ p.desc }}</div>
+        <div class="cart-tags">
+          {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        <div class="stat-badge" style="margin-bottom:14px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+          {{ stats.downloads.get(p.slug, 0) }} indirme
+        </div>
+        <div class="cart-actions">
+          <a href="{{ url_for('download', slug=p.slug) }}" class="mini-btn primary">İndir</a>
+          <a href="{{ url_for('app_detail', slug=p.slug) }}" class="mini-btn">Detaylar</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="about" id="hakkinda">
+  <div class="wrap">
+    <div class="about-box reveal">
+      <div>
+        <h3>Bu site nedir?</h3>
+        <p>Murnova Dünyası, geliştirdiğim oyun ve uygulamaları tek bir yerde toplamak için kurduğum kişisel vitrin. Her yeni proje bittiğinde buraya bir kartuş olarak eklenir.</p>
+        <p>Oyunlar mümkün olduğunca tarayıcıda oynanabilir şekilde sunulur; masaüstü uygulamaları ise indirme paketi olarak paylaşılır.</p>
+      </div>
+      <div class="about-code">// murnova.json
+{
+  <span class="c1">"gelistirici"</span>: <span class="c2">"MuBiKu"</span>,
+  <span class="c1">"kartuslar"</span>: <span class="c2">{{ games|length + apps|length }}</span>,
+  <span class="c1">"ziyaret"</span>: <span class="c2">{{ stats.visits }}</span>,
+  <span class="c1">"durum"</span>: <span class="c2">"gelisiyor"</span>
+}</div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

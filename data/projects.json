@@ -1,0 +1,77 @@
+[
+  {
+    "slug": "rise-of-the-bosses",
+    "name": "Rise of the Bosses",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Snake Evolution + boss savaşları",
+    "desc": "15 boss, prestij sistemi, market/yükseltme mekaniği, günlük görevler, başarımlar, liderlik tablosu ve 10 arenayla genişletilmiş bir Snake Evolution deneyimi.",
+    "tags": [
+      "Python / Flask",
+      "HTML Canvas",
+      "TR / EN"
+    ],
+    "features": [
+      "15 farklı boss ve özgün savaş desenleri",
+      "Prestij sistemi ve kalıcı yükseltmeler",
+      "Market üzerinden satın alınabilir, görsel olarak farklı yılan derileri",
+      "Günlük görevler ve başarımlar",
+      "10 farklı arena",
+      "Zorluk ön ayarları ve AI-vs-AI çarpışma modu",
+      "Tam Türkçe / İngilizce dil desteği"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": "/oyna/rise-of-the-bosses",
+    "download_url": null,
+    "updated_at": "2026-07-13",
+    "changelog": []
+  },
+  {
+    "slug": "bench",
+    "name": "Bench",
+    "kind": "uygulama",
+    "status": "download",
+    "tagline": "t",
+    "desc": "d",
+    "tags": [
+      "a"
+    ],
+    "features": [
+      "b"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": null,
+    "download_url": null,
+    "updated_at": "2026-07-13",
+    "changelog": []
+  },
+  {
+    "slug": "kutuphane",
+    "name": "Kütüphane",
+    "kind": "uygulama",
+    "status": "download",
+    "tagline": "Kişisel kitap + oyun kütüphanesi",
+    "desc": "Kitap ve oyun koleksiyonunu tek çatı altında toplayan, Playnite tarzı bir launcher işlevi de sunan kişisel kütüphane uygulaması.",
+    "tags": [
+      "Flask",
+      "SQLite"
+    ],
+    "features": [
+      "Kitap ve oyunlar için tam CRUD yönetimi",
+      "Tür / raf gibi seçmeli listelerde ekleme-silme",
+      "Ayarlarda gradyan renk paleti ile görsel özelleştirme",
+      "Planlanan: Steam/Epic/GOG kütüphane taraması, tek tık başlatma"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": null,
+    "download_url": null,
+    "updated_at": "2026-07-13",
+    "changelog": []
+  }
+]

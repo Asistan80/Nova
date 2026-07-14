@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}İndirme hazırlanıyor — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">{{ p.name if p else 'Bu proje' }} henüz indirmeye hazır değil</h1>
+    <p class="detail-tagline">
+      Yönetim panelinden (<code>/admin</code>) bu projeyi düzenleyip bir
+      <code>.zip</code> paketi yüklediğinde bu buton gerçek dosyayı
+      indirtmeye başlayacak.
+    </p>
+    <div class="hero-cta">
+      <a href="{{ url_for('index') }}#uygulamalar" class="btn btn-ghost">Rafa dön</a>
+    </div>
+  </div>
+</header>
+
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }} — Murnova Dünyası{% endblock %}
+{% block meta_desc %}{{ p.tagline or p.desc }}{% endblock %}
+{% block og_title %}{{ p.name }} — Murnova Dünyası{% endblock %}
+{% block og_desc %}{{ p.tagline or p.desc }}{% endblock %}
+{% block twitter_title %}{{ p.name }}{% endblock %}
+{% block twitter_desc %}{{ p.tagline or p.desc }}{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <span class="cart-kind kind-{{ p.kind }}">{{ 'Oyun' if p.kind == 'oyun' else 'Uygulama' }}</span>
+    <h1 class="detail-title">{{ p.name }}</h1>
+    <p class="detail-tagline">{{ p.tagline }}</p>
+
+    <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+      <span class="stat-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20l9-16H3z"/></svg>
+        v{{ p.version or "1.0" }}
+      </span>
+      {% if p.kind == 'oyun' %}
+      <span class="stat-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        {{ stats.plays.get(p.slug, 0) }} kez oynandı
+      </span>
+      {% else %}
+      <span class="stat-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+        {{ stats.downloads.get(p.slug, 0) }} indirme
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="hero-cta">
+      {% if p.status == 'playable' %}
+        <a href="{{ p.play_url }}" class="btn btn-primary">Tarayıcıda Oyna</a>
+      {% elif p.kind == 'uygulama' %}
+        <a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-primary">İndir</a>
+      {% endif %}
+      <a href="{{ url_for('index') }}#{{ 'oyunlar' if p.kind == 'oyun' else 'uygulamalar' }}" class="btn btn-ghost">Rafa dön</a>
+    </div>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    <p style="max-width:60ch; color:var(--text-dim); font-size:1rem; margin-bottom:20px;">{{ p.desc }}</p>
+
+    {% if p.features %}
+    <ul class="feature-list">
+      {% for f in p.features %}
+      <li>{{ f }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="cart-tags" style="margin-top:20px;">
+      {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+    </div>
+
+    {% if p.gallery %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:48px; margin-bottom:8px;">Ekran Görüntüleri</h2>
+    <div class="gallery-grid">
+      {% for g in p.gallery %}
+      <img src="{{ url_for('static', filename='uploads/gallery/' ~ p.slug ~ '/' ~ g) }}" alt="{{ p.name }} ekran görüntüsü">
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if p.changelog %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:48px; margin-bottom:14px;">Sürüm Geçmişi</h2>
+    <ul class="changelog-list">
+      {% for entry in p.changelog|reverse %}
+      <li>{{ entry }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" type="button" aria-label="Kapat">&times;</button>
+  <img src="" alt="">
+</div>
+
+{% endblock %}

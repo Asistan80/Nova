@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Proje Düzenle' if p else 'Yeni Proje' }} — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>{{ 'Projeyi Düzenle: ' ~ p.name if p else 'Yeni Proje Ekle' }}</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="form-grid">
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="name">Ad</label>
+          <input type="text" id="name" name="name" value="{{ p.name if p else '' }}" required>
+        </div>
+        <div class="form-field">
+          <label for="kind">Tür</label>
+          <select id="kind" name="kind">
+            <option value="oyun" {{ 'selected' if p and p.kind == 'oyun' }}>Oyun</option>
+            <option value="uygulama" {{ 'selected' if p and p.kind == 'uygulama' }}>Uygulama</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="tagline">Kısa Slogan</label>
+        <input type="text" id="tagline" name="tagline" value="{{ p.tagline if p else '' }}" placeholder="Örn: Snake Evolution + boss savaşları">
+      </div>
+
+      <div class="form-field">
+        <label for="desc">Açıklama</label>
+        <textarea id="desc" name="desc">{{ p.desc if p else '' }}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="status">Durum</label>
+          <select id="status" name="status">
+            <option value="playable" {{ 'selected' if p and p.status == 'playable' }}>Oynanabilir (tarayıcıda)</option>
+            <option value="download" {{ 'selected' if p and p.status == 'download' }}>İndirilebilir</option>
+            <option value="coming" {{ 'selected' if p and p.status == 'coming' }}>Yakında</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="version">Sürüm</label>
+          <input type="text" id="version" name="version" value="{{ p.version if p else '1.0' }}">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="tags">Etiketler (virgülle ayır)</label>
+        <input type="text" id="tags" name="tags" value="{{ p.tags|join(', ') if p else '' }}" placeholder="Python / Flask, HTML Canvas">
+      </div>
+
+      <div class="form-field">
+        <label for="features">Özellikler (her satıra bir tane)</label>
+        <textarea id="features" name="features" style="min-height:140px;">{{ p.features|join('\n') if p else '' }}</textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="changelog">Sürüm Geçmişi (her satıra bir not, ör: "v1.2 — Yeni boss eklendi")</label>
+        <textarea id="changelog" name="changelog" style="min-height:100px;">{{ p.changelog|join('\n') if p and p.changelog else '' }}</textarea>
+        <p class="form-hint">En son eklediğin satır listenin en üstünde gösterilir.</p>
+      </div>
+
+      <div class="form-field">
+        <label for="cover">Kapak Görseli (png/jpg/webp)</label>
+        <input type="file" id="cover" name="cover" accept="image/*">
+        {% if p and p.cover %}<p class="form-hint">Mevcut: {{ p.cover }} — yeni yüklersen üzerine yazılır.</p>{% endif %}
+      </div>
+
+      <div class="form-field">
+        <label for="gallery">Ekran Görüntüleri Galerisi (birden çok seçebilirsin)</label>
+        <input type="file" id="gallery" name="gallery" accept="image/*" multiple>
+        {% if p and p.gallery %}<p class="form-hint">Mevcut {{ p.gallery|length }} görsel var, yenileri bunlara eklenir.</p>{% endif %}
+      </div>
+
+      {% if not p or p.kind == 'uygulama' %}
+      <div class="form-field">
+        <label for="package">İndirilebilir Paket (.zip)</label>
+        <input type="file" id="package" name="package" accept=".zip">
+        {% if p and p.download_file %}<p class="form-hint">Mevcut dosya: {{ p.download_file }}</p>{% endif %}
+      </div>
+      {% endif %}
+
+      {% if not p or p.kind == 'oyun' %}
+      <div class="form-field">
+        <label for="game_zip">Oyun Kaynak Dosyaları (.zip — ileride siteye bağlamak için saklanır)</label>
+        <input type="file" id="game_zip" name="game_zip" accept=".zip">
+        {% if p and p.get('has_game_files') %}<p class="form-hint">Bu proje için dosyalar zaten yüklü.</p>{% endif %}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn btn-primary" style="justify-self:start;">{{ 'Kaydet' if p else 'Rafa Ekle' }}</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}
