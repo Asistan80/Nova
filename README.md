@@ -9,26 +9,57 @@ Sonra tarayıcıda: http://localhost:5000
 
 ## Yapı
 ```
-app.py                     -> route'lar (anasayfa, detay, oyna, indir, admin)
+app.py                     -> route'lar (anasayfa, kategori, detay, oyna, indir, medya, admin)
+categories.py               -> tüm kategori tanımları (oyun/uygulama/resim/gif/ses) — yeni
+                                kategori eklemek için tek değişiklik yeri burası
 store.py                   -> data/projects.json ve data/stats.json okuma/yazma katmanı
 data/projects.json          -> tüm proje verileri (admin panelden düzenlenir)
 data/stats.json              -> ziyaret / oynama / indirme sayaçları
 templates/
   base.html                    -> nav + footer + tema butonu, diğerleri bunu extend eder
-  index.html                    -> anasayfa: filtre/arama, kapak görselleri, sayaçlar
-  detail.html                    -> oyun/uygulama detay sayfası + galeri/lightbox
-  play.html                       -> oyunun tarayıcıda oynandığı sayfa (şu an placeholder)
+  index.html                    -> anasayfa: hero + kategori kutuları + son eklenenler
+  category.html                  -> kategori listeleme sayfası (Oyunlar/Uygulamalar/Medya) — yeni
+  _card.html                      -> tüm kategorilerde kullanılan ortak proje kartı (macro) — yeni
+  detail.html                      -> proje detay sayfası (oyun/uygulama + resim/gif/ses önizlemesi)
+  play.html                       -> oyunun tarayıcıda oynandığı sayfa (henüz bağlanmamış oyunlar için placeholder)
   download_pending.html            -> indirme dosyası henüz yoksa gösterilen sayfa
   admin/login.html                  -> yönetim paneli giriş
-  admin/dashboard.html               -> proje listesi, düzenle/sil butonları
-  admin/form.html                     -> proje ekleme/düzenleme formu, dosya yüklemeleri
-static/css/style.css        -> tüm site stili (koyu/açık tema dahil)
-static/js/main.js            -> tema geçişi, filtre/arama, scroll reveal, lightbox
-static/uploads/covers/        -> admin panelden yüklenen kapak görselleri
-static/uploads/gallery/<slug>/ -> admin panelden yüklenen ekran görüntüleri
-downloads/<slug>/               -> admin panelden yüklenen indirilebilir .zip paketleri
+  admin/dashboard.html               -> tüm kategorileri dinamik listeler
+  admin/form.html                     -> proje ekleme/düzenleme formu, türe göre alanlar değişir
+static/css/style.css        -> tüm site stili (koyu/açık tema, boot animasyonu dahil)
+static/js/main.js            -> boot sekansı, tema geçişi, filtre/arama, scroll reveal, lightbox
+static/uploads/covers/        -> admin panelden yüklenen kapak görselleri (oyun/uygulama)
+static/uploads/gallery/<slug>/ -> admin panelden yüklenen ekran görüntüleri (oyun/uygulama)
+downloads/<slug>/               -> admin panelden yüklenen tüm dosyalar (zip, resim, gif, ses)
 games/<slug>/                    -> admin panelden yüklenen oyun kaynak dosyaları (.zip açılmış hali)
+games_blueprints/                -> gerçekten siteye bağlanmış oyunların Flask Blueprint kodu
+  rise_of_the_bosses/               -> Snake Evolution: Rise of the Bosses entegrasyonu
 ```
+
+## Kategoriler ve sayfa yapısı
+Site artık 3 üst gruba ayrılmış durumda, her biri kendi sayfasında:
+- **/kategori/oyunlar** — sadece oyunlar
+- **/kategori/uygulamalar** — sadece uygulamalar
+- **/kategori/medya** — Görseller, GIF'ler ve Sesler (tek sayfada, üstteki
+  sekmelerle filtrelenir — nav'ı kalabalıklaştırmamak için böyle gruplandım;
+  istersen bunları ayrı ayrı sayfalara da bölebiliriz)
+
+Anasayfa artık tüm projeleri listelemiyor — sadece 3 kategori kutusu ve
+"Son eklenenler" (en son eklenen 6 içerik) gösteriyor. Böylece proje sayısı
+arttıkça anasayfa kalabalıklaşmıyor.
+
+**Yeni bir kategori eklemek** istersen (örn. "video"): `categories.py`
+içindeki `CATEGORIES` sözlüğüne bir giriş eklemen yeterli — rotalar,
+admin formu ve şablonlar otomatik olarak yeni kategoriyi tanır.
+
+## Resim / GIF / Ses nasıl çalışıyor
+Admin panelden "Yeni Proje" derken Tür olarak Görsel/GIF/Ses seçtiğinde:
+- Tek bir dosya yüklüyorsun (o kategoriye uygun uzantıda — form otomatik
+  doğru uzantıları kabul eder).
+- Bu dosya hem kart üzerinde önizleme (görsel için küçük resim, ses için
+  nota ikonu), hem detay sayfasında büyük önizleme (görsel/GIF büyük
+  gösterilir, ses için oynatıcı çıkar), hem de "İndir" butonunda kullanılır
+  — tek dosya, üç iş.
 
 ## Yönetim Paneli (proje ekleme/düzenleme/silme)
 

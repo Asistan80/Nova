@@ -9,7 +9,7 @@
 
 <header class="detail-hero">
   <div class="wrap">
-    <span class="cart-kind kind-{{ p.kind }}">{{ 'Oyun' if p.kind == 'oyun' else 'Uygulama' }}</span>
+    <span class="cart-kind kind-{{ p.kind }}">{{ category.singular }}</span>
     <h1 class="detail-title">{{ p.name }}</h1>
     <p class="detail-tagline">{{ p.tagline }}</p>
 
@@ -32,18 +32,30 @@
     </div>
 
     <div class="hero-cta">
-      {% if p.status == 'playable' %}
+      {% if p.kind == 'oyun' and p.status == 'playable' %}
         <a href="{{ p.play_url }}" class="btn btn-primary">Tarayıcıda Oyna</a>
-      {% elif p.kind == 'uygulama' %}
+      {% elif p.download_file %}
         <a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-primary">İndir</a>
       {% endif %}
-      <a href="{{ url_for('index') }}#{{ 'oyunlar' if p.kind == 'oyun' else 'uygulamalar' }}" class="btn btn-ghost">Rafa dön</a>
+      <a href="{{ url_for('category_list', group_slug=category.group) }}" class="btn btn-ghost">Rafa dön</a>
     </div>
   </div>
 </header>
 
 <section class="shelf">
   <div class="wrap">
+    {% if category.media_kind and p.download_file %}
+      {% if category.preview == 'image' %}
+      <div class="media-preview">
+        <img src="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}">
+      </div>
+      {% elif category.preview == 'audio' %}
+      <div class="media-preview media-preview-audio">
+        <audio controls src="{{ url_for('media_inline', slug=p.slug) }}"></audio>
+      </div>
+      {% endif %}
+    {% endif %}
+
     <p style="max-width:60ch; color:var(--text-dim); font-size:1rem; margin-bottom:20px;">{{ p.desc }}</p>
 
     {% if p.features %}

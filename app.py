@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 
 import store
 import github_sync
+import categories as cat
 from games_blueprints.rise_of_the_bosses import bp as rise_of_the_bosses_bp
 
 app = Flask(__name__)
@@ -40,6 +41,11 @@ def ext_ok(filename, allowed):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed
 
 
+def _allowed_exts_for_kind(kind):
+    category = cat.CATEGORIES.get(kind)
+    return category["file_exts"] if category else ALLOWED_PACKAGE_EXT
+
+
 def _sync_projects_json(message):
     if github_sync.is_enabled():
         github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
@@ -50,7 +56,7 @@ def _sync_projects_json(message):
 @app.before_request
 def _count_visit():
     ep = request.endpoint or ""
-    if ep in ("index",) or ep.startswith("game_detail") or ep.startswith("app_detail"):
+    if ep in ("index", "category_list", "category_detail"):
         store.bump_visit()
 
 
@@ -86,30 +92,47 @@ def admin_logout():
 @app.route("/")
 def index():
     stats = store.get_stats()
+    group_counts = {
+        g: len(store.by_group(cat.kinds_in_group(g))) for g in cat.GROUPS
+    }
     return render_template(
         "index.html",
-        games=store.by_kind("oyun"),
-        apps=store.by_kind("uygulama"),
+        stats=stats,
+        groups=cat.GROUPS,
+        group_counts=group_counts,
+        recent=store.recent_projects(6),
+        categories=cat.CATEGORIES,
+    )
+
+
+@app.route("/kategori/<group_slug>")
+def category_list(group_slug):
+    group = cat.group_by_slug(group_slug)
+    if not group:
+        abort(404)
+    kinds = cat.kinds_in_group(group_slug)
+    items = store.by_group(kinds)
+    stats = store.get_stats()
+    return render_template(
+        "category.html",
+        group=group,
+        kinds=kinds,
+        items=items,
+        categories=cat.CATEGORIES,
         stats=stats,
     )
 
 
-@app.route("/oyun/<slug>")
-def game_detail(slug):
+@app.route("/kategori/<group_slug>/<slug>")
+def category_detail(group_slug, slug):
+    group = cat.group_by_slug(group_slug)
+    if not group:
+        abort(404)
     project = store.get_project(slug)
-    if not project or project["kind"] != "oyun":
+    if not project or cat.group_for_kind(project["kind"]) != group_slug:
         abort(404)
     stats = store.get_stats()
-    return render_template("detail.html", p=project, stats=stats)
-
-
-@app.route("/uygulama/<slug>")
-def app_detail(slug):
-    project = store.get_project(slug)
-    if not project or project["kind"] != "uygulama":
-        abort(404)
-    stats = store.get_stats()
-    return render_template("detail.html", p=project, stats=stats)
+    return render_template("detail.html", p=project, stats=stats, category=cat.CATEGORIES[project["kind"]])
 
 
 @app.route("/oyna/<slug>")
@@ -146,15 +169,29 @@ def download(slug):
     return send_from_directory(folder, filename, as_attachment=True)
 
 
+@app.route("/medya/<slug>")
+def media_inline(slug):
+    """Resim/GIF/ses dosyalarını indirme zorlamadan tarayıcıda gösterir (önizleme, oynatma)."""
+    project = store.get_project(slug)
+    if not project:
+        abort(404)
+    folder = os.path.join(DOWNLOADS_DIR, slug)
+    filename = project.get("download_file")
+    if not filename or not os.path.exists(os.path.join(folder, filename)):
+        abort(404)
+    return send_from_directory(folder, filename, as_attachment=False)
+
+
 # ---------- Admin: proje yönetimi ----------
 
 @app.route("/admin")
 @login_required
 def admin_dashboard():
+    by_kind = {k: store.by_kind(k) for k in cat.CATEGORIES}
     return render_template(
         "admin/dashboard.html",
-        games=store.by_kind("oyun"),
-        apps=store.by_kind("uygulama"),
+        by_kind=by_kind,
+        categories=cat.CATEGORIES,
         stats=store.get_stats(),
     )
 
@@ -202,7 +239,7 @@ def admin_new():
         _sync_projects_json(f"proje eklendi: {project['name']}")
         flash(f"\"{project['name']}\" rafa eklendi.")
         return redirect(url_for("admin_dashboard"))
-    return render_template("admin/form.html", p=None)
+    return render_template("admin/form.html", p=None, categories=cat.CATEGORIES)
 
 
 @app.route("/admin/duzenle/<slug>", methods=["GET", "POST"])
@@ -218,7 +255,7 @@ def admin_edit(slug):
         _sync_projects_json(f"proje güncellendi: {updated['name']}")
         flash(f"\"{updated['name']}\" güncellendi.")
         return redirect(url_for("admin_dashboard"))
-    return render_template("admin/form.html", p=project)
+    return render_template("admin/form.html", p=project, categories=cat.CATEGORIES)
 
 
 @app.route("/admin/sil/<slug>", methods=["POST"])
@@ -293,9 +330,11 @@ def _handle_uploads(project, files):
                 if github_sync.is_enabled():
                     github_sync.push_file(local_path, f"static/uploads/gallery/{slug}/{safe}", f"galeri görseli: {slug}")
 
-    # Uygulama indirme paketi (zip)
+    # İndirilebilir / medya dosyası (kategoriye göre izinli uzantılar değişir:
+    # oyun/uygulama için .zip, resim için png/jpg/webp, gif için .gif, ses için mp3/wav/ogg)
     package = files.get("package")
-    if package and package.filename and ext_ok(package.filename, ALLOWED_PACKAGE_EXT):
+    allowed_exts = _allowed_exts_for_kind(project.get("kind"))
+    if package and package.filename and ext_ok(package.filename, allowed_exts):
         pdir = os.path.join(DOWNLOADS_DIR, slug)
         os.makedirs(pdir, exist_ok=True)
         safe = secure_filename(package.filename)
@@ -303,7 +342,7 @@ def _handle_uploads(project, files):
         package.save(local_path)
         project["download_file"] = safe
         if github_sync.is_enabled():
-            github_sync.push_file(local_path, f"downloads/{slug}/{safe}", f"indirme paketi: {slug}")
+            github_sync.push_file(local_path, f"downloads/{slug}/{safe}", f"dosya yüklendi: {slug}")
 
     # Oyun kaynak dosyaları (zip) -- açılıp games/<slug>/ altına konur, orijinal
     # zip de source.zip olarak saklanıp GitHub'a yedeklenir (ileride Blueprint

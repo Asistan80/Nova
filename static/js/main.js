@@ -1,3 +1,23 @@
+// ---------- Boot sekansı (sadece oturum başına bir kez) ----------
+(function () {
+  const overlay = document.getElementById("boot-overlay");
+  if (!overlay) return;
+
+  const alreadyBooted = sessionStorage.getItem("murnova-booted");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (alreadyBooted || reduceMotion) {
+    overlay.remove();
+    return;
+  }
+
+  sessionStorage.setItem("murnova-booted", "1");
+  setTimeout(function () {
+    overlay.classList.add("boot-hide");
+    setTimeout(function () { overlay.remove(); }, 650);
+  }, 950);
+})();
+
 // ---------- Tema geçişi ----------
 (function () {
   const root = document.documentElement;

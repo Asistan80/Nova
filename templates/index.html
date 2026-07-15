@@ -1,148 +1,105 @@
 {% extends "base.html" %}
+{% from "_card.html" import render_card %}
+
+{% block boot_overlay %}
+<noscript><style>#boot-overlay{ display:none !important; }</style></noscript>
+<div id="boot-overlay" aria-hidden="true">
+  <div class="boot-scanline"></div>
+  <div class="boot-core">
+    <div class="boot-mark">
+      <span class="boot-chip"></span>
+    </div>
+    <div class="boot-word">MURNOVA <span>DÜNYASI</span></div>
+    <div class="boot-bar"><div class="boot-bar-fill"></div></div>
+    <div class="boot-hint">kartuş yükleniyor...</div>
+  </div>
+</div>
+{% endblock %}
+
 {% block content %}
 
 <header class="hero">
+  <div class="hero-orbs" aria-hidden="true">
+    <span class="orb orb-amber"></span>
+    <span class="orb orb-teal"></span>
+    <span class="orb orb-red"></span>
+  </div>
   <div class="wrap">
-    <div class="eyebrow"><span class="dot"></span>Aktif geliştirme — yeni kartuşlar yolda</div>
-    <h1 class="title">Kendi yaptığın oyunlar ve programlar, <span class="hl">tek rafta.</span></h1>
-    <p class="hero-sub">MuBiKu'nun geliştirdiği tüm oyun ve uygulamaların toplandığı kişisel vitrin. Bazılarını tarayıcıda direkt oyna, bazılarını indirip bilgisayarına kur.</p>
-    <div class="hero-cta">
-      <a href="#oyunlar" class="btn btn-primary">Rafa göz at</a>
+    <div class="eyebrow hero-in hero-in-1"><span class="dot"></span>Aktif geliştirme — yeni kartuşlar yolda</div>
+    <h1 class="title">
+      <span class="title-line hero-in hero-in-2">Kendi yaptığın her şey,</span>
+      <span class="title-line hero-in hero-in-3"><span class="hl">tek dünyada.</span></span>
+    </h1>
+    <p class="hero-sub hero-in hero-in-4">MuBiKu'nun geliştirdiği oyunlar, uygulamalar, görseller, GIF'ler ve sesler — hepsi burada. Bazılarını tarayıcıda dene, bazılarını indir.</p>
+    <div class="hero-cta hero-in hero-in-5">
+      <a href="#kesfet" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px; vertical-align:-2px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Keşfetmeye başla
+      </a>
       <a href="#hakkinda" class="btn btn-ghost">Bu site nedir?</a>
     </div>
-    <div class="hero-stats">
-      <div><div class="stat-num">{{ games|length + apps|length }}</div><div class="stat-label">yayınlanan proje</div></div>
-      <div><div class="stat-num">{{ games|selectattr('status','equalto','playable')|list|length }}</div><div class="stat-label">oynanabilir oyun</div></div>
+    <div class="hero-stats hero-in hero-in-6">
+      <div><div class="stat-num">{{ group_counts.values()|sum }}</div><div class="stat-label">yayınlanan içerik</div></div>
+      <div><div class="stat-num">{{ group_counts.get('oyunlar', 0) }}</div><div class="stat-label">oyun</div></div>
       <div><div class="stat-num">{{ stats.visits }}</div><div class="stat-label">ziyaret</div></div>
     </div>
   </div>
+  <div class="hero-scroll-cue hero-in hero-in-6" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
 </header>
 
-<section class="shelf" id="oyunlar">
+<section class="shelf" id="kesfet">
   <div class="wrap">
     <div class="shelf-head">
       <div>
-        <h2>Oyun Rafı</h2>
-        <p>Tarayıcıda oynanabilen, kendi motorlarıyla geliştirilmiş oyunlar.</p>
+        <h2>Neyi keşfetmek istersin?</h2>
+        <p>Her kategori kendi sayfasında — dolduruldukça anasayfa sade kalsın diye.</p>
       </div>
     </div>
-
-    <div class="filter-bar">
-      <div class="filter-chips">
-        <button class="chip-btn active" data-filter="all">Tümü</button>
-        <button class="chip-btn" data-filter="oyun">Oyunlar</button>
-        <button class="chip-btn" data-filter="uygulama">Uygulamalar</button>
-      </div>
-      <div class="search-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="search" placeholder="Proje veya etiket ara...">
-      </div>
-    </div>
-
-    <div class="rack">
-      {% for p in games %}
-      <article class="cart reveal" tabindex="0" data-kind="oyun" data-search="{{ (p.name ~ ' ' ~ (p.tags|join(' ')) ~ ' ' ~ p.tagline)|lower }}">
-        <div class="cart-cover kind-oyun-cover">
-          {% if p.cover %}
-            <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
-          {% else %}
-            <span class="cover-fallback">{{ p.name[:2]|upper }}</span>
-          {% endif %}
-        </div>
-        <div class="cart-top">
-          <span class="cart-kind kind-oyun">Oyun</span>
-          <span class="cart-status">
-            <span class="pip {% if p.status != 'playable' %}off{% endif %}"></span>
-            {% if p.status == 'playable' %}Oynanabilir{% elif p.status == 'coming' %}Yakında{% else %}İndirilebilir{% endif %}
-          </span>
-        </div>
-        <div class="cart-label">{{ p.name }}</div>
-        <div class="cart-desc">{{ p.desc }}</div>
-        <div class="cart-tags">
-          {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
-        </div>
-        <div class="stat-badge" style="margin-bottom:14px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          {{ stats.plays.get(p.slug, 0) }} kez oynandı
-        </div>
-        <div class="cart-actions">
-          {% if p.status == 'playable' %}
-            <a href="{{ p.play_url }}" class="mini-btn primary">Tarayıcıda Oyna</a>
-          {% endif %}
-          <a href="{{ url_for('game_detail', slug=p.slug) }}" class="mini-btn">Detaylar</a>
-        </div>
-      </article>
-      {% endfor %}
-
-      <article class="cart coming reveal" tabindex="0" data-kind="oyun" data-search="yakında planlanıyor">
-        <div class="cart-cover kind-oyun-cover"><span class="cover-fallback">?</span></div>
-        <div class="cart-top">
-          <span class="cart-kind kind-oyun">Oyun</span>
-          <span class="cart-status"><span class="pip off"></span>Yakında</span>
-        </div>
-        <div class="cart-label">???</div>
-        <div class="cart-desc">Rafta bir sonraki kartuş için yer ayrıldı — yeni bir oyun geliştirildikçe burada görünecek.</div>
-        <div class="cart-tags"><span class="tag">Planlanıyor</span></div>
-        <div class="cart-actions"><span class="mini-btn">Yakında</span></div>
-      </article>
-    </div>
-    <p class="empty-msg">Aramanla eşleşen bir proje bulunamadı.</p>
-  </div>
-</section>
-
-<section class="shelf" id="uygulamalar">
-  <div class="wrap">
-    <div class="shelf-head">
-      <div>
-        <h2>Uygulama Rafı</h2>
-        <p>İndirip kurarak kullanılan araçlar ve program projeleri.</p>
-      </div>
-    </div>
-    <div class="rack">
-      {% for p in apps %}
-      <article class="cart reveal" tabindex="0" data-kind="uygulama" data-search="{{ (p.name ~ ' ' ~ (p.tags|join(' ')) ~ ' ' ~ p.tagline)|lower }}">
-        <div class="cart-cover kind-uygulama-cover">
-          {% if p.cover %}
-            <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
-          {% else %}
-            <span class="cover-fallback">{{ p.name[:2]|upper }}</span>
-          {% endif %}
-        </div>
-        <div class="cart-top">
-          <span class="cart-kind kind-uygulama">Uygulama</span>
-          <span class="cart-status"><span class="pip"></span>İndirilebilir</span>
-        </div>
-        <div class="cart-label">{{ p.name }}</div>
-        <div class="cart-desc">{{ p.desc }}</div>
-        <div class="cart-tags">
-          {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
-        </div>
-        <div class="stat-badge" style="margin-bottom:14px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
-          {{ stats.downloads.get(p.slug, 0) }} indirme
-        </div>
-        <div class="cart-actions">
-          <a href="{{ url_for('download', slug=p.slug) }}" class="mini-btn primary">İndir</a>
-          <a href="{{ url_for('app_detail', slug=p.slug) }}" class="mini-btn">Detaylar</a>
-        </div>
-      </article>
+    <div class="group-tiles">
+      {% for slug, g in groups.items() %}
+      <a href="{{ url_for('category_list', group_slug=g.slug) }}" class="group-tile reveal">
+        <div class="group-tile-icon icon-{{ slug }}"></div>
+        <div class="group-tile-label">{{ g.label }}</div>
+        <div class="group-tile-desc">{{ g.desc }}</div>
+        <div class="group-tile-count">{{ group_counts.get(slug, 0) }} içerik →</div>
+      </a>
       {% endfor %}
     </div>
   </div>
 </section>
+
+{% if recent %}
+<section class="shelf">
+  <div class="wrap">
+    <div class="shelf-head">
+      <div>
+        <h2>Son eklenenler</h2>
+        <p>Vitrine en son giren kartuşlar.</p>
+      </div>
+    </div>
+    <div class="rack">
+      {% for p in recent %}
+        {{ render_card(p, categories, stats) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
 
 <section class="about" id="hakkinda">
   <div class="wrap">
     <div class="about-box reveal">
       <div>
         <h3>Bu site nedir?</h3>
-        <p>Murnova Dünyası, geliştirdiğim oyun ve uygulamaları tek bir yerde toplamak için kurduğum kişisel vitrin. Her yeni proje bittiğinde buraya bir kartuş olarak eklenir.</p>
-        <p>Oyunlar mümkün olduğunca tarayıcıda oynanabilir şekilde sunulur; masaüstü uygulamaları ise indirme paketi olarak paylaşılır.</p>
+        <p>Murnova Dünyası, geliştirdiğim oyun, uygulama ve diğer içerikleri tek bir yerde toplamak için kurduğum kişisel vitrin. Her yeni proje bittiğinde buraya bir kartuş olarak eklenir.</p>
+        <p>Oyunlar mümkün olduğunca tarayıcıda oynanabilir şekilde sunulur; diğer her şey indirilebilir ya da tarayıcıda önizlenebilir.</p>
       </div>
       <div class="about-code">// murnova.json
 {
   <span class="c1">"gelistirici"</span>: <span class="c2">"MuBiKu"</span>,
-  <span class="c1">"kartuslar"</span>: <span class="c2">{{ games|length + apps|length }}</span>,
+  <span class="c1">"kartuslar"</span>: <span class="c2">{{ group_counts.values()|sum }}</span>,
   <span class="c1">"ziyaret"</span>: <span class="c2">{{ stats.visits }}</span>,
   <span class="c1">"durum"</span>: <span class="c2">"gelisiyor"</span>
 }</div>

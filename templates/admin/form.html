@@ -9,7 +9,7 @@
       <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="form-grid">
+    <form method="POST" enctype="multipart/form-data" class="form-grid" id="project-form">
 
       <div class="form-row">
         <div class="form-field">
@@ -19,8 +19,9 @@
         <div class="form-field">
           <label for="kind">Tür</label>
           <select id="kind" name="kind">
-            <option value="oyun" {{ 'selected' if p and p.kind == 'oyun' }}>Oyun</option>
-            <option value="uygulama" {{ 'selected' if p and p.kind == 'uygulama' }}>Uygulama</option>
+            {% for key, c in categories.items() %}
+            <option value="{{ key }}" {{ 'selected' if p and p.kind == key }}>{{ c.singular }}</option>
+            {% endfor %}
           </select>
         </div>
       </div>
@@ -36,7 +37,7 @@
       </div>
 
       <div class="form-row">
-        <div class="form-field">
+        <div class="form-field" data-field-for="oyun">
           <label for="status">Durum</label>
           <select id="status" name="status">
             <option value="playable" {{ 'selected' if p and p.status == 'playable' }}>Oynanabilir (tarayıcıda)</option>
@@ -55,48 +56,70 @@
         <input type="text" id="tags" name="tags" value="{{ p.tags|join(', ') if p else '' }}" placeholder="Python / Flask, HTML Canvas">
       </div>
 
-      <div class="form-field">
+      <div class="form-field" data-field-for="oyun,uygulama">
         <label for="features">Özellikler (her satıra bir tane)</label>
         <textarea id="features" name="features" style="min-height:140px;">{{ p.features|join('\n') if p else '' }}</textarea>
       </div>
 
-      <div class="form-field">
+      <div class="form-field" data-field-for="oyun,uygulama">
         <label for="changelog">Sürüm Geçmişi (her satıra bir not, ör: "v1.2 — Yeni boss eklendi")</label>
         <textarea id="changelog" name="changelog" style="min-height:100px;">{{ p.changelog|join('\n') if p and p.changelog else '' }}</textarea>
         <p class="form-hint">En son eklediğin satır listenin en üstünde gösterilir.</p>
       </div>
 
-      <div class="form-field">
+      <div class="form-field" data-field-for="oyun,uygulama">
         <label for="cover">Kapak Görseli (png/jpg/webp)</label>
         <input type="file" id="cover" name="cover" accept="image/*">
         {% if p and p.cover %}<p class="form-hint">Mevcut: {{ p.cover }} — yeni yüklersen üzerine yazılır.</p>{% endif %}
       </div>
 
-      <div class="form-field">
+      <div class="form-field" data-field-for="oyun,uygulama">
         <label for="gallery">Ekran Görüntüleri Galerisi (birden çok seçebilirsin)</label>
         <input type="file" id="gallery" name="gallery" accept="image/*" multiple>
         {% if p and p.gallery %}<p class="form-hint">Mevcut {{ p.gallery|length }} görsel var, yenileri bunlara eklenir.</p>{% endif %}
       </div>
 
-      {% if not p or p.kind == 'uygulama' %}
       <div class="form-field">
-        <label for="package">İndirilebilir Paket (.zip)</label>
-        <input type="file" id="package" name="package" accept=".zip">
+        <label for="package" id="package-label">Dosya</label>
+        <input type="file" id="package" name="package">
         {% if p and p.download_file %}<p class="form-hint">Mevcut dosya: {{ p.download_file }}</p>{% endif %}
       </div>
-      {% endif %}
 
-      {% if not p or p.kind == 'oyun' %}
-      <div class="form-field">
+      <div class="form-field" data-field-for="oyun">
         <label for="game_zip">Oyun Kaynak Dosyaları (.zip — ileride siteye bağlamak için saklanır)</label>
         <input type="file" id="game_zip" name="game_zip" accept=".zip">
         {% if p and p.get('has_game_files') %}<p class="form-hint">Bu proje için dosyalar zaten yüklü.</p>{% endif %}
       </div>
-      {% endif %}
 
       <button type="submit" class="btn btn-primary" style="justify-self:start;">{{ 'Kaydet' if p else 'Rafa Ekle' }}</button>
     </form>
   </div>
 </section>
+
+<script>
+  // Kategoriye göre dosya alanının etiketi/izinli uzantıları ve hangi
+  // alanların görüneceği burada tanımlı -- data/categories.py ile eşleşir.
+  const FILE_INFO = {
+    {% for key, c in categories.items() %}
+    "{{ key }}": {label: {{ c.file_label|tojson }}, exts: {{ c.file_exts|list|tojson }}},
+    {% endfor %}
+  };
+
+  function applyKindVisibility() {
+    const kind = document.getElementById('kind').value;
+    document.querySelectorAll('[data-field-for]').forEach(function (el) {
+      const allowed = el.dataset.fieldFor.split(',');
+      el.style.display = allowed.includes(kind) ? '' : 'none';
+    });
+    const info = FILE_INFO[kind];
+    if (info) {
+      document.getElementById('package-label').textContent = info.label;
+      document.getElementById('package').setAttribute('accept', info.exts.map(function(e){return '.' + e;}).join(','));
+    }
+  }
+
+  document.getElementById('kind').addEventListener('change', applyKindVisibility);
+  applyKindVisibility();
+</script>
 
 {% endblock %}

@@ -1,0 +1,51 @@
+{% macro render_card(p, categories, stats, index=0) %}
+{% set c = categories[p.kind] %}
+<article class="cart reveal" tabindex="0" data-kind="{{ p.kind }}" data-search="{{ (p.name ~ ' ' ~ (p.tags|join(' ')) ~ ' ' ~ p.tagline)|lower }}">
+  <div class="cart-cover kind-{{ p.kind }}-cover">
+    {% if c.media_kind and p.download_file %}
+      {% if c.preview == 'image' %}
+        <img src="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}">
+      {% else %}
+        <span class="cover-fallback icon-audio">♪</span>
+      {% endif %}
+    {% elif p.cover %}
+      <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
+    {% else %}
+      <span class="cover-fallback">{{ p.name[:2]|upper }}</span>
+    {% endif %}
+  </div>
+  <div class="cart-top">
+    <span class="cart-kind kind-{{ p.kind }}">{{ c.singular }}</span>
+    <span class="cart-status">
+      {% if p.kind == 'oyun' %}
+        <span class="pip {% if p.status != 'playable' %}off{% endif %}"></span>
+        {% if p.status == 'playable' %}Oynanabilir{% elif p.status == 'coming' %}Yakında{% else %}İndirilebilir{% endif %}
+      {% else %}
+        <span class="pip"></span>İndirilebilir
+      {% endif %}
+    </span>
+  </div>
+  <div class="cart-label">{{ p.name }}</div>
+  <div class="cart-desc">{{ p.desc }}</div>
+  <div class="cart-tags">
+    {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+  </div>
+  <div class="stat-badge" style="margin-bottom:14px;">
+    {% if p.kind == 'oyun' %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      {{ stats.plays.get(p.slug, 0) }} kez oynandı
+    {% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg>
+      {{ stats.downloads.get(p.slug, 0) }} indirme
+    {% endif %}
+  </div>
+  <div class="cart-actions">
+    {% if p.kind == 'oyun' and p.status == 'playable' %}
+      <a href="{{ p.play_url }}" class="mini-btn primary">Tarayıcıda Oyna</a>
+    {% elif p.download_file %}
+      <a href="{{ url_for('download', slug=p.slug) }}" class="mini-btn primary">İndir</a>
+    {% endif %}
+    <a href="{{ url_for('category_detail', group_slug=(categories[p.kind].group), slug=p.slug) }}" class="mini-btn">Detaylar</a>
+  </div>
+</article>
+{% endmacro %}

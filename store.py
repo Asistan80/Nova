@@ -46,6 +46,14 @@ def by_kind(kind):
     return [p for p in all_projects() if p["kind"] == kind]
 
 
+def by_group(kind_list):
+    return [p for p in all_projects() if p["kind"] in kind_list]
+
+
+def recent_projects(limit=6):
+    return list(reversed(all_projects()))[:limit]
+
+
 def slugify(name):
     s = name.strip().lower()
     tr_map = str.maketrans("çğıöşü", "cgiosu")

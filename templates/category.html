@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_card.html" import render_card %}
+{% block title %}{{ group.label }} — Murnova Dünyası{% endblock %}
+{% block meta_desc %}{{ group.desc }}{% endblock %}
+{% block og_title %}{{ group.label }} — Murnova Dünyası{% endblock %}
+{% block og_desc %}{{ group.desc }}{% endblock %}
+
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">{{ group.label }}</h1>
+    <p class="detail-tagline">{{ group.desc }}</p>
+    <div class="hero-cta">
+      <a href="{{ url_for('index') }}" class="btn btn-ghost">← Anasayfaya dön</a>
+    </div>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    {% if kinds|length > 1 %}
+    <div class="filter-bar">
+      <div class="filter-chips">
+        <button class="chip-btn active" data-filter="all">Tümü</button>
+        {% for k in kinds %}
+        <button class="chip-btn" data-filter="{{ k }}">{{ categories[k].label }}</button>
+        {% endfor %}
+      </div>
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" placeholder="İsim veya etiket ara...">
+      </div>
+    </div>
+    {% else %}
+    <div class="filter-bar">
+      <div class="search-box" style="max-width:360px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="search" placeholder="İsim veya etiket ara...">
+      </div>
+    </div>
+    {% endif %}
+
+    {% if items %}
+    <div class="rack">
+      {% for p in items %}
+        {{ render_card(p, categories, stats) }}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim); padding:40px 0;">Bu kategoride henüz içerik yok — yakında eklenecek.</p>
+    {% endif %}
+    <p class="empty-msg">Aramanla eşleşen bir içerik bulunamadı.</p>
+  </div>
+</section>
+
+{% endblock %}

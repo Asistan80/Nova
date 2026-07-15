@@ -23,13 +23,16 @@
 </head>
 <body>
 
+{% block boot_overlay %}{% endblock %}
+
 <nav>
   <div class="wrap">
     <a href="{{ url_for('index') }}" class="brand"><span class="chip"></span>Murnova Dünyası</a>
     <div style="display:flex; align-items:center; gap:28px;">
       <div class="navlinks">
-        <a href="{{ url_for('index') }}#oyunlar">Oyunlar</a>
-        <a href="{{ url_for('index') }}#uygulamalar">Uygulamalar</a>
+        <a href="{{ url_for('category_list', group_slug='oyunlar') }}">Oyunlar</a>
+        <a href="{{ url_for('category_list', group_slug='uygulamalar') }}">Uygulamalar</a>
+        <a href="{{ url_for('category_list', group_slug='medya') }}">Medya</a>
         <a href="{{ url_for('index') }}#hakkinda">Hakkında</a>
       </div>
       <button class="theme-toggle" type="button" title="Tema değiştir" aria-label="Tema değiştir">
