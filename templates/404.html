@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Sayfa bulunamadı — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<div class="wrap">
+  <div class="error-404">
+    <div class="code">404</div>
+    <h1>Bu kartuş rafta yok</h1>
+    <p>Aradığın sayfa taşınmış, silinmiş ya da hiç var olmamış olabilir.</p>
+    <div class="hero-cta">
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Anasayfaya dön</a>
+      <a href="{{ url_for('random_project') }}" class="btn btn-ghost">Rastgele bir şeye bak</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

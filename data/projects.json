@@ -27,20 +27,29 @@
     "download_url": null,
     "updated_at": "2026-07-13",
     "changelog": [],
-    "has_game_files": true
+    "has_game_files": true,
+    "created_at": "2026-07-13T00:00:00+00:00",
+    "published": true
   },
   {
     "slug": "bench",
     "name": "Bench",
     "kind": "uygulama",
     "status": "download",
-    "tagline": "t",
-    "desc": "d",
+    "tagline": "Görsel/metinden video üretim motoru",
+    "desc": "Tek bir uygulamada hem görselden videoya (image-to-video) hem de metinden videoya (prompt-to-video) üretim yapabilen video motoru.",
     "tags": [
-      "a"
+      "Flask",
+      "moviepy",
+      "Runway API"
     ],
     "features": [
-      "b"
+      "Görselden videoya dönüşüm (moviepy tabanlı, tekli/toplu)",
+      "Metinden videoya dönüşüm (Runway API)",
+      "10sn / 30sn / 1dk ve üzeri çıktı süreleri",
+      "Efekt ve animasyon seçenekleri",
+      "Uzun videolar için birleştirme (concatenation)",
+      "Metin bindirme ve arka plan sesi ekleme"
     ],
     "cover": null,
     "gallery": [],
@@ -48,7 +57,9 @@
     "play_url": null,
     "download_url": null,
     "updated_at": "2026-07-13",
-    "changelog": []
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-13T00:00:00+00:00"
   },
   {
     "slug": "kutuphane",
@@ -73,6 +84,8 @@
     "play_url": null,
     "download_url": null,
     "updated_at": "2026-07-13",
-    "changelog": []
+    "changelog": [],
+    "created_at": "2026-07-13T00:00:00+00:00",
+    "published": true
   }
 ]

@@ -38,6 +38,10 @@
         <a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-primary">İndir</a>
       {% endif %}
       <a href="{{ url_for('category_list', group_slug=category.group) }}" class="btn btn-ghost">Rafa dön</a>
+      <button type="button" class="btn btn-ghost copy-link-btn" data-url="{{ request.url }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" style="vertical-align:-2px; margin-right:6px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Linki Kopyala
+      </button>
     </div>
   </div>
 </header>
@@ -77,6 +81,19 @@
       <img src="{{ url_for('static', filename='uploads/gallery/' ~ p.slug ~ '/' ~ g) }}" alt="{{ p.name }} ekran görüntüsü">
       {% endfor %}
     </div>
+    {% endif %}
+
+    {% if leaderboard %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:48px; margin-bottom:14px;">🏆 Liderlik Tablosu</h2>
+    <ul class="leaderboard-list">
+      {% for entry in leaderboard %}
+      <li>
+        <span class="leaderboard-rank">#{{ loop.index }}</span>
+        <span class="leaderboard-name">{{ entry.name }}</span>
+        <span class="leaderboard-score">{{ entry.score }} puan · lvl {{ entry.level }}</span>
+      </li>
+      {% endfor %}
+    </ul>
     {% endif %}
 
     {% if p.changelog %}

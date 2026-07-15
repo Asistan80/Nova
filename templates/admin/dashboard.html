@@ -12,16 +12,27 @@
       </div>
     </div>
 
-    <p class="stat-badge" style="margin-bottom:24px;">Toplam ziyaret: {{ stats.visits }}</p>
+    <p class="stat-badge" style="margin-bottom:14px;">Toplam ziyaret: {{ stats.visits }}</p>
+
+    <div class="visit-chart">
+      {% for label, count in visit_chart %}
+      {% set max_count = visit_chart|map(attribute=1)|max %}
+      <div class="bar-col">
+        <div class="bar" style="height: {{ (count / max_count * 100) if max_count > 0 else 2 }}%;" title="{{ count }} ziyaret"></div>
+        <div class="bar-label">{{ label }}</div>
+      </div>
+      {% endfor %}
+    </div>
 
     {% for key, c in categories.items() %}
     <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin:32px 0 14px;">{{ c.label }}</h2>
-    <table class="admin-table">
-      <thead><tr><th>Ad</th><th>Durum</th><th>{{ 'Oynama' if key == 'oyun' else 'İndirme' }}</th><th></th></tr></thead>
+    <table class="admin-table" data-kind="{{ key }}">
+      <thead><tr><th></th><th>Ad</th><th>Durum</th><th>{{ 'Oynama' if key == 'oyun' else 'İndirme' }}</th><th></th></tr></thead>
       <tbody>
         {% for p in by_kind[key] %}
-        <tr>
-          <td>{{ p.name }}</td>
+        <tr draggable="true" data-slug="{{ p.slug }}">
+          <td style="color:var(--text-dim); cursor:grab;">⠿⠿</td>
+          <td>{{ p.name }}{% if not p.get('published', True) %} <span class="tag" style="color:var(--boss-red); border-color:var(--boss-red);">taslak</span>{% endif %}</td>
           <td>{{ p.status }}</td>
           <td>{{ stats.plays.get(p.slug, 0) if key == 'oyun' else stats.downloads.get(p.slug, 0) }}</td>
           <td class="admin-actions">
@@ -32,12 +43,54 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="4" style="color:var(--text-dim);">Henüz {{ c.singular|lower }} eklenmedi.</td></tr>
+        <tr><td colspan="5" style="color:var(--text-dim);">Henüz {{ c.singular|lower }} eklenmedi.</td></tr>
         {% endfor %}
       </tbody>
     </table>
     {% endfor %}
   </div>
 </section>
+
+<script>
+  // Basit sürükle-bırak sıralama -- her kategori tablosu kendi içinde bağımsız.
+  document.querySelectorAll('.admin-table[data-kind]').forEach(function (table) {
+    const kind = table.dataset.kind;
+    const tbody = table.querySelector('tbody');
+    let dragEl = null;
+
+    tbody.addEventListener('dragstart', function (e) {
+      const tr = e.target.closest('tr[draggable="true"]');
+      if (!tr) return;
+      dragEl = tr;
+      tr.classList.add('dragging');
+    });
+
+    tbody.addEventListener('dragend', function () {
+      if (dragEl) dragEl.classList.remove('dragging');
+      dragEl = null;
+      persistOrder();
+    });
+
+    tbody.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      const tr = e.target.closest('tr[draggable="true"]');
+      if (!tr || tr === dragEl) return;
+      const rect = tr.getBoundingClientRect();
+      const after = (e.clientY - rect.top) > rect.height / 2;
+      tbody.insertBefore(dragEl, after ? tr.nextSibling : tr);
+    });
+
+    function persistOrder() {
+      const order = Array.from(tbody.querySelectorAll('tr[data-slug]')).map(function (tr) {
+        return tr.dataset.slug;
+      });
+      fetch('/admin/sirala/' + kind, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order),
+      }).catch(function () {});
+    }
+  });
+</script>
 
 {% endblock %}

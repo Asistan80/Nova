@@ -46,6 +46,40 @@ def _allowed_exts_for_kind(kind):
     return category["file_exts"] if category else ALLOWED_PACKAGE_EXT
 
 
+def _compress_image(path, max_width=1600, quality=85):
+    """Büyük görselleri küçültüp sıkıştırır (GIF'lere dokunmaz -- animasyonu bozar)."""
+    if path.lower().endswith(".gif"):
+        return
+    try:
+        from PIL import Image
+        img = Image.open(path)
+        fmt = img.format
+        changed = False
+        if img.width > max_width:
+            ratio = max_width / img.width
+            img = img.resize((max_width, int(img.height * ratio)), Image.LANCZOS)
+            changed = True
+        save_kwargs = {}
+        if fmt in ("JPEG", "WEBP"):
+            save_kwargs["quality"] = quality
+            save_kwargs["optimize"] = True
+        if changed or fmt in ("JPEG", "WEBP", "PNG"):
+            img.save(path, format=fmt, **save_kwargs)
+    except Exception:
+        pass  # sıkıştırma başarısız olursa orijinal dosya olduğu gibi kalır
+
+
+def _make_gif_poster(gif_path, poster_path):
+    """GIF'in ilk karesini durağan bir PNG olarak kaydeder (hover'da oynat efekti için)."""
+    try:
+        from PIL import Image
+        img = Image.open(gif_path)
+        img.seek(0)
+        img.convert("RGB").save(poster_path, format="PNG")
+    except Exception:
+        pass
+
+
 def _sync_projects_json(message):
     if github_sync.is_enabled():
         github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
@@ -131,11 +165,78 @@ def category_detail(group_slug, slug):
     project = store.get_project(slug)
     if not project or cat.group_for_kind(project["kind"]) != group_slug:
         abort(404)
+    if not project.get("published", True) and not session.get("is_admin"):
+        abort(404)
     stats = store.get_stats()
-    return render_template("detail.html", p=project, stats=stats, category=cat.CATEGORIES[project["kind"]])
+    leaderboard = None
+    if project["slug"] == "rise-of-the-bosses":
+        leaderboard = _rise_of_the_bosses_leaderboard()
+    return render_template(
+        "detail.html", p=project, stats=stats,
+        category=cat.CATEGORIES[project["kind"]], leaderboard=leaderboard,
+    )
 
 
-@app.route("/oyna/<slug>")
+def _rise_of_the_bosses_leaderboard(limit=5):
+    import json as _json
+    path = os.path.join(
+        BASE_DIR, "games_blueprints", "rise_of_the_bosses", "data", "leaderboard.json"
+    )
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            entries = _json.load(f)
+    except (ValueError, OSError):
+        return []
+    entries = sorted(entries, key=lambda e: e.get("score", 0), reverse=True)
+    return entries[:limit]
+
+
+@app.route("/rastgele")
+def random_project():
+    project = store.random_project()
+    if not project:
+        return redirect(url_for("index"))
+    group = cat.group_for_kind(project["kind"])
+    return redirect(url_for("category_detail", group_slug=group, slug=project["slug"]))
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        f"Sitemap: {request.url_root.rstrip('/')}/sitemap.xml",
+    ]
+    return "\n".join(lines), 200, {"Content-Type": "text/plain; charset=utf-8"}
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    root = request.url_root.rstrip("/")
+    urls = [root + "/"]
+    for g in cat.GROUPS.values():
+        urls.append(f"{root}/kategori/{g['slug']}")
+    for p in store.all_projects():
+        if not p.get("published", True):
+            continue
+        group = cat.group_for_kind(p["kind"])
+        urls.append(f"{root}/kategori/{group}/{p['slug']}")
+    body = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for u in urls:
+        body.append(f"  <url><loc>{u}</loc></url>")
+    body.append("</urlset>")
+    return "\n".join(body), 200, {"Content-Type": "application/xml; charset=utf-8"}
+
+
+@app.errorhandler(404)
+def not_found(e):
+    return render_template("404.html"), 404
+
+
+
 def play(slug):
     """
     Oyunun kendisini burada göstereceğiz.
@@ -182,18 +283,38 @@ def media_inline(slug):
     return send_from_directory(folder, filename, as_attachment=False)
 
 
+@app.route("/medya/<slug>/poster")
+def media_poster(slug):
+    """GIF'ler için durağan önizleme karesi (kartlarda hover'a kadar bunu gösteririz)."""
+    folder = os.path.join(DOWNLOADS_DIR, slug)
+    poster_path = os.path.join(folder, "_poster.png")
+    if not os.path.exists(poster_path):
+        abort(404)
+    return send_from_directory(folder, "_poster.png", as_attachment=False)
+
+
 # ---------- Admin: proje yönetimi ----------
 
 @app.route("/admin")
 @login_required
 def admin_dashboard():
-    by_kind = {k: store.by_kind(k) for k in cat.CATEGORIES}
+    by_kind = {k: store.by_kind(k, published_only=False) for k in cat.CATEGORIES}
     return render_template(
         "admin/dashboard.html",
         by_kind=by_kind,
         categories=cat.CATEGORIES,
         stats=store.get_stats(),
+        visit_chart=store.last_n_days(14),
     )
+
+
+@app.route("/admin/sirala/<kind>", methods=["POST"])
+@login_required
+def admin_reorder(kind):
+    order = request.get_json(force=True) or []
+    store.reorder_kind(kind, order)
+    _sync_projects_json(f"sıralama güncellendi: {kind}")
+    return {"ok": True}
 
 
 def _project_from_form(form, existing=None):
@@ -210,6 +331,7 @@ def _project_from_form(form, existing=None):
         "features": features,
         "changelog": changelog,
         "version": form.get("version", "").strip() or "1.0",
+        "published": form.get("published") == "on",
     }
     if existing:
         merged = dict(existing)
@@ -311,6 +433,7 @@ def _handle_uploads(project, files):
         fname = f"{slug}.{ext}"
         local_path = os.path.join(COVERS_DIR, fname)
         cover.save(local_path)
+        _compress_image(local_path)
         project["cover"] = fname
         if github_sync.is_enabled():
             github_sync.push_file(local_path, f"static/uploads/covers/{fname}", f"kapak yüklendi: {slug}")
@@ -324,6 +447,7 @@ def _handle_uploads(project, files):
                 safe = secure_filename(gf.filename)
                 local_path = os.path.join(gdir, safe)
                 gf.save(local_path)
+                _compress_image(local_path)
                 project.setdefault("gallery", [])
                 if safe not in project["gallery"]:
                     project["gallery"].append(safe)
@@ -340,6 +464,10 @@ def _handle_uploads(project, files):
         safe = secure_filename(package.filename)
         local_path = os.path.join(pdir, safe)
         package.save(local_path)
+        if project.get("kind") == "resim":
+            _compress_image(local_path)
+        if project.get("kind") == "gif":
+            _make_gif_poster(local_path, os.path.join(pdir, "_poster.png"))
         project["download_file"] = safe
         if github_sync.is_enabled():
             github_sync.push_file(local_path, f"downloads/{slug}/{safe}", f"dosya yüklendi: {slug}")

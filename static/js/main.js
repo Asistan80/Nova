@@ -135,3 +135,38 @@
     }
   });
 })();
+
+// ---------- GIF kartlarında hover'da oynatma ----------
+(function () {
+  document.querySelectorAll(".gif-hover-preview").forEach((img) => {
+    const posterSrc = img.getAttribute("src");
+    const gifSrc = img.dataset.gif;
+    img.addEventListener("mouseenter", () => { img.src = gifSrc; });
+    img.addEventListener("mouseleave", () => { img.src = posterSrc; });
+  });
+})();
+
+// ---------- Görsel yüklenene kadar iskelet (skeleton) efekti ----------
+(function () {
+  document.querySelectorAll(".cart-cover img, .media-preview img").forEach((img) => {
+    if (img.complete) return;
+    img.classList.add("skeleton");
+    img.addEventListener("load", () => img.classList.remove("skeleton"), { once: true });
+    img.addEventListener("error", () => img.classList.remove("skeleton"), { once: true });
+  });
+})();
+
+// ---------- Linki kopyala ----------
+(function () {
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".copy-link-btn");
+    if (!btn) return;
+    const url = btn.dataset.url || window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      const original = btn.textContent;
+      btn.textContent = "Kopyalandı!";
+      setTimeout(() => { btn.textContent = original; }, 1600);
+    });
+  });
+})();
+

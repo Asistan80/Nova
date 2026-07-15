@@ -91,6 +91,13 @@
         {% if p and p.get('has_game_files') %}<p class="form-hint">Bu proje için dosyalar zaten yüklü.</p>{% endif %}
       </div>
 
+      <div class="form-field">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+          <input type="checkbox" name="published" id="published" style="width:auto;" {{ 'checked' if not p or p.get('published', True) }}>
+          Yayında (kapatırsan sadece sen görebilirsin, ziyaretçiler göremez)
+        </label>
+      </div>
+
       <button type="submit" class="btn btn-primary" style="justify-self:start;">{{ 'Kaydet' if p else 'Rafa Ekle' }}</button>
     </form>
   </div>
