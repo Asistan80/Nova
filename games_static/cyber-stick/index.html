@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CYBER STICK</title>
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="theme-color" content="#10141c">
+<style>
+  *{box-sizing:border-box; margin:0; padding:0; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
+  html,body{width:100%; height:100%; overflow:hidden; background:#0a0c10; font-family:'Courier New', monospace; touch-action:none;}
+  #wrap{position:relative; width:100%; height:100vh; display:flex; align-items:center; justify-content:center; background:#0a0c10;}
+  canvas{display:block; background:#10141c; max-width:100%; max-height:100vh; cursor:crosshair;}
+
+  #hud{position:absolute; top:0; left:0; width:100%; padding:14px 16px; display:flex; justify-content:space-between; pointer-events:none; z-index:5;}
+  .barbox{width:150px;}
+  .barlabel{color:#aef0d6; font-size:11px; letter-spacing:1px; margin-bottom:2px; text-shadow:0 0 4px #39ff8f;}
+  .bar-outer{width:100%; height:10px; background:rgba(255,255,255,0.08); border:1px solid rgba(57,255,143,0.4);}
+  .bar-inner{height:100%; background:#39ff8f; transition:width 0.2s;}
+  .bar-inner.xp{background:#2fd8ff;}
+  .bar-inner.buff{background:#ffd23b;}
+  .lvltext{color:#fff; font-size:12px; margin-top:3px; text-shadow:0 0 4px #2fd8ff;}
+  #regionLabel{color:rgba(255,255,255,0.6); font-size:12px; letter-spacing:2px; text-align:right;}
+  #buffRow{margin-top:4px;}
+
+  #controls{position:absolute; bottom:0; left:0; width:100%; padding:20px; display:flex; justify-content:space-between; align-items:flex-end; z-index:6;}
+  .movebtns{display:flex; gap:14px;}
+  .ctrlbtn{
+    width:62px; height:62px; border-radius:50%;
+    background:rgba(255,255,255,0.05); border:2px solid rgba(57,255,143,0.5);
+    color:#39ff8f; font-size:24px; font-weight:bold;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px rgba(57,255,143,0.2);
+  }
+  .ctrlbtn.active{ background:rgba(57,255,143,0.25); }
+  .actionbtns{display:flex; flex-direction:column; gap:10px; align-items:center;}
+  .actbtn{
+    width:70px; height:70px; border-radius:50%;
+    background:rgba(255,59,59,0.08); border:2px solid rgba(255,59,59,0.6);
+    color:#ff6b6b; font-size:13px; font-weight:bold; letter-spacing:1px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 10px rgba(255,59,59,0.2);
+  }
+  .actbtn.jump{
+    width:56px; height:56px;
+    background:rgba(47,216,255,0.08); border-color:rgba(47,216,255,0.6); color:#6bd6ff;
+    box-shadow:0 0 10px rgba(47,216,255,0.2);
+  }
+  .actbtn.active{ transform:scale(0.92); }
+  .ctrlhint{position:absolute; bottom:96px; left:0; width:100%; text-align:center; color:rgba(255,255,255,0.3); font-size:10px; letter-spacing:1px; pointer-events:none; z-index:6;}
+
+  #flash{position:absolute; top:28%; left:50%; transform:translate(-50%,-50%); font-size:24px; font-weight:bold; color:#39ff8f; text-shadow:0 0 14px #39ff8f; opacity:0; pointer-events:none; z-index:7; text-align:center; letter-spacing:1px; max-width:90%;}
+  #floorBanner{position:absolute; top:42%; left:50%; transform:translate(-50%,-50%); font-size:18px; font-weight:bold; color:#7df9ff; text-shadow:0 0 14px #7df9ff; opacity:0; pointer-events:none; z-index:7; text-align:center; letter-spacing:2px;}
+
+  .overlay{position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(2,3,6,0.93); z-index:10; text-align:center; padding:20px; overflow-y:auto;}
+  .hidden{display:none !important;}
+  .title-main{font-size:38px; font-weight:bold; letter-spacing:3px; color:#39ff8f; text-shadow:0 0 10px #39ff8f, 0 0 26px #2fd8ff; margin-bottom:8px;}
+  .title-sub{color:#2fd8ff; font-size:12px; letter-spacing:4px; margin-bottom:26px; text-shadow:0 0 6px #2fd8ff;}
+  .btn{background:transparent; border:2px solid #39ff8f; color:#39ff8f; font-family:'Courier New', monospace; font-size:15px; font-weight:bold; letter-spacing:2px; padding:13px 32px; cursor:pointer; text-shadow:0 0 6px #39ff8f; box-shadow:0 0 12px rgba(57,255,143,0.25); margin-top:10px;}
+  .btn:active{transform:scale(0.95);}
+  .hint{color:rgba(255,255,255,0.4); font-size:11px; margin-top:20px; max-width:280px; line-height:1.6;}
+
+  .regiongrid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px; max-width:360px; width:100%; margin:10px 0 20px;}
+  .regioncard{
+    width:100%; height:84px; border:3px solid rgba(57,255,143,0.65); border-radius:10px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:#fff; font-size:24px; font-weight:bold; cursor:pointer;
+    background:rgba(57,255,143,0.08);
+    box-shadow:0 0 14px rgba(57,255,143,0.25);
+    position:relative;
+  }
+  .regioncard .rnum{ font-size:22px; text-shadow:0 0 8px currentColor; }
+  .regioncard.locked{
+    opacity:0.4; border-color:rgba(255,255,255,0.18); color:rgba(255,255,255,0.5);
+    cursor:default; background:rgba(255,255,255,0.02); box-shadow:none;
+  }
+  .regioncard.locked .rnum{ font-size:20px; }
+  .regioncard .rname{ font-size:9px; letter-spacing:0.5px; margin-top:4px; max-width:90%; text-align:center; line-height:1.2; color:rgba(255,255,255,0.85); font-weight:normal;}
+  .regioncard.boss-region{ border-color:rgba(255,59,59,0.85); box-shadow:0 0 16px rgba(255,59,59,0.35); }
+  .regioncard.current{ animation: pulseCard 1.4s infinite; }
+  @keyframes pulseCard{ 0%,100%{ box-shadow:0 0 14px rgba(57,255,143,0.3);} 50%{ box-shadow:0 0 28px rgba(57,255,143,0.7);} }
+  .regioncard .checkmark{ position:absolute; top:4px; right:6px; font-size:11px; color:#39ff8f; text-shadow:0 0 6px #39ff8f; }
+  #muteBtnRPG, #pauseBtnRPG{
+    position:absolute; top:62px; z-index:8;
+    width:30px; height:30px; border-radius:50%;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(57,255,143,0.4);
+    color:#39ff8f; font-size:14px; display:flex; align-items:center; justify-content:center;
+    pointer-events:auto;
+  }
+  #muteBtnRPG{ right:14px; }
+  #pauseBtnRPG{ right:52px; }
+  #muteBtnRPG.is-muted{ color:rgba(255,255,255,0.35); border-color:rgba(255,255,255,0.15); }
+
+  /* Basarim toast */
+  #achToast{
+    position:absolute; top:110px; left:50%; transform:translate(-50%,-20px);
+    background:rgba(10,8,4,0.92); border:2px solid #ffd23b; border-radius:8px;
+    padding:10px 18px; color:#ffd23b; font-size:12px; font-weight:bold; letter-spacing:1px;
+    text-shadow:0 0 6px #ffd23b; box-shadow:0 0 16px rgba(255,210,59,0.4);
+    opacity:0; transition:all 0.3s; z-index:9; text-align:center; pointer-events:none; max-width:80%;
+  }
+  #achToast.show{ opacity:1; transform:translate(-50%,0); }
+
+  /* Isim girisi / skor tablosu */
+  #nameEntryRPG{ display:flex; gap:8px; margin:14px 0 16px; align-items:center; justify-content:center; }
+  #nameInputRPG{
+    background:rgba(255,255,255,0.04); border:2px solid #2fd8ff; color:#fff;
+    font-family:'Courier New', monospace; font-size:15px; letter-spacing:2px;
+    text-align:center; text-transform:uppercase; padding:9px 8px; width:120px; outline:none;
+  }
+  #saveScoreBtnRPG{
+    background:transparent; border:2px solid #2fd8ff; color:#2fd8ff; font-family:'Courier New', monospace;
+    font-weight:bold; padding:10px 14px; cursor:pointer; font-size:12px;
+  }
+  #saveScoreBtnRPG:disabled{ opacity:0.3; }
+  .lbboxRPG{
+    width:280px; max-height:160px; overflow-y:auto; border:1px solid rgba(57,255,143,0.25);
+    background:rgba(255,255,255,0.02); margin:6px 0 14px; padding:6px 12px;
+  }
+  .lbrowRPG{ display:flex; justify-content:space-between; font-size:12px; padding:3px 0; color:rgba(255,255,255,0.75); border-bottom:1px solid rgba(255,255,255,0.05); }
+  .lbrowRPG.me{ color:#39ff8f; }
+  .ach-list-item{
+    display:flex; align-items:center; gap:10px; padding:8px 10px; margin-bottom:6px;
+    border:1px solid rgba(255,255,255,0.1); border-radius:6px; text-align:left;
+  }
+  .ach-list-item.locked{ opacity:0.3; }
+  .ach-list-item .ach-icon{ font-size:20px; }
+  .ach-list-item .ach-text{ font-size:11px; color:rgba(255,255,255,0.8); }
+  .ach-list-item .ach-text b{ display:block; color:#ffd23b; font-size:12px; }
+
+  /* Pause overlay */
+  #pauseScreen .btn{ width:200px; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<canvas id="game"></canvas>
+
+<div id="hud">
+  <div class="barbox">
+    <div class="barlabel">CAN</div>
+    <div class="bar-outer"><div class="bar-inner" id="hpBar" style="width:100%;"></div></div>
+    <div class="lvltext" id="lvlText">LV 1</div>
+    <div class="bar-outer"><div class="bar-inner xp" id="xpBar" style="width:0%;"></div></div>
+    <div id="buffRow"></div>
+  </div>
+  <div id="regionLabel">BOLGE 1<br><span id="enemyCount">0/0 dusman</span></div>
+</div>
+
+<div id="flash"></div>
+<div id="floorBanner"></div>
+<div id="achToast"></div>
+<button id="muteBtnRPG">🔊</button>
+<button id="pauseBtnRPG">⏸</button>
+<div class="ctrlhint" id="ctrlHint">DOKUN/TIKLA = VUR &nbsp;|&nbsp; CIFT YON = DASH</div>
+
+<div id="controls">
+  <div class="movebtns">
+    <div class="ctrlbtn" id="btnLeft">◀</div>
+    <div class="ctrlbtn" id="btnRight">▶</div>
+  </div>
+  <div class="actionbtns">
+    <div class="actbtn jump" id="btnJump">ZIPLA</div>
+    <div class="actbtn" id="btnAttack">VUR</div>
+  </div>
+</div>
+
+<div class="overlay" id="startScreen">
+  <div class="title-main">CYBER STICK</div>
+  <div class="title-sub">10 BOLUMLUK MACERA</div>
+  <div class="hint">Sol/sag ile yuru, VUR (veya ekrana tikla) ile dovus, ZIPLA ile sicra. Bir yone hizlica 2 kez bas/tikla = DASH (yoldan gectigin dusmanlara hasar verir). Dusman yenip XP topla, iksir topla, 10. bolumde mahkumu kurtar!</div>
+  <button class="btn" id="continueBtn">DEVAM ET</button>
+  <button class="btn" id="newGameBtn" style="border-color:#ff8a2b; color:#ff8a2b; text-shadow:0 0 6px #ff8a2b;">YENI OYUN</button>
+</div>
+
+<div class="overlay hidden" id="regionSelect">
+  <div class="title-sub" style="margin-bottom:14px;">BOLUM SEC</div>
+  <div class="regiongrid" id="regionGrid"></div>
+  <div class="hint" id="profileInfo"></div>
+  <div class="btn-row" style="display:flex; gap:10px; margin-top:6px;">
+    <button class="btn" id="achBtnRPG" style="border-color:#ffd23b; color:#ffd23b; text-shadow:0 0 6px #ffd23b; font-size:12px; padding:11px 18px;">BASARIMLAR</button>
+    <button class="btn" id="lbBtnRPG" style="border-color:#2fd8ff; color:#2fd8ff; text-shadow:0 0 6px #2fd8ff; font-size:12px; padding:11px 18px;">SKOR TABLOSU</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="loseScreen">
+  <div class="title-main" style="color:#ff3b3b; text-shadow:0 0 10px #ff3b3b;">YENILDIN</div>
+  <div class="hint" id="loseStats"></div>
+  <div id="nameEntryRPG">
+    <input type="text" id="nameInputRPG" placeholder="ISMIN" maxlength="10">
+    <button id="saveScoreBtnRPG">KAYDET</button>
+  </div>
+  <div class="lbboxRPG"><div class="lb-title" style="color:#39ff8f; font-size:10px; letter-spacing:2px; margin-bottom:6px;">SKOR TABLOSU</div><div id="lbListLose"></div></div>
+  <button class="btn" id="retryBtn" style="border-color:#ff3b3b; color:#ff3b3b; text-shadow:0 0 6px #ff3b3b;">TEKRAR DENE</button>
+  <button class="btn" id="loseMenuBtn">BOLUM SECIMINE DON</button>
+</div>
+
+<div class="overlay hidden" id="winScreen">
+  <div class="title-main">BOLUM TAMAMLANDI!</div>
+  <div class="title-sub" id="winStats">LV ?</div>
+  <button class="btn" id="winNextBtn">SONRAKI BOLUM</button>
+  <button class="btn" id="winMenuBtn">BOLUM SECIMINE DON</button>
+</div>
+
+<div class="overlay hidden" id="finalScreen">
+  <div class="title-main" style="color:#ffd23b; text-shadow:0 0 14px #ffd23b;">KURTARILDI!</div>
+  <div class="title-sub" style="color:#ffd23b; text-shadow:0 0 6px #ffd23b;">CEKIRDEK KALESI DUSTU</div>
+  <div class="hint" id="finalStats" style="max-width:300px;"></div>
+  <div id="nameEntryFinal">
+    <input type="text" id="nameInputFinal" placeholder="ISMIN" maxlength="10" style="background:rgba(255,255,255,0.04); border:2px solid #ffd23b; color:#fff; font-family:'Courier New', monospace; font-size:15px; letter-spacing:2px; text-align:center; text-transform:uppercase; padding:9px 8px; width:120px; outline:none;">
+    <button id="saveScoreBtnFinal" style="background:transparent; border:2px solid #ffd23b; color:#ffd23b; font-family:'Courier New', monospace; font-weight:bold; padding:10px 14px; cursor:pointer; font-size:12px; margin-left:8px;">KAYDET</button>
+  </div>
+  <button class="btn" id="finalRestartBtn" style="border-color:#ffd23b; color:#ffd23b; text-shadow:0 0 6px #ffd23b; margin-top:14px;">BASTAN OYNA</button>
+</div>
+
+<div class="overlay hidden" id="pauseScreen">
+  <div class="title-main" style="font-size:30px;">DURAKLATILDI</div>
+  <button class="btn" id="resumeBtn">DEVAM ET</button>
+  <button class="btn" id="pauseMenuBtn" style="border-color:#ff8a2b; color:#ff8a2b; text-shadow:0 0 6px #ff8a2b;">ANA MENUYE DON</button>
+</div>
+
+<div class="overlay hidden" id="achScreen">
+  <div class="title-sub" style="margin-bottom:14px; color:#ffd23b; text-shadow:0 0 6px #ffd23b;">BASARIMLAR</div>
+  <div id="achList" style="width:300px; max-height:50vh; overflow-y:auto;"></div>
+  <button class="btn" id="closeAchBtn" style="margin-top:14px;">KAPAT</button>
+</div>
+
+<div class="overlay hidden" id="lbScreen">
+  <div class="title-sub" style="margin-bottom:14px; color:#2fd8ff; text-shadow:0 0 6px #2fd8ff;">SKOR TABLOSU</div>
+  <div class="lbboxRPG" style="width:300px; max-height:55vh;"><div id="lbListMain"></div></div>
+  <button class="btn" id="closeLbBtn">KAPAT</button>
+</div>
+
+</div>
+
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  let W, H, GROUND_Y;
+  function resize(){
+    const maxW = Math.min(window.innerWidth, 480);
+    W = maxW; H = window.innerHeight;
+    canvas.width = W; canvas.height = H;
+    GROUND_Y = H*0.72;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------------- Bolge tanimlari ----------------
+  const REGIONS = [
+    {id:1,  name:'CORAK ARAZI',        bgTop:'#10141c', bgBot:'#1a2230', accent:'#39ff8f', tower:false, desc:'Egitim alani - sade ve sakin'},
+    {id:2,  name:'NEON SOKAKLAR',      bgTop:'#140a1c', bgBot:'#241333', accent:'#ff5fd1', tower:false, desc:'Hizli dusman akinlari'},
+    {id:3,  name:'ZEHIRLI BATAKLIK',   bgTop:'#0a1c14', bgBot:'#15301f', accent:'#39ff8f', tower:false, mud:true, desc:'Bataklik camuru yuruyusunu yavaslatir'},
+    {id:4,  name:'KUM FIRTINASI',      bgTop:'#1c1408', bgBot:'#332810', accent:'#ffd23b', tower:false, fog:true, desc:'Kum firtinasi gorusu kisitlar'},
+    {id:5,  name:'BUZ KULESI',         bgTop:'#0a1620', bgBot:'#142838', accent:'#7df9ff', tower:true, desc:'Kat kat tirmanma'},
+    {id:6,  name:'KARANLIK ORMAN',     bgTop:'#0c140a', bgBot:'#1c2c14', accent:'#a23bff', tower:false, dark:true, desc:'Karanlikta sadece yakinini gorursun'},
+    {id:7,  name:'TERK FABRIKA',       bgTop:'#1c0a0a', bgBot:'#301414', accent:'#ff3b3b', tower:false, spikes:'dense', desc:'Yogun diken tuzaklari - ziplamayi unutma'},
+    {id:8,  name:'GOKYUZU KULESI',     bgTop:'#0a0a1c', bgBot:'#141430', accent:'#2fd8ff', tower:true, wind:true, desc:'Kat kat tirmanma + ruzgar iter'},
+    {id:9,  name:'YERALTI ZINDANI',    bgTop:'#140a14', bgBot:'#241424', accent:'#ff8a2b', tower:false, dark:true, spikes:'dense', desc:'Karanlik + tuzaklar bir arada'},
+    {id:10, name:'CEKIRDEK KALESI',    bgTop:'#1c0a1c', bgBot:'#300a30', accent:'#ff3b6b', tower:false, final:true, desc:'Son hesaplasma - boss ofkelenebilir'},
+  ];
+
+  const ENEMY_BASE = {
+    basic:   {name:'Temel',  color:'#ff8a2b', hp:28, atk:5,  speed:0.95, w:24, xp:12},
+    fast:    {name:'Hizli',  color:'#ff3b6b', hp:16, atk:4,  speed:1.8,  w:20, xp:9},
+    armored: {name:'Zirhli', color:'#9b59b6', hp:55, atk:9,  speed:0.6,  w:30, xp:22},
+    elite:   {name:'Elit',   color:'#1dd3b0', hp:80, atk:12, speed:0.85, w:32, xp:32},
+    boss:    {name:'BOSS',   color:'#ff3b3b', hp:200,atk:15, speed:0.7,  w:46, xp:110}
+  };
+
+  // ---------------- Profil (kalici ilerleme) ----------------
+  function defaultProfile(){
+    return {level:1, xp:0, xpToNext:40, maxHp:120, atk:17, unlocked:1, totalPlayMs:0};
+  }
+  function loadProfile(){
+    try{
+      const p = JSON.parse(localStorage.getItem('cs_profile')) || defaultProfile();
+      if(typeof p.totalPlayMs !== 'number') p.totalPlayMs = 0;
+      return p;
+    }
+    catch(e){ return defaultProfile(); }
+  }
+  function saveProfile(p){ localStorage.setItem('cs_profile', JSON.stringify(p)); }
+  let profile = loadProfile();
+  function formatPlayTime(ms){
+    const totalSec = Math.floor(ms/1000);
+    const min = Math.floor(totalSec/60);
+    const sec = totalSec%60;
+    return min + ' dk ' + sec + ' sn';
+  }
+
+  // ---------------- Basarimlar ----------------
+  const ACHIEVEMENTS = [
+    {id:'first_blood', icon:'🗡️', name:'Ilk Kan', desc:'Ilk dusmanini yen'},
+    {id:'region1_clear', icon:'🏁', name:'Ilk Adim', desc:'Bolum 1i tamamla'},
+    {id:'combo5', icon:'🔥', name:'Seri Katil', desc:'x5 combo yap'},
+    {id:'dash_kill', icon:'💨', name:'Hizli ve Ofkeli', desc:'Dash ile bir dusman oldur'},
+    {id:'no_damage_region', icon:'🛡️', name:'Dokunulmaz', desc:'Bir bolumu hic hasar almadan tamamla'},
+    {id:'tower_clear', icon:'🗼', name:'Tirmanisci', desc:'Bir kule bolumunu tamamla'},
+    {id:'level10', icon:'⭐', name:'Seviye Ustasi', desc:'Seviye 10a ulas'},
+    {id:'game_complete', icon:'👑', name:'Kahraman', desc:'Oyunu tamamla, mahkumu kurtar'},
+  ];
+  function loadAchievements(){
+    try{ return JSON.parse(localStorage.getItem('cs_achievements')) || []; }
+    catch(e){ return []; }
+  }
+  let unlockedAchievements = loadAchievements();
+  function unlockAchievement(id){
+    if(unlockedAchievements.includes(id)) return;
+    unlockedAchievements.push(id);
+    localStorage.setItem('cs_achievements', JSON.stringify(unlockedAchievements));
+    const def = ACHIEVEMENTS.find(a=>a.id===id);
+    if(def) showAchToast(def);
+  }
+  function showAchToast(def){
+    const el = document.getElementById('achToast');
+    el.innerHTML = def.icon + ' BASARIM: <b>' + def.name + '</b>';
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>el.classList.remove('show'), 2600);
+  }
+
+  // ---------------- Skor tablosu ----------------
+  function getLeaderboard(){
+    try{ return JSON.parse(localStorage.getItem('cs_leaderboard')) || []; }
+    catch(e){ return []; }
+  }
+  function addToLeaderboard(name, score, label){
+    const list = getLeaderboard();
+    list.push({name: name||'ANONIM', score, label: label||''});
+    list.sort((a,b)=>b.score-a.score);
+    const trimmed = list.slice(0,10);
+    localStorage.setItem('cs_leaderboard', JSON.stringify(trimmed));
+    return trimmed;
+  }
+  function renderLeaderboardInto(containerId, highlightScore){
+    const list = getLeaderboard();
+    const box = document.getElementById(containerId);
+    if(list.length === 0){ box.innerHTML = '<div style="color:rgba(255,255,255,0.3); font-size:11px; text-align:center; padding:8px 0;">HENUZ KAYIT YOK</div>'; return; }
+    box.innerHTML = list.map((row,i)=>{
+      const isMe = highlightScore!==undefined && row.score===highlightScore;
+      return '<div class="lbrowRPG'+(isMe?' me':'')+'"><span>'+(i+1)+'. '+escapeHtmlRPG(row.name)+'</span><span>'+row.label+'</span></div>';
+    }).join('');
+  }
+  function escapeHtmlRPG(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------------- Oyuncu / dunya durumu ----------------
+  let player, enemies = [], pickups = [], particles = [], floatTexts = [], slashFx = [], obstacles = [];
+  let cameraX = 0, worldEnd = 3000, shakeAmt = 0;
+  let currentRegion = 1;
+  let floorIndex = 0; // tower icin 0,1,2
+  let floorThresholds = [];
+  let regionCleared = false;
+  let state = 'start'; // start, regionselect, playing, lose, win, final
+  let spawnPlan = [], spawned = [], totalNonBoss = 0, defeatedCount = 0;
+  let snapshotProfile = null;
+  let combo = 0, comboTimer = 0;
+  let bossWarned = false;
+  let ambientParticles = [];
+  player = makePlayer(profile); // ilk yukleme hatasini onlemek icin hemen olustur
+
+  function makePlayer(p){
+    return {
+      x:100, vy:0, onGround:true, facing:1, jumpOffset:0,
+      hp:p.maxHp, maxHp:p.maxHp, atk:p.atk,
+      level:p.level, xp:p.xp, xpToNext:p.xpToNext,
+      state:'idle', attackTimer:0, attackCooldown:0, hitFlash:0, walking:false,
+      buffTimer:0, buffMul:1, dashTimer:0, dashCooldown:0, dashHits:[]
+    };
+  }
+
+  function regionMultiplier(idx){ return 1 + (idx-1)*0.26; }
+
+  function generateSpawnPlan(regionIdx, miniLength){
+    const mult = regionMultiplier(regionIdx);
+    const waves = miniLength || (5 + Math.min(6, Math.floor(regionIdx/1.3)));
+    let plan = []; let x = 500;
+    let pool = ['basic','fast'];
+    if(regionIdx>=4) pool = ['basic','fast','armored'];
+    if(regionIdx>=7) pool = ['basic','fast','armored','elite'];
+    for(let w=0; w<waves; w++){
+      const roll = Math.random();
+      const groupSize = roll<0.3 ? 1 : (roll<0.7 ? 3 : 4);
+      const type = pool[Math.floor(Math.random()*pool.length)];
+      for(let g=0; g<groupSize; g++) plan.push([x+g*42, type]);
+      x += 340 + Math.random()*140;
+    }
+    return {plan, endX: x + 250, mult};
+  }
+
+  function generateObstacles(regionIdx, endX){
+    const region = REGIONS[regionIdx-1];
+    const density = region.spikes === 'dense' ? 0.85 : 0.4;
+    let obs = []; let x = 650;
+    while(x < endX - 150){
+      if(Math.random() < density) obs.push({worldX:x, cooldownTimer:0});
+      x += 300 + Math.random()*220;
+    }
+    return obs;
+  }
+
+  function spawnEnemy(worldX, type, mult){
+    const b = ENEMY_BASE[type];
+    enemies.push({
+      type, worldX, hp:Math.round(b.hp*mult), maxHp:Math.round(b.hp*mult),
+      atk:Math.round(b.atk*mult), speed:b.speed, w:b.w, xp:Math.round(b.xp*mult),
+      color:b.color, name:b.name, state:'idle', attackTimer:0, alive:true,
+      hitFlash:0, deathTimer:0, deathRot:0, bobPhase:Math.random()*10
+    });
+  }
+
+  function startRegion(regionIdx, fromContinue){
+    currentRegion = regionIdx;
+    const region = REGIONS[regionIdx-1];
+    floorIndex = 0;
+    enemies = []; particles = []; floatTexts = []; pickups = []; slashFx = []; obstacles = [];
+    cameraX = 0; shakeAmt = 0; regionCleared = false; defeatedCount = 0;
+    bossWarned = false; combo = 0; comboTimer = 0;
+    ambientParticles = [];
+    for(let i=0;i<16;i++){
+      ambientParticles.push({wx: Math.random()*((REGIONS[regionIdx-1]||{}).tower?2000:2500), y: Math.random()*GROUND_Y*0.7, phase: Math.random()*10});
+    }
+
+    snapshotProfile = JSON.parse(JSON.stringify(profile));
+    player = makePlayer(profile);
+    player.damagedThisRegion = false;
+
+    if(region.tower){
+      // 3 kat: ilk 2 kat dusman dalgalari + gecis banner, 3. kat boss
+      const f1 = generateSpawnPlan(regionIdx, 4);
+      const f2 = generateSpawnPlan(regionIdx, 4);
+      const f3 = generateSpawnPlan(regionIdx, 0);
+      let plan = [];
+      let offset = 0;
+      f1.plan.forEach(p=>plan.push([p[0]+offset, p[1]]));
+      floorThresholds = [f1.endX];
+      offset = f1.endX + 300;
+      f2.plan.forEach(p=>plan.push([p[0]+offset, p[1]]));
+      floorThresholds.push(offset + f2.endX);
+      offset = offset + f2.endX + 300;
+      f3.plan.forEach(p=>plan.push([p[0]+offset, p[1]]));
+      plan.push([offset + f3.endX + 250, 'boss']);
+      worldEnd = offset + f3.endX + 500;
+      spawnPlan = plan;
+    } else {
+      const g = generateSpawnPlan(regionIdx);
+      spawnPlan = g.plan.slice();
+      spawnPlan.push([g.endX + 300, 'boss']);
+      worldEnd = g.endX + 600;
+      floorThresholds = [];
+    }
+    spawned = spawnPlan.map(()=>false);
+    totalNonBoss = spawnPlan.filter(s=>s[1]!=='boss').length;
+    obstacles = generateObstacles(regionIdx, worldEnd);
+    updateHUD();
+  }
+
+  // ---------------- Input ----------------
+  let moveDir = 0, wantAttack = false, wantJump = false, attackClickBuffer = 0;
+  let lastTapTime = {left:0, right:0};
+  const DOUBLE_TAP_WINDOW = 320;
+
+  function tryDash(dir){
+    const now = Date.now();
+    if(now - lastTapTime[dir] < DOUBLE_TAP_WINDOW){
+      requestDash(dir);
+      lastTapTime[dir] = 0;
+    } else {
+      lastTapTime[dir] = now;
+    }
+  }
+
+  function bindHold(id, onDown, onUp){
+    const el = document.getElementById(id);
+    const down=(e)=>{ e.preventDefault(); el.classList.add('active'); onDown(); };
+    const up=()=>{ el.classList.remove('active'); onUp(); };
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointerleave', up);
+    el.addEventListener('pointercancel', up);
+  }
+  bindHold('btnLeft', ()=>{moveDir=-1; tryDash('left');}, ()=>{ if(moveDir===-1) moveDir=0; });
+  bindHold('btnRight', ()=>{moveDir=1; tryDash('right');}, ()=>{ if(moveDir===1) moveDir=0; });
+  bindHold('btnAttack', ()=>{ensureAudio(); wantAttack=true;}, ()=>{wantAttack=false;});
+  bindHold('btnJump', ()=>{wantJump=true;}, ()=>{wantJump=false;});
+
+  canvas.addEventListener('pointerdown', ()=>{ ensureAudio(); if(state==='playing') attackClickBuffer = 14; });
+
+  window.addEventListener('keydown', e=>{
+    if((e.key==='ArrowLeft'||e.key==='a') && moveDir!==-1){ moveDir=-1; tryDash('left'); }
+    if((e.key==='ArrowRight'||e.key==='d') && moveDir!==1){ moveDir=1; tryDash('right'); }
+    if(e.key===' '||e.key==='w'||e.key==='ArrowUp') wantJump=true;
+    if(e.key==='j') wantAttack=true;
+  });
+  window.addEventListener('keyup', e=>{
+    if((e.key==='ArrowLeft'||e.key==='a')&&moveDir===-1) moveDir=0;
+    if((e.key==='ArrowRight'||e.key==='d')&&moveDir===1) moveDir=0;
+    if(e.key===' '||e.key==='w'||e.key==='ArrowUp') wantJump=false;
+    if(e.key==='j') wantAttack=false;
+  });
+
+
+  // ---------------- HUD ----------------
+  function updateHUD(){
+    document.getElementById('hpBar').style.width = Math.max(0,(player.hp/player.maxHp*100))+'%';
+    document.getElementById('xpBar').style.width = Math.max(0,(player.xp/player.xpToNext*100))+'%';
+    document.getElementById('lvlText').textContent = 'LV '+player.level;
+    document.getElementById('enemyCount').textContent = defeatedCount+'/'+totalNonBoss+' dusman';
+    const region = REGIONS[currentRegion-1];
+    document.getElementById('regionLabel').innerHTML = 'BOLUM '+currentRegion+': '+region.name+'<br><span id="enemyCount">'+defeatedCount+'/'+totalNonBoss+' dusman</span>';
+    const buffRow = document.getElementById('buffRow');
+    let buffHtml = '';
+    if(player.buffTimer > 0){
+      buffHtml += '<div class="barlabel" style="color:#ffd23b;">GUC IKSIRI</div><div class="bar-outer"><div class="bar-inner buff" style="width:'+(player.buffTimer/480*100)+'%;"></div></div>';
+    }
+    if(combo >= 2){
+      buffHtml += '<div class="barlabel" style="color:#ffd23b; margin-top:4px;">COMBO x'+combo+'</div>';
+    }
+    buffRow.innerHTML = buffHtml;
+  }
+
+  function flashText(text, color){
+    const f = document.getElementById('flash');
+    f.textContent = text; f.style.color = color||'#39ff8f'; f.style.textShadow = '0 0 14px '+(color||'#39ff8f');
+    f.style.opacity = '1';
+    clearTimeout(f._t); f._t = setTimeout(()=>{ f.style.opacity='0'; }, 1000);
+  }
+  function floorBanner(text){
+    const f = document.getElementById('floorBanner');
+    f.textContent = text; f.style.opacity = '1';
+    clearTimeout(f._t); f._t = setTimeout(()=>{ f.style.opacity='0'; }, 1800);
+  }
+
+  function burst(x,y,color,count){
+    for(let i=0;i<count;i++){
+      const ang = Math.random()*Math.PI*2, spd=1.5+Math.random()*3;
+      particles.push({x,y,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:24+Math.random()*10,color});
+    }
+  }
+
+  // ---------------- Ses (hafif synth, dosya gerektirmez) ----------------
+  let audioCtx, muted = localStorage.getItem('cs_muted') === '1';
+  function ensureAudio(){ if(!audioCtx){ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } }
+  function tone(freq, dur, type, vol){
+    if(!audioCtx || muted) return;
+    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+    osc.type = type||'sine'; osc.frequency.value = freq; gain.gain.value = vol||0.07;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+    osc.stop(audioCtx.currentTime+dur);
+  }
+  function playHitSound(){ tone(180+Math.random()*60, 0.07, 'square', 0.05); }
+  function playDeathSound(){ tone(120, 0.18, 'sawtooth', 0.08); }
+  function playDamageSound(){ tone(90, 0.15, 'square', 0.07); }
+  function playPickupSound(){ tone(700,0.1,'sine',0.05); setTimeout(()=>tone(1000,0.1,'sine',0.04),60); }
+  function playLevelUpSound(){ tone(523,0.1,'square',0.05); setTimeout(()=>tone(659,0.1,'square',0.05),90); setTimeout(()=>tone(784,0.16,'square',0.06),180); }
+  function playVictorySound(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,0.18,'square',0.06), i*120)); }
+  function playBossWarningSound(){ tone(80,0.4,'sawtooth',0.06); }
+
+  function gainXp(amount){
+    player.xp += amount;
+    floatTexts.push({x:player.x, y:GROUND_Y-110, text:'+'+amount+' XP', color:'#2fd8ff', life:50});
+    while(player.xp >= player.xpToNext){
+      player.xp -= player.xpToNext;
+      player.level++;
+      player.maxHp = Math.round(player.maxHp*1.18);
+      player.atk = Math.round(player.atk*1.14);
+      player.hp = player.maxHp;
+      player.xpToNext = Math.round(player.xpToNext*1.35);
+      flashText('LEVEL UP! LV '+player.level, '#2fd8ff');
+      shakeAmt = Math.max(shakeAmt, 8);
+      playLevelUpSound();
+      if(player.level >= 10) unlockAchievement('level10');
+    }
+  }
+
+  function tryDropItem(en){
+    const rolls = {basic:0.15, fast:0.10, armored:0.35, elite:0.45, boss:1};
+    if(Math.random() > (rolls[en.type]||0)) return;
+    const t = en.type==='boss' ? 'hp' : (Math.random()<0.5?'hp':'pw');
+    pickups.push({worldX:en.worldX, type:t, bob:0, taken:false});
+    if(en.type==='boss'){
+      pickups.push({worldX:en.worldX+30, type:'pw', bob:0, taken:false});
+    }
+  }
+
+  function collectPickups(){
+    pickups.forEach(pk=>{
+      if(pk.taken) return;
+      if(Math.abs(pk.worldX - player.x) < 30){
+        pk.taken = true;
+        if(pk.type==='hp'){
+          player.hp = Math.min(player.maxHp, player.hp + Math.round(player.maxHp*0.3));
+          floatTexts.push({x:player.x,y:GROUND_Y-110,text:'+CAN',color:'#39ff8f',life:50});
+        } else {
+          player.buffTimer = 480; player.buffMul = 1.6;
+          floatTexts.push({x:player.x,y:GROUND_Y-110,text:'GUC ARTTI!',color:'#ffd23b',life:50});
+        }
+        burst(player.x-cameraX, GROUND_Y-50, pk.type==='hp'?'#39ff8f':'#ffd23b', 14);
+        playPickupSound();
+      }
+    });
+    pickups = pickups.filter(p=>!p.taken);
+  }
+
+  function triggerPlayerAttack(){
+    player.state = 'attack';
+    player.attackTimer = 14;
+    player.attackCooldown = 20;
+    slashFx.push({life:10, facing:player.facing});
+  }
+
+  function requestDash(dir){
+    if(state !== 'playing') return;
+    if(player.dashCooldown > 0 || player.state === 'dash') return;
+    player.state = 'dash';
+    player.dashTimer = 14;
+    player.dashCooldown = 70;
+    player.facing = dir === 'left' ? -1 : 1;
+    player.dashHits = [];
+    ensureAudio();
+    tone(340, 0.1, 'sawtooth', 0.06);
+    if(navigator.vibrate) navigator.vibrate(18);
+  }
+
+  // ---------------- Update ----------------
+  function update(){
+    player.walking = moveDir !== 0 && player.state !== 'attack' && player.state !== 'dash';
+    if(player.state === 'dash'){
+      player.x += player.facing * 9.5;
+      player.x = Math.max(40, Math.min(worldEnd-40, player.x));
+      particles.push({x:player.x-cameraX-player.facing*14, y:GROUND_Y-40, vx:-player.facing*1.2, vy:(Math.random()-0.5)*1.5, life:14, color:'rgba(125,249,255,0.5)'});
+      player.dashTimer--;
+      // dash sirasinda yoldan gectigi dusmanlara hasar
+      enemies.forEach(en=>{
+        if(!en.alive || player.dashHits.includes(en)) return;
+        if(Math.abs(en.worldX - player.x) < 40){
+          player.dashHits.push(en);
+          const dmg = Math.round(player.atk * 0.8);
+          en.hp -= dmg; en.hitFlash = 8;
+          burst(en.worldX-cameraX, GROUND_Y-50, '#7df9ff', 12);
+          playHitSound();
+          if(en.hp <= 0 && en.alive){
+            en.alive = false; en.deathTimer = 24;
+            if(en.type !== 'boss') defeatedCount++;
+            gainXp(en.xp); tryDropItem(en);
+            burst(en.worldX-cameraX, GROUND_Y-40, en.color, 18);
+            playDeathSound();
+            unlockAchievement('first_blood');
+            unlockAchievement('dash_kill');
+            if(en.type === 'boss'){ regionCleared = true; shakeAmt = 16; playVictorySound(); }
+          }
+        }
+      });
+      if(player.dashTimer <= 0) player.state = 'idle';
+    } else if(player.state !== 'attack' && moveDir !== 0){
+      player.facing = moveDir;
+      const curRegion = REGIONS[currentRegion-1];
+      const speedMul = (curRegion && curRegion.mud) ? 0.6 : 1;
+      player.x += moveDir * 2.6 * speedMul;
+      player.x = Math.max(40, Math.min(worldEnd-40, player.x));
+    }
+    if(player.dashCooldown > 0) player.dashCooldown--;
+
+    if(wantJump && player.onGround){ player.vy = -7.5; player.onGround = false; }
+    player.vy += 0.45;
+    if(!player.onGround){
+      player.jumpOffset += player.vy;
+      if(player.jumpOffset >= 0){ player.jumpOffset = 0; player.onGround = true; player.vy = 0; }
+    }
+
+    if(player.attackCooldown > 0) player.attackCooldown--;
+    if(attackClickBuffer > 0) attackClickBuffer--;
+    const wantsAttackNow = (wantAttack || attackClickBuffer > 0) && player.attackCooldown<=0 && player.state!=='attack' && player.state!=='dash';
+    if(wantsAttackNow){ triggerPlayerAttack(); attackClickBuffer = 0; }
+
+    if(comboTimer > 0){ comboTimer--; if(comboTimer === 0) combo = 0; }
+
+    if(player.state === 'attack'){
+      player.attackTimer--;
+      if(player.attackTimer === 7){
+        let hitSomething = false;
+        const effAtk = Math.round(player.atk * (player.buffTimer>0?player.buffMul:1) * (1 + Math.min(combo,5)*0.06));
+        enemies.forEach(en=>{
+          if(!en.alive) return;
+          const dx = (en.worldX - player.x) * player.facing;
+          if(dx > 0 && dx < 54){
+            hitSomething = true;
+            en.hp -= effAtk; en.hitFlash = 8;
+            burst(en.worldX-cameraX, GROUND_Y-50, '#fff', 10);
+            shakeAmt = Math.max(shakeAmt, 3);
+            playHitSound();
+            if(navigator.vibrate) navigator.vibrate(12);
+            if(en.hp <= 0 && en.alive){
+              en.alive = false; en.deathTimer = 24;
+              if(en.type !== 'boss') defeatedCount++;
+              gainXp(en.xp);
+              tryDropItem(en);
+              burst(en.worldX-cameraX, GROUND_Y-40, en.color, 18);
+              playDeathSound();
+              unlockAchievement('first_blood');
+              if(en.type === 'boss'){ regionCleared = true; shakeAmt = 16; playVictorySound(); }
+            }
+          }
+        });
+        if(hitSomething){
+          combo = Math.min(combo+1, 5); comboTimer = 90;
+          if(combo >= 2) floatTexts.push({x:player.x, y:GROUND_Y-130, text:'COMBO x'+combo, color:'#ffd23b', life:40});
+          if(combo >= 5) unlockAchievement('combo5');
+        } else {
+          combo = 0; comboTimer = 0;
+        }
+      }
+      if(player.attackTimer <= 0) player.state = 'idle';
+    }
+    if(player.hitFlash > 0) player.hitFlash--;
+    if(player.buffTimer > 0) player.buffTimer--;
+    if(shakeAmt > 0) shakeAmt *= 0.85;
+
+    // yuruyus tozu
+    if(player.walking && player.onGround && Math.random() < 0.3){
+      particles.push({x:player.x-cameraX-player.facing*8, y:GROUND_Y-2, vx:-player.facing*0.5, vy:-0.3, life:16, color:'rgba(255,255,255,0.3)'});
+    }
+
+    // ambient parcaciklar (kar/kivilcim/atesbocegi)
+    const regionNow = REGIONS[currentRegion-1];
+    const ambientFalls = regionNow && (regionNow.id===5 || regionNow.id===8);
+    const ambientRises = regionNow && (regionNow.id===7 || regionNow.id===9 || regionNow.id===10);
+    ambientParticles.forEach(p=>{
+      p.phase += 0.03;
+      p.wx += Math.sin(p.phase*0.5)*0.15;
+      if(ambientFalls){ p.y += 0.4; if(p.y > GROUND_Y) p.y = 0; }
+      else if(ambientRises){ p.y -= 0.3; if(p.y < 0) p.y = GROUND_Y*0.7; }
+    });
+
+    // ruzgar (gokyuzu kulesi) - oyuncuyu hafifce geriye iter
+    if(regionNow && regionNow.wind && player.state !== 'dash'){
+      player.x -= 0.45;
+      player.x = Math.max(40, Math.min(worldEnd-40, player.x));
+    }
+
+    // diken tuzaklari
+    obstacles.forEach(ob=>{
+      if(ob.cooldownTimer > 0){ ob.cooldownTimer--; return; }
+      if(Math.abs(ob.worldX - player.x) < 24 && player.onGround && player.jumpOffset >= -2 && player.state !== 'dash'){
+        const dmg = Math.round(7 * regionMultiplier(currentRegion));
+        player.hp -= dmg; player.hitFlash = 10; ob.cooldownTimer = 90;
+        player.damagedThisRegion = true;
+        shakeAmt = Math.max(shakeAmt, 6);
+        burst(ob.worldX-cameraX, GROUND_Y-6, '#ff3b3b', 10);
+        playDamageSound();
+        if(navigator.vibrate) navigator.vibrate(20);
+        combo = 0; comboTimer = 0;
+        if(player.hp <= 0){ player.hp = 0; gameOver(); }
+      }
+    });
+
+    cameraX = Math.max(0, Math.min(worldEnd - W, player.x - W*0.35));
+
+    spawnPlan.forEach((sp,i)=>{
+      if(!spawned[i] && sp[0] < cameraX + W + 100){
+        spawned[i] = true;
+        const mult = regionMultiplier(currentRegion);
+        spawnEnemy(sp[0], sp[1], sp[1]==='boss' ? mult*1.35 : mult);
+      }
+    });
+
+    // kat gecis banner kontrolu (tower bolgeler)
+    floorThresholds.forEach((thr, i)=>{
+      if(player.x > thr && floorIndex === i){
+        floorIndex++;
+        floorBanner((i+1)+'. KAT TEMIZLENDI - YUKARI CIKILIYOR');
+      }
+    });
+
+    // boss yaklasma uyarisi
+    if(!bossWarned){
+      const bossEntry = spawnPlan.find(s=>s[1]==='boss');
+      if(bossEntry && player.x > bossEntry[0] - 380){
+        bossWarned = true;
+        floorBanner('⚠ BOSS YAKLASIYOR ⚠');
+        playBossWarningSound();
+      }
+    }
+
+    enemies.forEach(en=>{
+      if(!en.alive){ if(en.deathTimer>0){ en.deathTimer--; en.deathRot = Math.min(1.5, en.deathRot+0.12); } return; }
+      if(en.hitFlash>0) en.hitFlash--;
+      en.bobPhase += 0.08;
+      if(en.type==='boss' && !en.enraged && en.hp <= en.maxHp*0.5){
+        en.enraged = true;
+        en.atk = Math.round(en.atk*1.4);
+        en.speed = en.speed*1.3;
+        en.color = '#ff0000';
+        shakeAmt = Math.max(shakeAmt, 14);
+        flashText('BOSS OFKELENDI!', '#ff0000');
+        playBossWarningSound();
+      }
+      const dist = en.worldX - player.x, adist = Math.abs(dist);
+      if(adist > 36){ en.worldX -= Math.sign(dist)*en.speed; en.state='walk'; }
+      else {
+        en.state = 'attack';
+        if(en.attackTimer<=0){
+          en.attackTimer = 50;
+          if(player.state !== 'dash'){
+            player.hp -= en.atk; player.hitFlash = 10; shakeAmt = Math.max(shakeAmt, en.type==='boss'?10:4);
+            burst(player.x-cameraX, GROUND_Y-60, '#ff3b3b', 10);
+            playDamageSound();
+            if(navigator.vibrate) navigator.vibrate(en.type==='boss'?60:25);
+            combo = 0; comboTimer = 0;
+            player.damagedThisRegion = true;
+            if(player.hp <= 0){ player.hp = 0; gameOver(); }
+          }
+        }
+      }
+      if(en.attackTimer>0) en.attackTimer--;
+    });
+    enemies = enemies.filter(en => en.alive || en.deathTimer>0);
+
+    collectPickups();
+    pickups.forEach(p=>p.bob += 0.1);
+
+    particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=0.94; p.vy*=0.94; p.life--; });
+    particles = particles.filter(p=>p.life>0);
+    floatTexts.forEach(f=>{ f.y -= 0.6; f.life--; });
+    floatTexts = floatTexts.filter(f=>f.life>0);
+    slashFx.forEach(s=>s.life--);
+    slashFx = slashFx.filter(s=>s.life>0);
+
+    if(regionCleared && state==='playing'){
+      profile.level = player.level; profile.xp = player.xp; profile.xpToNext = player.xpToNext;
+      profile.maxHp = player.maxHp; profile.atk = player.atk;
+      if(!player.damagedThisRegion) unlockAchievement('no_damage_region');
+      if(REGIONS[currentRegion-1].tower) unlockAchievement('tower_clear');
+      if(currentRegion === 1) unlockAchievement('region1_clear');
+      if(REGIONS[currentRegion-1].final){
+        profile.unlocked = Math.max(profile.unlocked, 10);
+        saveProfile(profile);
+        unlockAchievement('game_complete');
+        state = 'cutscene';
+        startFinalCutscene();
+      } else {
+        profile.unlocked = Math.max(profile.unlocked, currentRegion+1);
+        saveProfile(profile);
+        state = 'win';
+        showWin();
+      }
+    }
+    updateHUD();
+  }
+
+  // ---------------- Cizim ----------------
+  function drawStick(x,y,facing,color,pose,jumpOffset,hitFlash,deathRot,bob,kind){
+    kind = kind || 'player';
+    ctx.save();
+    ctx.translate(x, y+(jumpOffset||0)+(bob||0));
+    if(deathRot){ ctx.translate(0,-30); ctx.rotate(facing*deathRot); ctx.translate(0,30); }
+    ctx.scale(facing,1);
+    const c = hitFlash>0 ? '#ffffff' : color;
+    const t = Date.now();
+    ctx.strokeStyle = c; ctx.fillStyle = c; ctx.lineCap = 'round';
+    ctx.lineWidth = (kind==='armored'||kind==='boss') ? 6 : (kind==='fast' ? 3.2 : 4);
+
+    const headY = -72;
+    const headR = kind==='boss' ? 14 : (kind==='fast' ? 9 : 11);
+
+    // --- govde once cizilen olceklenme efekti (saldiri sirasi hafif on egilim) ---
+    const lean = pose==='attack' ? 4 : (pose==='dash' ? 10 : 0);
+
+    // --- BAS ---
+    if(kind==='armored'){
+      // koseli zirhli kask
+      ctx.beginPath();
+      ctx.moveTo(-headR,headY-headR*0.4); ctx.lineTo(headR,headY-headR*0.4);
+      ctx.lineTo(headR*0.9,headY+headR*0.9); ctx.lineTo(-headR*0.9,headY+headR*0.9);
+      ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#1a0a26'; // vizor
+      ctx.fillRect(-headR*0.6, headY-3, headR*1.2, 4);
+      ctx.fillStyle = c;
+    } else if(kind==='elite'){
+      // elmas kafa + parlayan halka
+      ctx.save();
+      ctx.shadowColor = c; ctx.shadowBlur = 14 + Math.sin(t/150)*4;
+      ctx.beginPath();
+      ctx.moveTo(0,headY-headR); ctx.lineTo(headR,headY); ctx.lineTo(0,headY+headR); ctx.lineTo(-headR,headY);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    } else if(kind==='boss'){
+      // kafa + tac dikenleri + kirmizi gozler
+      ctx.beginPath(); ctx.arc(0,headY,headR,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = c;
+      for(let s=-1;s<=1;s++){
+        ctx.beginPath();
+        ctx.moveTo(s*headR*0.7, headY-headR*0.7);
+        ctx.lineTo(s*headR*0.9+s*2, headY-headR*1.9);
+        ctx.lineTo(s*headR*1.1, headY-headR*0.5);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.fillStyle = '#ff1010';
+      ctx.shadowColor = '#ff1010'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(headR*0.4, headY-1, 2.2, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-headR*0.4, headY-1, 2.2, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0; ctx.fillStyle = c;
+    } else if(kind==='fast'){
+      // kucuk kafa + anten
+      ctx.beginPath(); ctx.arc(0,headY,headR,0,Math.PI*2); ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-3,headY-headR); ctx.lineTo(-6,headY-headR-7); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(3,headY-headR); ctx.lineTo(6,headY-headR-7); ctx.stroke();
+      ctx.lineWidth = 3.2;
+    } else {
+      ctx.beginPath(); ctx.arc(0,headY,headR,0,Math.PI*2); ctx.fill();
+    }
+
+    // --- GOVDE ---
+    const torsoBottom = kind==='boss' ? -16 : -20;
+    ctx.beginPath(); ctx.moveTo(lean*0.3,headY+headR-1); ctx.lineTo(lean,torsoBottom); ctx.stroke();
+    if(kind==='armored'){
+      // omuz zirhlari
+      ctx.fillStyle = c;
+      ctx.fillRect(-19,-56,10,9);
+      ctx.fillRect(9,-56,10,9);
+    }
+    if(kind==='boss'){
+      // gogus plakasi
+      ctx.fillStyle = c;
+      ctx.fillRect(-9,-58,18,16);
+    }
+
+    // --- KOLLAR ---
+    const armTop = kind==='boss' ? -58 : -50;
+    if(pose==='attack'){
+      ctx.beginPath(); ctx.moveTo(lean,armTop); ctx.lineTo(26+lean,armTop-8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lean,armTop); ctx.lineTo(-14+lean,armTop+10); ctx.stroke();
+    } else if(pose==='dash'){
+      ctx.beginPath(); ctx.moveTo(lean,armTop); ctx.lineTo(lean-10,armTop+14); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lean,armTop); ctx.lineTo(lean-16,armTop+4); ctx.stroke();
+    } else if(pose==='walk'){
+      const sw = Math.sin(t/110)*10;
+      ctx.beginPath(); ctx.moveTo(0,armTop); ctx.lineTo(12+sw*0.3,armTop+15); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,armTop); ctx.lineTo(-12-sw*0.3,armTop+15); ctx.stroke();
+    } else {
+      const breathe = Math.sin(t/400)*2;
+      ctx.beginPath(); ctx.moveTo(0,armTop); ctx.lineTo(13,armTop+12+breathe); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,armTop); ctx.lineTo(-13,armTop+12-breathe); ctx.stroke();
+    }
+
+    // --- BACAKLAR ---
+    ctx.lineWidth = (kind==='armored'||kind==='boss') ? 6 : (kind==='fast' ? 3.2 : 4);
+    if(pose==='walk'){
+      const sw = Math.sin(t/110)*(kind==='fast'?16:12);
+      ctx.beginPath(); ctx.moveTo(0,torsoBottom); ctx.lineTo(10+sw,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,torsoBottom); ctx.lineTo(-10-sw,0); ctx.stroke();
+    } else {
+      ctx.beginPath(); ctx.moveTo(0,torsoBottom); ctx.lineTo(10,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0,torsoBottom); ctx.lineTo(-10,0); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+
+  function drawHpBar(x,y,hp,maxHp,w,label,boss){
+    const pct = Math.max(0, hp/maxHp);
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(x-w/2,y,w,boss?7:6);
+    ctx.fillStyle = pct>0.4 ? (boss?'#ff3b3b':'#39ff8f') : '#ff3b3b';
+    ctx.fillRect(x-w/2,y,w*pct,boss?7:6);
+    if(label){
+      ctx.font = (boss?'10px':'9px')+' Courier New';
+      ctx.fillStyle = 'rgba(255,255,255,0.75)'; ctx.textAlign='center';
+      ctx.fillText(label, x, y-3);
+    }
+  }
+
+  function drawPickup(sx, pk){
+    const y = GROUND_Y - 14 + Math.sin(pk.bob)*4;
+    ctx.save();
+    ctx.translate(sx, y);
+    ctx.rotate(Math.PI/4);
+    ctx.fillStyle = pk.type==='hp' ? '#39ff8f' : '#ffd23b';
+    ctx.shadowColor = pk.type==='hp' ? '#39ff8f' : '#ffd23b';
+    ctx.shadowBlur = 14;
+    ctx.fillRect(-8,-8,16,16);
+    ctx.restore();
+  }
+
+  function draw(){
+    ctx.save();
+    if(shakeAmt > 0.4) ctx.translate((Math.random()-0.5)*shakeAmt, (Math.random()-0.5)*shakeAmt);
+    ctx.clearRect(-20,-20,W+40,H+40);
+    const region = REGIONS[currentRegion-1] || REGIONS[0];
+    const grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0, region.bgTop); grad.addColorStop(1, region.bgBot);
+    ctx.fillStyle = grad; ctx.fillRect(-20,-20,W+40,H+40);
+
+    // ufuk parlamasi (atmosferik derinlik)
+    const horizonGlow = ctx.createRadialGradient(W*0.5, GROUND_Y, 10, W*0.5, GROUND_Y, W*0.85);
+    horizonGlow.addColorStop(0, region.accent + '22');
+    horizonGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = horizonGlow;
+    ctx.fillRect(-20,-20,W+40,H+40);
+
+    // uzak siluet binalar (parallax)
+    ctx.fillStyle = 'rgba(0,0,0,0.25)';
+    for(let i=-1;i<8;i++){
+      const bx = (i*140 - (cameraX*0.25)%140);
+      const bh = 60 + ((i*53)%70);
+      ctx.fillRect(bx, GROUND_Y-bh, 90, bh);
+    }
+    // orta katman izgara
+    ctx.strokeStyle = region.accent + '22';
+    for(let gx = -((cameraX*0.5)%60); gx<W; gx+=60){
+      ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke();
+    }
+
+    drawAmbient(region);
+
+    ctx.fillStyle = '#05060a';
+    ctx.fillRect(0, GROUND_Y, W, H-GROUND_Y);
+    ctx.strokeStyle = region.accent + '55';
+    ctx.beginPath(); ctx.moveTo(0,GROUND_Y); ctx.lineTo(W,GROUND_Y); ctx.stroke();
+
+    // zemin dokusu (hareketli catlak/cizgi deseni)
+    ctx.strokeStyle = region.accent + '18';
+    ctx.lineWidth = 1;
+    for(let gx = -((cameraX)%50); gx<W; gx+=50){
+      ctx.beginPath(); ctx.moveTo(gx, GROUND_Y+6); ctx.lineTo(gx+14, H); ctx.stroke();
+    }
+
+    drawScenery(region, GROUND_Y);
+
+    if(state==='playing' || state==='win' || state==='final' || state==='cutscene' || state==='paused'){
+      obstacles.forEach(ob=>{
+        const sx = ob.worldX - cameraX;
+        if(sx < -30 || sx > W+30) return;
+        ctx.save();
+        ctx.fillStyle = ob.cooldownTimer>0 ? 'rgba(255,255,255,0.5)' : '#ff3b3b';
+        ctx.shadowColor = '#ff3b3b'; ctx.shadowBlur = 8;
+        for(let s=-1;s<=1;s++){
+          ctx.beginPath();
+          ctx.moveTo(sx+s*9-7, GROUND_Y);
+          ctx.lineTo(sx+s*9, GROUND_Y-16);
+          ctx.lineTo(sx+s*9+7, GROUND_Y);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+      });
+
+      pickups.forEach(pk=>{
+        const sx = pk.worldX - cameraX;
+        if(sx>-30 && sx<W+30) drawPickup(sx, pk);
+      });
+
+      enemies.forEach(en=>{
+        const sx = en.worldX - cameraX;
+        if(sx < -60 || sx > W+60) return;
+        const scale = en.type==='boss' ? 1.8 : 1;
+        ctx.save();
+        if(!en.alive) ctx.globalAlpha = Math.max(0, en.deathTimer/24);
+        ctx.translate(sx, GROUND_Y);
+        ctx.scale(scale, scale);
+        const bobY = en.alive && en.state!=='walk' ? Math.sin(en.bobPhase)*2 : 0;
+        drawStick(0,0, (en.worldX<player.x)?1:-1, en.color, en.state, 0, en.hitFlash, en.alive?0:en.deathRot, bobY, en.type);
+        ctx.restore();
+        if(en.alive) drawHpBar(sx, GROUND_Y-72*scale-14, en.hp, en.maxHp, en.type==='boss'?72:34, en.name, en.type==='boss');
+      });
+
+      const px = player.x - cameraX;
+      const breatheBob = player.state==='idle' ? Math.sin(Date.now()/400)*1.5 : 0;
+      const playerPose = player.state==='attack' ? 'attack' : (player.state==='dash' ? 'dash' : (player.walking?'walk':'idle'));
+      drawStick(px, GROUND_Y, player.facing, player.state==='dash'?'#7df9ff':(player.buffTimer>0?'#ffd23b':'#39ff8f'), playerPose, player.jumpOffset, player.hitFlash, 0, breatheBob, 'player');
+
+      if(rescuedChar && (state==='cutscene' || state==='final')){
+        const rx = rescuedChar.worldX - cameraX;
+        const rBob = Math.sin(rescuedChar.walkPhase*3)*1.5;
+        drawStick(rx, GROUND_Y, (rescuedChar.worldX < player.x)?1:-1, '#ffd23b', cutsceneTimer<60?'walk':'idle', 0, 0, rBob, 'player');
+        if(rescuedChar.chainAlpha > 0){
+          ctx.save();
+          ctx.strokeStyle = 'rgba(140,140,140,'+rescuedChar.chainAlpha+')';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(rx-10, GROUND_Y-30); ctx.lineTo(rx-10, GROUND_Y-5); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(rx+10, GROUND_Y-30); ctx.lineTo(rx+10, GROUND_Y-5); ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      slashFx.forEach(s=>{
+        ctx.save();
+        ctx.translate(px, GROUND_Y-50);
+        ctx.scale(s.facing,1);
+        ctx.strokeStyle = 'rgba(255,255,255,'+(s.life/10)+')';
+        ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.arc(20,-5,30,-0.9,0.5); ctx.stroke();
+        ctx.restore();
+      });
+
+      particles.forEach(p=>{
+        ctx.globalAlpha = Math.max(0,p.life/30);
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x,p.y,2.5,0,Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+      floatTexts.forEach(f=>{
+        ctx.globalAlpha = Math.max(0,f.life/50);
+        ctx.fillStyle = f.color; ctx.font = 'bold 13px Courier New'; ctx.textAlign='center';
+        ctx.fillText(f.text, f.x-cameraX, f.y);
+        ctx.globalAlpha = 1;
+      });
+
+      const progress = Math.min(1, player.x/(worldEnd-100));
+      ctx.fillStyle = 'rgba(255,255,255,0.08)'; ctx.fillRect(20,14,W-40,4);
+      ctx.fillStyle = region.accent; ctx.fillRect(20,14,(W-40)*progress,4);
+    }
+
+    // kum firtinasi sisi (gorus periyodik kisitlanir)
+    if(region.fog && (state==='playing')){
+      const fogPulse = 0.25 + Math.sin(Date.now()/900)*0.18;
+      ctx.fillStyle = 'rgba(220,190,120,'+Math.max(0.08,fogPulse)+')';
+      ctx.fillRect(-20,-20,W+40,H+40);
+    }
+
+    // karanlik mekanlar - oyuncu etrafinda gorus alani
+    if(region.dark && (state==='playing')){
+      const px = player.x - cameraX;
+      const darkness = ctx.createRadialGradient(px, GROUND_Y-40, 50, px, GROUND_Y-40, 230);
+      darkness.addColorStop(0,'rgba(0,0,0,0)');
+      darkness.addColorStop(0.7,'rgba(0,0,0,0.55)');
+      darkness.addColorStop(1,'rgba(0,0,0,0.92)');
+      ctx.fillStyle = darkness;
+      ctx.fillRect(-20,-20,W+40,H+40);
+    }
+
+    // sinematik vinyet (kose karartma)
+    const vignette = ctx.createRadialGradient(W/2,H/2,H*0.35,W/2,H/2,H*0.75);
+    vignette.addColorStop(0,'rgba(0,0,0,0)');
+    vignette.addColorStop(1,'rgba(0,0,0,0.45)');
+    ctx.fillStyle = vignette;
+    ctx.fillRect(-20,-20,W+40,H+40);
+
+    // dusuk can uyarisi (kirmizi nabiz)
+    if(state==='playing' && player.hp/player.maxHp < 0.25){
+      const pulse = 0.15 + Math.sin(Date.now()/180)*0.1;
+      ctx.fillStyle = 'rgba(255,0,0,'+Math.max(0,pulse)+')';
+      ctx.fillRect(-20,-20,W+40,H+40);
+    }
+
+    ctx.restore();
+  }
+
+  function drawDecoration(regionId, sx, seed, baseY){
+    ctx.save();
+    switch(regionId){
+      case 1: // corak arazi: kayalar
+        ctx.fillStyle = 'rgba(120,110,90,0.45)';
+        ctx.beginPath(); ctx.ellipse(sx, baseY-(8+seed*8), 16+seed*18, 9+seed*9, 0, 0, Math.PI*2); ctx.fill();
+        break;
+      case 2: // neon sokaklar: neon direkler
+        ctx.shadowColor = '#ff5fd1'; ctx.shadowBlur = 12;
+        ctx.fillStyle = 'rgba(255,95,209,0.55)';
+        ctx.fillRect(sx-3, baseY-60-seed*40, 6, 60+seed*40);
+        break;
+      case 3: // zehirli bataklik: sazlar
+        ctx.strokeStyle = 'rgba(57,255,143,0.45)'; ctx.lineWidth = 2;
+        for(let r=0;r<3;r++){
+          ctx.beginPath(); ctx.moveTo(sx+r*7-7, baseY);
+          ctx.quadraticCurveTo(sx+r*7-3, baseY-30, sx+r*7+3, baseY-42-seed*12); ctx.stroke();
+        }
+        break;
+      case 4: // kum firtinasi: kaktus
+        ctx.fillStyle = 'rgba(180,140,40,0.5)';
+        ctx.fillRect(sx-4, baseY-28-seed*14, 8, 28+seed*14);
+        ctx.fillRect(sx-13, baseY-18-seed*6, 9, 6);
+        break;
+      case 5: // buz kulesi: buz kristalleri
+        ctx.fillStyle = 'rgba(125,249,255,0.4)';
+        ctx.beginPath(); ctx.moveTo(sx, baseY-38-seed*22); ctx.lineTo(sx+11,baseY); ctx.lineTo(sx-11,baseY); ctx.closePath(); ctx.fill();
+        break;
+      case 6: // karanlik orman: agaclar
+        ctx.fillStyle = 'rgba(15,8,22,0.65)';
+        ctx.fillRect(sx-3, baseY-52-seed*24, 6, 52+seed*24);
+        ctx.beginPath(); ctx.arc(sx, baseY-52-seed*24, 17, 0, Math.PI*2); ctx.fill();
+        break;
+      case 7: // terk fabrika: borular
+        ctx.fillStyle = 'rgba(255,59,59,0.25)';
+        ctx.strokeStyle = 'rgba(255,59,59,0.5)'; ctx.lineWidth = 2;
+        ctx.fillRect(sx-5, baseY-44-seed*20, 10, 44+seed*20);
+        ctx.strokeRect(sx-5, baseY-44-seed*20, 10, 44+seed*20);
+        break;
+      case 8: // gokyuzu kulesi: bulutlar
+        ctx.fillStyle = 'rgba(47,216,255,0.18)';
+        ctx.beginPath(); ctx.ellipse(sx, baseY-85-seed*55, 28,11,0,0,Math.PI*2); ctx.fill();
+        break;
+      case 9: // yeralti zindani: mesale
+        ctx.fillStyle = 'rgba(120,90,40,0.6)';
+        ctx.fillRect(sx-3, baseY-38, 6, 38);
+        ctx.fillStyle = 'rgba(255,138,43,0.7)';
+        ctx.shadowColor = '#ff8a2b'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.ellipse(sx, baseY-44, 5, 8, 0, 0, Math.PI*2); ctx.fill();
+        break;
+      case 10: // cekirdek kalesi: runik sutun
+        ctx.strokeStyle = 'rgba(255,59,107,0.55)'; ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(255,59,107,0.15)';
+        ctx.fillRect(sx-8, baseY-66-seed*16, 16, 66+seed*16);
+        ctx.strokeRect(sx-8, baseY-66-seed*16, 16, 66+seed*16);
+        break;
+    }
+    ctx.restore();
+  }
+
+  function drawScenery(region, baseY){
+    const spacing = 130, scrollFactor = 0.55;
+    const startIdx = Math.floor((cameraX*scrollFactor)/spacing) - 1;
+    for(let k=0;k<9;k++){
+      const idx = startIdx + k;
+      const wx = idx*spacing;
+      const sx = wx - cameraX*scrollFactor;
+      if(sx < -60 || sx > W+60) continue;
+      const seed = Math.abs(Math.sin(idx*999.13)) % 1;
+      drawDecoration(region.id, sx, seed, baseY);
+    }
+  }
+
+  function drawAmbient(region){
+    const isSnow = region.id===5 || region.id===8;
+    const isEmber = region.id===7 || region.id===9 || region.id===10;
+    const isFirefly = region.id===3 || region.id===6;
+    ambientParticles.forEach(p=>{
+      const sx = p.wx - cameraX*0.7;
+      if(sx < -20 || sx > W+20) return;
+      let alpha = 0.35 + Math.sin(p.phase)*0.2;
+      if(isSnow){ ctx.fillStyle = 'rgba(255,255,255,'+Math.max(0,alpha)+')'; }
+      else if(isEmber){ ctx.fillStyle = 'rgba(255,138,43,'+Math.max(0,alpha)+')'; }
+      else if(isFirefly){ ctx.fillStyle = 'rgba(220,255,140,'+Math.max(0,alpha*1.2)+')'; }
+      else { ctx.fillStyle = 'rgba(255,255,255,'+Math.max(0,alpha*0.5)+')'; }
+      ctx.beginPath(); ctx.arc(sx, p.y, isSnow?2.2:1.8, 0, Math.PI*2); ctx.fill();
+    });
+  }
+
+
+
+  let cutsceneTimer = 0, rescuedChar = null;
+  function startFinalCutscene(){
+    cutsceneTimer = 130;
+    rescuedChar = { worldX: player.x + 70*player.facing, chainAlpha: 1, walkPhase:0 };
+    floorBanner('⛓ MAHKUM SERBEST! ⛓');
+  }
+  function updateCutscene(){
+    cutsceneTimer--;
+    if(rescuedChar){
+      rescuedChar.chainAlpha = Math.max(0, rescuedChar.chainAlpha - 0.012);
+      if(cutsceneTimer < 60){
+        const dir = Math.sign(player.x - rescuedChar.worldX) || 1;
+        rescuedChar.worldX += dir * 1.1;
+        rescuedChar.walkPhase += 0.1;
+      }
+      if(cutsceneTimer === 40){ burst(rescuedChar.worldX-cameraX, GROUND_Y-50, '#ffd23b', 24); playVictorySound(); }
+    }
+    cameraX = Math.max(0, Math.min(worldEnd - W, player.x - W*0.35));
+    particles.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vx*=0.94; p.vy*=0.94; p.life--; });
+    particles = particles.filter(p=>p.life>0);
+    if(cutsceneTimer <= 0){
+      state = 'final';
+      showFinal();
+    }
+  }
+
+  let lastFrameTime = Date.now();
+  function loop(){
+    const now = Date.now();
+    const dt = now - lastFrameTime;
+    lastFrameTime = now;
+    if(state==='playing'){
+      update();
+      if(dt > 0 && dt < 1000) profile.totalPlayMs += dt;
+    }
+    else if(state==='cutscene') updateCutscene();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  function gameOver(){
+    state = 'lose';
+    saveProfile(profile);
+    document.getElementById('loseStats').textContent = 'LV '+player.level+' olarak '+defeatedCount+' dusman yendin. Bolum '+currentRegion+'de durduruldun. Toplam sure: '+formatPlayTime(profile.totalPlayMs);
+    const nameInput = document.getElementById('nameInputRPG');
+    nameInput.value = ''; nameInput.disabled = false;
+    document.getElementById('saveScoreBtnRPG').disabled = false;
+    document.getElementById('saveScoreBtnRPG').textContent = 'KAYDET';
+    renderLeaderboardInto('lbListLose');
+    document.getElementById('loseScreen').classList.remove('hidden');
+  }
+  function showWin(){
+    document.getElementById('winStats').textContent = 'BOLUM '+currentRegion+' - LV '+player.level;
+    document.getElementById('winScreen').classList.remove('hidden');
+  }
+  function showFinal(){
+    document.getElementById('finalStats').textContent = 'LV ' + player.level + ' bir savasci olarak Cekirdek Kalesindeki mahkumu kurtardin. Toplam macera suresi: ' + formatPlayTime(profile.totalPlayMs) + '. Cyber Stick macerasi tamamlandi!';
+    const nameInput = document.getElementById('nameInputFinal');
+    nameInput.value = ''; nameInput.disabled = false;
+    document.getElementById('saveScoreBtnFinal').disabled = false;
+    document.getElementById('finalScreen').classList.remove('hidden');
+  }
+
+  function hideAllOverlays(){
+    ['startScreen','regionSelect','loseScreen','winScreen','finalScreen','pauseScreen','achScreen','lbScreen'].forEach(id=>{
+      document.getElementById(id).classList.add('hidden');
+    });
+  }
+
+  function renderRegionSelect(){
+    const grid = document.getElementById('regionGrid');
+    grid.innerHTML = '';
+    REGIONS.forEach(r=>{
+      const locked = r.id > profile.unlocked;
+      const completed = r.id < profile.unlocked;
+      const isCurrent = r.id === profile.unlocked;
+      const card = document.createElement('div');
+      card.className = 'regioncard' + (locked?' locked':'') + (r.final?' boss-region':'') + (isCurrent?' current':'');
+      if(!locked){
+        card.style.borderColor = r.accent;
+        card.style.color = r.accent;
+        card.style.boxShadow = '0 0 14px ' + r.accent + '55';
+      }
+      const checkHtml = completed ? '<div class="checkmark">✓</div>' : '';
+      card.innerHTML = checkHtml + '<div class="rnum">' + (locked? '🔒' : r.id) + '</div><div class="rname">'+r.name+'</div>';
+      if(!locked){
+        card.onclick = ()=>{
+          startRegion(r.id);
+          state = 'playing';
+          hideAllOverlays();
+        };
+      }
+      grid.appendChild(card);
+    });
+    document.getElementById('profileInfo').textContent = 'Mevcut seviye: LV '+profile.level+' | Acik bolum: '+profile.unlocked+'/10 | Devam etmek icin parlayan bolume tikla';
+  }
+
+  document.getElementById('continueBtn').onclick = ()=>{
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+  document.getElementById('newGameBtn').onclick = ()=>{
+    profile = defaultProfile(); saveProfile(profile);
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+  document.getElementById('retryBtn').onclick = ()=>{
+    profile = snapshotProfile;
+    startRegion(currentRegion);
+    state = 'playing'; hideAllOverlays();
+  };
+  document.getElementById('loseMenuBtn').onclick = ()=>{
+    profile = snapshotProfile; saveProfile(profile);
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+  document.getElementById('winNextBtn').onclick = ()=>{
+    const next = Math.min(10, currentRegion+1);
+    startRegion(next);
+    state = 'playing'; hideAllOverlays();
+  };
+  document.getElementById('winMenuBtn').onclick = ()=>{
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+  document.getElementById('finalRestartBtn').onclick = ()=>{
+    profile = defaultProfile(); saveProfile(profile);
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+
+  const muteBtnRPG = document.getElementById('muteBtnRPG');
+  function applyMuteVisualRPG(){
+    muteBtnRPG.textContent = muted ? '🔇' : '🔊';
+    muteBtnRPG.classList.toggle('is-muted', muted);
+  }
+  applyMuteVisualRPG();
+  muteBtnRPG.onclick = (e)=>{
+    e.stopPropagation();
+    ensureAudio();
+    muted = !muted;
+    localStorage.setItem('cs_muted', muted ? '1' : '0');
+    applyMuteVisualRPG();
+  };
+
+  // ---------------- Pause ----------------
+  let stateBeforePause = 'playing';
+  document.getElementById('pauseBtnRPG').onclick = (e)=>{
+    e.stopPropagation();
+    if(state !== 'playing') return;
+    stateBeforePause = state;
+    state = 'paused';
+    document.getElementById('pauseScreen').classList.remove('hidden');
+  };
+  document.getElementById('resumeBtn').onclick = ()=>{
+    state = stateBeforePause;
+    document.getElementById('pauseScreen').classList.add('hidden');
+  };
+  document.getElementById('pauseMenuBtn').onclick = ()=>{
+    profile = snapshotProfile;
+    document.getElementById('pauseScreen').classList.add('hidden');
+    state = 'regionselect'; hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+
+  // ---------------- Basarimlar / Skor tablosu ekranlari ----------------
+  function renderAchList(){
+    const box = document.getElementById('achList');
+    box.innerHTML = ACHIEVEMENTS.map(a=>{
+      const unlocked = unlockedAchievements.includes(a.id);
+      return '<div class="ach-list-item'+(unlocked?'':' locked')+'"><div class="ach-icon">'+(unlocked?a.icon:'🔒')+'</div><div class="ach-text"><b>'+a.name+'</b>'+a.desc+'</div></div>';
+    }).join('');
+  }
+  document.getElementById('achBtnRPG').onclick = ()=>{
+    renderAchList();
+    hideAllOverlays();
+    document.getElementById('achScreen').classList.remove('hidden');
+  };
+  document.getElementById('closeAchBtn').onclick = ()=>{
+    hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+  document.getElementById('lbBtnRPG').onclick = ()=>{
+    renderLeaderboardInto('lbListMain');
+    hideAllOverlays();
+    document.getElementById('lbScreen').classList.remove('hidden');
+  };
+  document.getElementById('closeLbBtn').onclick = ()=>{
+    hideAllOverlays();
+    renderRegionSelect();
+    document.getElementById('regionSelect').classList.remove('hidden');
+  };
+
+  // ---------------- Isim kaydetme (oyun sonu / final) ----------------
+  let scoreSavedRPG = false;
+  document.getElementById('saveScoreBtnRPG').onclick = ()=>{
+    if(scoreSavedRPG) return;
+    const nameInput = document.getElementById('nameInputRPG');
+    const name = (nameInput.value||'ANONIM').trim().slice(0,10).toUpperCase() || 'ANONIM';
+    const score = player.level*1000 + currentRegion*10;
+    addToLeaderboard(name, score, 'LV'+player.level+' B'+currentRegion+' - '+formatPlayTime(profile.totalPlayMs));
+    renderLeaderboardInto('lbListLose', score);
+    scoreSavedRPG = true;
+    nameInput.disabled = true;
+    document.getElementById('saveScoreBtnRPG').disabled = true;
+    document.getElementById('saveScoreBtnRPG').textContent = 'KAYDEDILDI';
+  };
+  document.getElementById('nameInputRPG').addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('saveScoreBtnRPG').click();
+  });
+
+  let scoreSavedFinal = false;
+  document.getElementById('saveScoreBtnFinal').onclick = ()=>{
+    if(scoreSavedFinal) return;
+    const nameInput = document.getElementById('nameInputFinal');
+    const name = (nameInput.value||'ANONIM').trim().slice(0,10).toUpperCase() || 'ANONIM';
+    const score = player.level*1000 + 100;
+    addToLeaderboard(name, score, 'LV'+player.level+' KAHRAMAN - '+formatPlayTime(profile.totalPlayMs));
+    scoreSavedFinal = true;
+    nameInput.disabled = true;
+    document.getElementById('saveScoreBtnFinal').disabled = true;
+    document.getElementById('saveScoreBtnFinal').textContent = 'KAYDEDILDI';
+  };
+  document.getElementById('nameInputFinal').addEventListener('keydown', e=>{
+    if(e.key==='Enter') document.getElementById('saveScoreBtnFinal').click();
+  });
+
+  updateHUD();
+  loop();
+})();
+</script>
+</body>
+</html>

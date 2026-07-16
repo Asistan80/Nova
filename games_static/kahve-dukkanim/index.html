@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kahve Dükkanım - Tycoon Edition</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+    <style>
+        :root {
+            --bg-page: #f2e3d5;
+            --panel-bg: #fffbf7;
+            --text-dark: #4a3b32;
+            --soft-green: #7ca982;
+            --accent-orange: #e07a5f;
+            --gold-color: #f4a261;
+            --border-color: #dfd0c0;
+        }
+
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0; user-select: none; }
+        body { background-color: var(--bg-page); color: var(--text-dark); display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; padding: 20px; }
+
+        .game-container { width: 100%; max-width: 1350px; height: 100%; display: flex; flex-direction: column; gap: 20px; position: relative; }
+
+        /* --- ÜST HUD BAR --- */
+        .header-panel { background-color: var(--panel-bg); border-radius: 20px; padding: 18px 35px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 24px rgba(74, 59, 50, 0.08); border: 2px solid var(--border-color); flex-shrink: 0; }
+        .brand-section { display: flex; align-items: center; gap: 16px; }
+        .brand-icon { font-size: 2.8rem; background: #eddcd2; padding: 8px; border-radius: 50%; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); }
+        .brand-details h1 { font-size: 1.9rem; font-weight: 800; color: var(--text-dark); letter-spacing: -0.5px; }
+        .brand-details span { font-size: 1.1rem; color: #8e7d73; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        
+        .gold-display { background-color: #fff3e3; padding: 12px 28px; border-radius: 16px; font-weight: 800; font-size: 1.7rem; color: #d47a2a; border: 2px solid #ffd8b3; box-shadow: 0 4px 10px rgba(212, 122, 42, 0.05); }
+        .lives-display { background-color: #ffeef0; padding: 12px 24px; border-radius: 16px; font-weight: 800; font-size: 1.5rem; color: #d9534f; border: 2px solid #ffccd2; }
+        .combo-badge { background: linear-gradient(135deg, #ff0055, #ff5500); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: bold; display: none; }
+        
+        .audio-btn, .difficulty-select, .leaderboard-btn { background-color: #e8ded4; border: none; font-size: 1.2rem; padding: 12px; border-radius: 14px; cursor: pointer; font-weight: bold; }
+        .market-btn { background: linear-gradient(135deg, #d47a2a, #b5651d); color: white; border: none; padding: 14px 28px; border-radius: 16px; font-weight: bold; cursor: pointer; font-size: 1.15rem; box-shadow: 0 4px 12px rgba(181, 101, 29, 0.2); }
+
+        /* --- ANA SÜTUNLAR --- */
+        .main-content { display: grid; grid-template-columns: 1.45fr 1fr; gap: 20px; flex-grow: 1; min-height: 0; }
+        .card-panel { background-color: var(--panel-bg); border-radius: 26px; padding: 25px 30px; box-shadow: 0 8px 24px rgba(74, 59, 50, 0.06); border: 2px solid var(--border-color); display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+
+        /* --- CANLI VİTRİN ALANI --- */
+        .window-area { background-color: #fbf5ee; border-radius: 22px; flex-grow: 1; min-height: 310px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 15px; border: 2px solid #eedecf; padding: 25px; overflow: hidden; }
+        .window-top-tags { position: absolute; top: 15px; left: 25px; right: 25px; display: flex; justify-content: space-between; font-size: 1.1rem; color: #8e7d73; font-weight: 700; z-index: 2; }
+        
+        .customer-card { background: white; border: 6px solid var(--soft-green); border-radius: 30px; width: 175px; height: 175px; display: none; align-items: center; justify-content: center; font-size: 6.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.06); margin-bottom: 15px; margin-top: 25px; }
+        .order-speech-bubble { background: white; border: 2.5px solid var(--soft-green); border-radius: 22px; width: 95%; max-width: 500px; padding: 18px; text-align: center; display: none; flex-direction: column; gap: 6px; margin-bottom: 15px; box-shadow: 0 8px 20px rgba(124, 169, 130, 0.15); }
+        .speech-name { font-weight: 800; font-size: 1.4rem; }
+        .speech-text { font-size: 1.25rem; color: #c35a3e; font-weight: 700; }
+        
+        .patience-container { width: 85%; max-width: 400px; display: none; align-items: center; gap: 15px; }
+        .patience-bar-bg { flex-grow: 1; height: 18px; background-color: #e5dacd; border-radius: 20px; overflow: hidden; }
+        .patience-bar-fg { width: 100%; height: 100%; background: linear-gradient(90deg, #4cc9f0, #4b9157); }
+
+        /* --- HAZIRLIK ALANI VE TEPSİ --- */
+        .prep-header { display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; }
+        .clear-btn { color: #d9534f; cursor: pointer; background: none; border: none; font-weight: 800; font-size: 1.1rem; }
+        .tray-zone { background-color: #fffbf7; border: 3px dashed var(--accent-orange); border-radius: 20px; min-height: 105px; padding: 16px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; }
+        .tray-chip { background: #fceade; border: 2px solid #f2ccb6; padding: 8px 20px; border-radius: 24px; font-size: 1.1rem; font-weight: 700; color: #a0522d; }
+
+        /* --- MALZEMELER --- */
+        .ingredients-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 15px; }
+        .ing-card { background: white; border: 2px solid var(--border-color); border-radius: 18px; padding: 15px 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 8px rgba(0,0,0,0.02); }
+        .ing-card:hover { border-color: var(--accent-orange); }
+        .ing-card span { font-size: 2.5rem; }
+        .serve-btn { background: linear-gradient(90deg, #6b9471 0%, #bd8653 100%); color: white; border: none; padding: 22px; border-radius: 20px; font-weight: 800; font-size: 1.4rem; cursor: pointer; box-shadow: 0 6px 20px rgba(107, 148, 113, 0.3); }
+
+        /* --- SAĞ TARAF --- */
+        .right-layout { display: flex; flex-direction: column; justify-content: flex-start; gap: 15px; }
+        .stats-summary { display: flex; justify-content: space-between; align-items: center; }
+        .day-counter p { font-size: 3.5rem; font-weight: 900; }
+        .success-rate p { font-size: 3.5rem; font-weight: 900; color: #3b7a47; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center; border-top: 2px solid var(--border-color); padding-top: 15px; }
+        .stat-num { font-size: 2.2rem; font-weight: 900; }
+        .stat-label { font-size: 0.95rem; color: #8e7d73; font-weight: 700; }
+        
+        .call-btn-large { background-color: var(--soft-green); color: white; border: none; padding: 22px; border-radius: 18px; font-weight: 800; font-size: 1.35rem; cursor: pointer; width: 100%; }
+
+        .tabs-area { display: flex; gap: 15px; border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-top: 5px; }
+        .tab-btn { background: none; border: none; font-weight: 800; font-size: 1.15rem; cursor: pointer; color: #8e7d73; padding: 5px 12px; }
+        .tab-btn.active { color: var(--text-dark); border-bottom: 4px solid var(--accent-orange); }
+        
+        .list-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; max-height: 280px; padding-right: 5px; }
+        .menu-item-row { background-color: #fffbf7; border: 1px solid #ebdcd0; border-radius: 14px; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1rem; }
+        .achiev-card { background: #f3f4f6; border: 1px solid #e5e7eb; padding: 12px 16px; border-radius: 14px; display: flex; align-items: center; gap: 12px; font-size: 1rem; opacity: 0.45; transition: all 0.3s; }
+        .achiev-card.unlocked { opacity: 1; background: #f0fdf4; border-color: #bbf7d0; font-weight: bold; box-shadow: 0 4px 10px rgba(75,145,87,0.08); }
+
+        /* --- MARKET MODAL VE LİDERLİK TABLOSU --- */
+        .modal-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(74, 59, 50, 0.5); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; }
+        .market-modal { background: white; border-radius: 30px; width: 90%; max-width: 550px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); }
+        .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .market-header h3 { font-size: 1.8rem; font-weight: 800; }
+        .close-market-btn { font-size: 2.2rem; cursor: pointer; background: none; border: none; color: #111; font-weight: bold; }
+        
+        .market-items-list { display: flex; flex-direction: column; gap: 15px; max-height: 420px; overflow-y: auto; padding-right: 5px; }
+        .market-item-card { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding-bottom: 15px; border-bottom: 1px solid #f3f3f3; }
+        .market-item-left { display: flex; align-items: center; gap: 15px; }
+        .market-img-box { width: 60px; height: 60px; background: #fff8f5; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+        .market-item-info h4 { font-size: 1.2rem; font-weight: 800; color: #111; }
+        .market-item-info p { font-size: 0.95rem; color: #8e7d73; margin-top: 2px; }
+        .market-item-info span { font-size: 1rem; font-weight: bold; color: #d47a2a; display: block; margin-top: 2px; }
+        .buy-btn { background: none; border: none; font-weight: bold; font-size: 1.15rem; color: #d47a2a; cursor: pointer; padding: 10px; }
+        .buy-btn:disabled { color: #ccc; cursor: not-allowed; }
+
+        .leaderboard-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .leaderboard-row { display: flex; justify-content: space-between; background: #fbf5ee; padding: 12px 20px; border-radius: 12px; font-weight: bold; border: 1px solid #eedecf; }
+
+        .overlay-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); color:white; z-index: 200; display:none; flex-direction:column; align-items:center; justify-content:center; gap:20px; border-radius:26px; }
+        .overlay-screen h2 { font-size: 3rem; }
+        .overlay-screen input { padding: 15px; font-size: 1.2rem; border-radius: 10px; border: none; text-align: center; width: 280px; }
+        .overlay-screen button { background: var(--accent-orange); color: white; border: none; padding: 15px 35px; font-size: 1.3rem; border-radius: 12px; cursor: pointer; font-weight: bold; }
+
+        .floating-text { position: absolute; font-weight: 900; font-size: 1.7rem; pointer-events: none; animation: flyUp 0.8s forwards ease-out; z-index: 50; }
+        @keyframes flyUp { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-50px); opacity: 0; } }
+
+        /* ========================================================= */
+        /* 📱 TAM MOBİL UYUMLULUK AYARLARI (BURAYA ENTEGRE EDİLDİ)     */
+        /* ========================================================= */
+        @media (max-width: 768px) {
+            body { height: auto; overflow-y: auto; padding: 8px; }
+            .game-container { height: auto; gap: 10px; }
+            .header-panel { flex-direction: column; gap: 12px; padding: 12px; text-align: center; border-radius: 15px; }
+            .brand-section { flex-direction: column; gap: 5px; }
+            .brand-icon { width: 55px; height: 55px; font-size: 2.2rem; }
+            .header-right { flex-wrap: wrap; justify-content: center; width: 100%; gap: 6px; }
+            .gold-display, .lives-display, .audio-btn, .difficulty-select, .leaderboard-btn, .market-btn { font-size: 1rem; padding: 8px 12px; border-radius: 10px; }
+            
+            /* Panelleri üst üste getiriyoruz */
+            .main-content { grid-template-columns: 1fr; gap: 10px; }
+            .card-panel { padding: 15px; height: auto; border-radius: 18px; }
+            .window-area { min-height: 250px; padding: 12px; margin-bottom: 10px; }
+            .customer-card { width: 110px; height: 110px; font-size: 4rem; margin-top: 15px; margin-bottom: 10px; border-width: 4px; }
+            .order-speech-bubble { padding: 10px; margin-bottom: 10px; }
+            .speech-name { font-size: 1.1rem; }
+            .speech-text { font-size: 1.05rem; }
+            
+            /* Malzemeleri telefona sığacak şekilde 4 sütun yapıyoruz */
+            .ingredients-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px; }
+            .ing-card { padding: 8px 2px; font-size: 0.85rem; border-radius: 12px; }
+            .ing-card span { font-size: 1.8rem; }
+            .serve-btn { padding: 15px; font-size: 1.2rem; border-radius: 14px; }
+            
+            .day-counter p, .success-rate p { font-size: 2.5rem; }
+            .stat-num { font-size: 1.6rem; }
+            .call-btn-large { padding: 16px; font-size: 1.15rem; border-radius: 14px; }
+            .list-container { max-height: 200px; }
+            .menu-item-row { padding: 10px 14px; font-size: 0.95rem; }
+            .market-modal { width: 95%; padding: 18px; }
+            .market-header h3 { font-size: 1.4rem; }
+            .market-img-box { width: 45px; height: 45px; font-size: 1.5rem; }
+            .market-item-info h4 { font-size: 1rem; }
+            .market-item-info p, .market-item-info span { font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        
+        <div class="overlay-screen" id="gameover-screen">
+            <h2>Dükkan İflas Etti! 🛑</h2>
+            <p>Müşterileri çok fazla kızdırdın.</p>
+            <p id="final-score-txt">Skor: 0 Başarılı Servis</p>
+            <input type="text" id="player-name" placeholder="Usta Şef Adı" maxlength="12">
+            <button onclick="saveAndReset()">Skor Tablosuna Yaz ve Baştan Başla</button>
+        </div>
+
+        <div class="overlay-screen" id="day-screen">
+            <h2>Gün Başarıyla Bitti! 🎉</h2>
+            <p>Erişilen Günlük Hedef: 15 Sipariş Tamamlandı.</p>
+            <button onclick="startNextDay()">Kolları Sıva ve Yeni Güne Geç</button>
+        </div>
+
+        <div class="modal-overlay" id="leaderboard-overlay">
+            <div class="market-modal">
+                <div class="market-header">
+                    <h3>🏆 Tüm Zamanların En İyi Şefleri</h3>
+                    <button class="close-market-btn" onclick="toggleLeaderboard()">×</button>
+                </div>
+                <div class="leaderboard-list" id="leaderboard-container"></div>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="market-modal-overlay">
+            <div class="market-modal">
+                <div class="market-header">
+                    <h3>🏪 Pazar Alanı</h3>
+                    <button class="close-market-btn" onclick="toggleMarket()">×</button>
+                </div>
+                <div class="market-items-list">
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">⚡</div>
+                            <div class="market-item-info">
+                                <h4>Hızlı Makine</h4>
+                                <p>Müşterilere ekstra +10sn sabır süresi kazandırır.</p>
+                                <span>450 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-mixer" onclick="buyUpgrade('mixer', 450)">Satın Al</button>
+                    </div>
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">🌸</div>
+                            <div class="market-item-info">
+                                <h4>Şirin Dekor</h4>
+                                <p>Sipariş başına kalıcı %30 daha fazla bahşiş sağlar.</p>
+                                <span>950 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-decor" onclick="buyUpgrade('decor', 950)">Satın Al</button>
+                    </div>
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">🛋️</div>
+                            <div class="market-item-info">
+                                <h4>Konfor Koltuk</h4>
+                                <p>Hata yapabilmeniz için dükkana kalıcı +1 Can hakkı sağlar.</p>
+                                <span>1500 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-chair" onclick="buyUpgrade('chair', 1500)">Satın Al</button>
+                    </div>
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">🎵</div>
+                            <div class="market-item-info">
+                                <h4>Müzik Sistemi</h4>
+                                <p>Müşterileri mutlu ederek taban kazancı +5 Altın artırır.</p>
+                                <span>650 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-music" onclick="buyUpgrade('music', 650)">Satın Al</button>
+                    </div>
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">⚙️</div>
+                            <div class="market-item-info">
+                                <h4>Endüstriyel Öğütücü</h4>
+                                <p>Kombo yapıldığında gelen kazanç çarpanını ikiye katlar.</p>
+                                <span>1200 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-grinder" onclick="buyUpgrade('grinder', 1200)">Satın Al</button>
+                    </div>
+                    <div class="market-item-card">
+                        <div class="market-item-left">
+                            <div class="market-img-box">🧥</div>
+                            <div class="market-item-info">
+                                <h4>Gurme Şef Önlüğü</h4>
+                                <p>Kusursuz servislerde ekstra +15 Altın prestij ödülü verir.</p>
+                                <span>2000 altın</span>
+                            </div>
+                        </div>
+                        <button class="buy-btn" id="btn-apron" onclick="buyUpgrade('apron', 2000)">Satın Al</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="header-panel">
+            <div class="brand-section">
+                <div class="brand-icon">☕</div>
+                <div class="brand-details">
+                    <h1>Kahve Dükkanım</h1>
+                    <span id="day-title">Gün 1</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <select class="difficulty-select" id="diff-select" onchange="changeDifficulty()">
+                    <option value="normal">Normal Mod</option>
+                    <option value="easy">Kolay Mod (Süresiz)</option>
+                    <option value="hard">Zor Mod (Hızlı / 12sn)</option>
+                </select>
+                <div class="combo-badge" id="combo-badge">🔥 COMBO x3</div>
+                <div class="lives-display" id="lives-txt">❤️ ❤️ ❤️</div>
+                <div class="gold-display">💰 <span id="gold-txt">150</span></div>
+                <button class="leaderboard-btn" onclick="toggleLeaderboard()">🏆 Skorlar</button>
+                <button class="audio-btn" id="audio-toggle" onclick="toggleAudio()">🔊</button>
+                <button class="market-btn" onclick="toggleMarket()">🛒 Market</button>
+            </div>
+        </div>
+
+        <div class="main-content">
+            
+            <div class="card-panel">
+                <div class="window-area" id="window-area-zone">
+                    <div class="window-top-tags">
+                        <div>En Yüksek: <span id="highscore-txt" style="color:#d47a2a;">YOK</span></div>
+                        <div>Hedef: <span id="cust-count">0</span>/15</div>
+                    </div>
+
+                    <div id="idle-view">
+                        <div style="font-size:5rem; text-align:center;">🏠</div>
+                        <div style="font-size:1.2rem; font-weight:700; text-align:center;">Dükkan Açık! Yeni Müşteri Çağırın</div>
+                    </div>
+
+                    <div class="customer-card" id="customer-card">👵🏼</div>
+
+                    <div class="order-speech-bubble" id="speech-bubble">
+                        <div class="speech-name" id="cust-name">Fatma Teyze:</div>
+                        <div class="speech-text">"<span id="order-name">Latte</span> istiyorum!"</div>
+                    </div>
+
+                    <div class="patience-container" id="patience-container">
+                        <div class="patience-bar-bg"><div class="patience-bar-fg" id="patience-fg"></div></div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="prep-header">
+                        <span>📋 Hazırlık Alanı (Maks 5)</span>
+                        <button class="clear-btn" onclick="clearTray()">🗑️ Temizle</button>
+                    </div>
+                    <div class="tray-zone" id="tray-txt">Malzemeleri ekleyerek tepsiyi doldur...</div>
+                </div>
+
+                <div>
+                    <div class="prep-header"><span>Malzemeler</span></div>
+                    <div class="ingredients-grid">
+                        <button class="ing-card" onclick="add('Kahve')"><span>🫘</span>Kahve</button>
+                        <button class="ing-card" onclick="add('Süt')"><span>🥛</span>Süt</button>
+                        <button class="ing-card" onclick="add('Su')"><span>💧</span>Su</button>
+                        <button class="ing-card" onclick="add('Bardak')"><span>☕</span>Bardak</button>
+                        <button class="ing-card" onclick="add('Çikolata')"><span>🍫</span>Çikolata</button>
+                        <button class="ing-card" onclick="add('Köpük')"><span>🧼</span>Köpük</button>
+                        <button class="ing-card" onclick="add('Atıştırmalık')"><span>🥐</span>Atıştırmalık</button>
+                    </div>
+                </div>
+
+                <button class="serve-btn" onclick="serveCustomer()">💁🏽‍♂️ SİPARİŞİ SERVİS ET</button>
+            </div>
+
+            <div class="card-panel right-layout">
+                <div class="stats-summary">
+                    <div class="day-counter">
+                        <h2>GÜN</h2>
+                        <p id="day-num">1</p>
+                    </div>
+                    <div class="success-rate">
+                        <h2>ORAN</h2>
+                        <p id="success-rate-txt">100%</p>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div>
+                        <div class="stat-num" id="stat-total">0</div>
+                        <div class="stat-label">Toplam</div>
+                    </div>
+                    <div>
+                        <div class="stat-num" id="stat-success" style="color: #3b7a47;">0</div>
+                        <div class="stat-label">Başarı</div>
+                    </div>
+                    <div>
+                        <div class="stat-num" id="stat-fail" style="color: #d9534f;">0</div>
+                        <div class="stat-label">Kaçan</div>
+                    </div>
+                </div>
+
+                <button class="call-btn-large" id="call-btn" onclick="spawnCustomer()">Yeni Müşteri Çağır</button>
+
+                <div>
+                    <div class="tabs-area">
+                        <button class="tab-btn active" id="tab-recipe-btn" onclick="switchTab('recipe')">📖 Menü</button>
+                        <button class="tab-btn" id="tab-achiev-btn" onclick="switchTab('achiev')">🏅 Başarımlar</button>
+                    </div>
+
+                    <div class="list-container" id="menu-recipe-list">
+                        <div class="menu-item-row"><b>Espresso</b><span>Kahve + Bardak</span></div>
+                        <div class="menu-item-row"><b>Americano</b><span>Kahve + Su + Bardak</span></div>
+                        <div class="menu-item-row"><b>Latte</b><span>Kahve + Süt + Bardak</span></div>
+                        <div class="menu-item-row"><b>Cappuccino</b><span>Kahve + Süt + Köpük + Bardak</span></div>
+                        <div class="menu-item-row"><b>Mocha</b><span>Kahve + Süt + Çikolata + Bardak</span></div>
+                        <div class="menu-item-row"><b>Donut Şöleni</b><span>Atıştırmalık + Çikolata</span></div>
+                        <div class="menu-item-row"><b>Kruvasan Menü</b><span>Atıştırmalık + Kahve</span></div>
+                    </div>
+
+                    <div class="list-container" id="menu-achiev-list" style="display:none;">
+                        <div class="achiev-card" id="ac-1">🥇 <b>İlk Adım:</b> İlk başarılı servisini tamamla.</div>
+                        <div class="achiev-card" id="ac-2">🔥 <b>Kombocu:</b> Üst üste 4 başarılı sipariş ver.</div>
+                        <div class="achiev-card" id="ac-3">💎 <b>Girişimci:</b> Cüzdanda 600 altına ulaş.</div>
+                        <div class="achiev-card" id="ac-4">📦 <b>Yatırımcı:</b> Marketten ilk ürününü satın al.</div>
+                        <div class="achiev-card" id="ac-5">🌅 <b>İnatçı Esnaf:</b> 2. Güne ulaşmayı başar.</div>
+                        <div class="achiev-card" id="ac-6">⚡ <b>Yıldırım Hızı:</b> Zor modda sipariş teslim et.</div>
+                        <div class="achiev-card" id="ac-7">👑 <b>Efsane Şef:</b> Toplamda 30 kusursuz sipariş ver.</div>
+                        <div class="achiev-card" id="ac-8">🏬 <b>Büyük Şirket:</b> Marketten 3 farklı geliştirme al.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let gold = 150; let tray = []; let activeOrder = null; let patienceTimer = null;
+        let difficulty = "normal"; let basePatienceTime = 20; let timeLeft = 20;
+        let totalCount = 0; let successCount = 0; let failCount = 0; let combo = 0;
+        let maxLives = 3; let currentLives = 3; let currentDay = 1; let daySuccesses = 0; let purchasedCount = 0;
+        let upgrades = { mixer: false, decor: false, chair: false, music: false, grinder: false, apron: false };
+        let isAudioMuted = false; let audioCtx = null;
+
+        const recipes = {
+            "Espresso": ["Kahve", "Bardak"], "Americano": ["Kahve", "Su", "Bardak"], "Latte": ["Kahve", "Süt", "Bardak"],
+            "Cappuccino": ["Kahve", "Süt", "Köpük", "Bardak"], "Mocha": ["Kahve", "Süt", "Çikolata", "Bardak"],
+            "Donut Şöleni": ["Atıştırmalık", "Çikolata"], "Kruvasan Menü": ["Atıştırmalık", "Kahve"]
+        };
+        const customers = [{ name: "Fatma Teyze", emoji: "👵🏼" }, { name: "Ahmet Amca", emoji: "👨🏻‍🦳" }, { name: "Öğrenci Can", emoji: "👦🏻" }, { name: "Yazılımcı Berk", emoji: "👨‍💻" }];
+
+        window.onload = function() { loadLiveHighScore(); };
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        function playSound(type) {
+            if (isAudioMuted) return; initAudio(); if (!audioCtx) return;
+            let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination); let now = audioCtx.currentTime;
+            if (type === 'click') { osc.frequency.setValueAtTime(600, now); gain.gain.setValueAtTime(0.05, now); osc.start(now); osc.stop(now + 0.04); }
+            else if (type === 'success') { osc.frequency.setValueAtTime(520, now); osc.frequency.setValueAtTime(780, now + 0.1); gain.gain.setValueAtTime(0.1, now); osc.start(now); osc.stop(now + 0.25); }
+            else if (type === 'fail') { osc.frequency.setValueAtTime(180, now); gain.gain.setValueAtTime(0.15, now); osc.start(now); osc.stop(now + 0.25); }
+        }
+
+        function toggleAudio() { isAudioMuted = !isAudioMuted; document.getElementById('audio-toggle').innerText = isAudioMuted ? "🔇" : "🔊"; }
+        function toggleMarket() { playSound('click'); let o = document.getElementById('market-modal-overlay'); o.style.display = (o.style.display === 'flex') ? 'none' : 'flex'; }
+        function toggleLeaderboard() { playSound('click'); let o = document.getElementById('leaderboard-overlay'); if(o.style.display !== 'flex') { renderLeaderboardList(); o.style.display = 'flex'; } else { o.style.display = 'none'; } }
+        
+        function changeDifficulty() {
+            difficulty = document.getElementById('diff-select').value;
+            if (difficulty === "easy") basePatienceTime = 9999;
+            else if (difficulty === "normal") basePatienceTime = upgrades.mixer ? 30 : 20;
+            else if (difficulty === "hard") basePatienceTime = 12;
+            resetDene();
+        }
+
+        function buyUpgrade(type, cost) {
+            if (gold >= cost && !upgrades[type]) {
+                gold -= cost; upgrades[type] = true; purchasedCount++; playSound('success');
+                document.getElementById(`btn-${type}`).innerText = "Alındı"; document.getElementById(`btn-${type}`).disabled = true;
+                if (type === 'mixer') { basePatienceTime += 10; } if (type === 'chair') { maxLives += 1; currentLives += 1; renderLives(); }
+                updateStats(); checkAchievements(); createFloatingText("Yükseltildi! ✨", "#3b7a47");
+            } else { playSound('fail'); }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('tab-recipe-btn').classList.toggle('active', tab === 'recipe');
+            document.getElementById('tab-achiev-btn').classList.toggle('active', tab === 'achiev');
+            document.getElementById('menu-recipe-list').style.display = tab === 'recipe' ? 'flex' : 'none';
+            document.getElementById('menu-achiev-list').style.display = tab === 'achiev' ? 'flex' : 'none';
+        }
+
+        function renderLives() { let str = ""; for(let i=0; i<currentLives; i++) str += "❤️ "; document.getElementById('lives-txt').innerText = str || "💀 CAN YOK"; }
+        
+        function spawnCustomer() {
+            clearTray(); clearInterval(patienceTimer); playSound('click');
+            let keys = Object.keys(recipes); let drink = keys[Math.floor(Math.random() * keys.length)];
+            let cust = customers[Math.floor(Math.random() * customers.length)];
+            activeOrder = { name: drink, mix: recipes[drink] }; timeLeft = basePatienceTime;
+
+            document.getElementById('idle-view').style.display = 'none';
+            document.getElementById('customer-card').innerText = cust.emoji; document.getElementById('customer-card').style.display = 'flex';
+            document.getElementById('cust-name').innerText = cust.name + ":"; document.getElementById('order-name').innerText = drink;
+            document.getElementById('speech-bubble').style.display = 'flex';
+
+            if(difficulty !== "easy") {
+                document.getElementById('patience-container').style.display = 'flex'; document.getElementById('patience-fg').style.width = '100%';
+                patienceTimer = setInterval(() => {
+                    timeLeft--; let p = (timeLeft / basePatienceTime) * 100; document.getElementById('patience-fg').style.width = p + '%';
+                    if(timeLeft <= 0) handleFailure("Kaçtı! ⏳");
+                }, 1000);
+            }
+            document.getElementById('call-btn').disabled = true;
+        }
+
+        function add(item) {
+            if (!activeOrder || tray.length >= 5) { playSound('fail'); return; }
+            playSound('click'); tray.push(item); let zone = document.getElementById('tray-txt');
+            if(tray.length === 1) zone.innerHTML = "";
+            zone.innerHTML = tray.map(i => `<span class="tray-chip">${i}</span>`).join('');
+        }
+        function clearTray() { tray = []; document.getElementById('tray-txt').innerText = "Tepsi boş..."; }
+
+        function serveCustomer() {
+            if (!activeOrder) return; clearInterval(patienceTimer); totalCount++;
+            let target = activeOrder.mix; let match = tray.length === target.length;
+            if (match) {
+                let temp = [...target]; tray.forEach(i => { let idx = temp.indexOf(i); if(idx > -1) temp.splice(idx, 1); else match = false; });
+                if(temp.length > 0) match = false;
+            }
+            if (match) {
+                successCount++; combo++; daySuccesses++; let cash = 25;
+                if(upgrades.music) cash += 5; if(upgrades.decor) cash = Math.round(cash * 1.3);
+                if(upgrades.grinder && combo >= 3) cash += 15; if(upgrades.apron) cash += 15;
+                gold += cash; playSound('success'); createFloatingText(`+${cash} 💰`, "#3b7a47");
+                checkAchievements(); checkLiveHighScore();
+                if(daySuccesses >= 15) { clearInterval(patienceTimer); document.getElementById('day-screen').style.display = 'flex'; return; }
+            } else { handleFailure("Hatalı! ❌"); return; }
+            updateStats(); resetDene();
+        }
+
+        function handleFailure(msg) {
+            failCount++; combo = 0; currentLives--; playSound('fail'); createFloatingText(msg, "#d9534f"); renderLives(); updateStats();
+            if(currentLives <= 0) {
+                clearInterval(patienceTimer); document.getElementById('final-score-txt').innerText = "Skorun: " + successCount;
+                document.getElementById('gameover-screen').style.display = 'flex';
+            } else { resetDene(); }
+        }
+
+        function checkAchievements() {
+            if(successCount >= 1) document.getElementById('ac-1').classList.add('unlocked'); if(combo >= 4) document.getElementById('ac-2').classList.add('unlocked');
+            if(gold >= 600) document.getElementById('ac-3').classList.add('unlocked'); if(purchasedCount >= 1) document.getElementById('ac-4').classList.add('unlocked');
+            if(currentDay >= 2) document.getElementById('ac-5').classList.add('unlocked'); if(difficulty === 'hard' && successCount >= 1) document.getElementById('ac-6').classList.add('unlocked');
+            if(successCount >= 30) document.getElementById('ac-7').classList.add('unlocked'); if(purchasedCount >= 3) document.getElementById('ac-8').classList.add('unlocked');
+        }
+        function startNextDay() { currentDay++; daySuccesses = 0; document.getElementById('day-title').innerText = "Gün " + currentDay; document.getElementById('day-num').innerText = currentDay; document.getElementById('day-screen').style.display = 'none'; checkAchievements(); resetDene(); }
+        function checkLiveHighScore() { let scores = JSON.parse(localStorage.getItem('coffee_scores') || "[]"); let maxCurrent = scores.length > 0 ? Math.max(...scores.map(s => s.score)) : 0; if (successCount > maxCurrent) { document.getElementById('highscore-txt').innerText = successCount + " (SEN! 🔥)"; } }
+        function loadLiveHighScore() { let scores = JSON.parse(localStorage.getItem('coffee_scores') || "[]"); if(scores.length > 0) { scores.sort((a,b) => b.score - a.score); document.getElementById('highscore-txt').innerText = `${scores[0].score} (${scores[0].name})`; } }
+        function saveAndReset() { let pName = document.getElementById('player-name').value.trim() || "Anonim Şef"; let scores = JSON.parse(localStorage.getItem('coffee_scores') || "[]"); scores.push({ name: pName, score: successCount, date: new Date().toLocaleDateString() }); localStorage.setItem('coffee_scores', JSON.stringify(scores)); location.reload(); }
+        
+        function renderLeaderboardList() {
+            let container = document.getElementById('leaderboard-container'); let scores = JSON.parse(localStorage.getItem('coffee_scores') || "[]");
+            if(scores.length === 0) { container.innerHTML = "<p style='text-align:center;color:#8e7d73;'>Henüz rekor yok!</p>"; return; }
+            scores.sort((a,b) => b.score - a.score);
+            container.innerHTML = scores.slice(0, 5).map((s, idx) => `<div class="leaderboard-row"><span>#${idx+1} ${s.name}</span><span style="color:#3b7a47;">${s.score} Başarı</span></div>`).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('gold-txt').innerText = gold; document.getElementById('stat-total').innerText = totalCount;
+            document.getElementById('stat-success').innerText = successCount; document.getElementById('stat-fail').innerText = failCount;
+            let b = document.getElementById('combo-badge'); if(combo >= 3) { b.innerText = `🔥 COMBO x${combo}`; b.style.display = 'block'; } else { b.style.display = 'none'; }
+            let r = totalCount > 0 ? Math.round((successCount / totalCount) * 100) : 100; document.getElementById('success-rate-txt').innerText = r + "%";
+        }
+        function resetDene() { activeOrder = null; clearInterval(patienceTimer); document.getElementById('customer-card').style.display = 'none'; document.getElementById('speech-bubble').style.display = 'none'; document.getElementById('patience-container').style.display = 'none'; document.getElementById('idle-view').style.display = 'block'; document.getElementById('call-btn').disabled = false; clearTray(); }
+        function createFloatingText(text, color) { let zone = document.getElementById('window-area-zone'); let span = document.createElement('span'); span.className = 'floating-text'; span.innerText = text; span.style.color = color; span.style.left = '45%'; span.style.top = '50%'; zone.appendChild(span); setTimeout(() => span.remove(), 800); }
+    </script>
+</body>
+</html>

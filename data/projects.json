@@ -87,5 +87,145 @@
     "changelog": [],
     "created_at": "2026-07-13T00:00:00+00:00",
     "published": true
+  },
+  {
+    "slug": "cyber-dash",
+    "name": "Cyber Dash",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Risk et // Hayatta kal",
+    "desc": "Neon siberpunk temalı kaçış oyunu. Engellere kayarak kaç, enerji küplerini topla. Engellere ne kadar yakın geçersen o kadar çok kombo kazanırsın.",
+    "tags": [
+      "HTML/JS",
+      "Canvas",
+      "PWA"
+    ],
+    "features": [
+      "Kombo sistemi",
+      "Kozmetik/skin sistemi",
+      "Skor tablosu",
+      "PWA - telefona kurulabilir"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": "/oyna/cyber-dash",
+    "download_url": null,
+    "download_file": null,
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-16T07:04:38.793073+00:00"
+  },
+  {
+    "slug": "kahve-dukkanim",
+    "name": "Kahve Dükkanım",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Arcade Tycoon - kendi kahve imparatorluğunu kur",
+    "desc": "Tarayıcı üzerinden doğrudan oynanabilen, bağımlılık yapıcı bir kahve dükkanı simülasyonu. 3 farklı zorluk modu, 6 farklı pazar alanı geliştirmesi.",
+    "tags": [
+      "HTML/JS",
+      "Tycoon",
+      "Simülasyon"
+    ],
+    "features": [
+      "3 zorluk modu",
+      "LocalStorage skor tablosu",
+      "6 pazar alanı geliştirmesi"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": "/oyna/kahve-dukkanim",
+    "download_url": null,
+    "download_file": null,
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-16T07:04:38.793182+00:00"
+  },
+  {
+    "slug": "neon-racer",
+    "name": "Neon Racer",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "Synthwave temalı arcade araba yarışı (Python + Pygame)",
+    "desc": "Tamamen Python (Pygame) ile yazılmış, görsel/ses dosyası gerektirmeyen bir arcade yarış oyunu. Tüm grafikler kod içinde çizilir, tüm sesler numpy ile anlık üretilir. Bilgisayarına Python kurulu olması gerekir.",
+    "tags": [
+      "Python",
+      "Pygame",
+      "Masaüstü"
+    ],
+    "features": [
+      "5 farklı oyun modu",
+      "4 canlı ortam/tema",
+      "Kalıcı skor tablosu",
+      "15 başarım",
+      "Tam prosedürel ses/müzik"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": null,
+    "download_url": null,
+    "download_file": "neon-racer.zip",
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-16T07:04:38.793186+00:00"
+  },
+  {
+    "slug": "endless-runner",
+    "name": "Endless Runner",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Basit ve bağımlılık yapan sonsuz koşu oyunu",
+    "desc": "Tarayıcıda oynanabilir basit bir endless runner oyunu. Tek HTML dosyası, kurulum gerekmez.",
+    "tags": [
+      "HTML/JS",
+      "Canvas",
+      "PWA"
+    ],
+    "features": [
+      "Zıplama ve çift zıplama",
+      "Çömelme",
+      "Dokunmatik kontrol desteği"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": "/oyna/endless-runner",
+    "download_url": null,
+    "download_file": null,
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-16T07:04:38.793189+00:00"
+  },
+  {
+    "slug": "cyber-stick",
+    "name": "Cyber Stick",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Neon siberpunk temalı stick-figure dövüş/RPG macerası",
+    "desc": "10 bölümlük stick-figure dövüş/RPG macera oyunu. Sağa-sola hareket et, vur, dash yap, seviye atla ve Çekirdek Kalesi'ndeki mahkumu kurtar!",
+    "tags": [
+      "HTML/JS",
+      "Canvas",
+      "PWA",
+      "Dövüş"
+    ],
+    "features": [
+      "10 bölüm",
+      "Dash ve vuruş mekaniği",
+      "Seviye atlama sistemi",
+      "Mobil dokunmatik kontrol"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": "/oyna/cyber-stick",
+    "download_url": null,
+    "download_file": null,
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-16T07:04:38.793191+00:00"
   }
 ]

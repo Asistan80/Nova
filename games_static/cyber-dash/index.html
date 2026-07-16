@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>CYBER DASH</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#05060a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cyber Dash">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+  :root{
+    --bg: #05060a;
+    --grid: #0d2233;
+    --green: #39ff8f;
+    --green-soft: rgba(57,255,143,0.35);
+    --blue: #2fd8ff;
+    --red: #ff3b3b;
+    --orange: #ff8a2b;
+    --white: #eafff5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; user-select:none; -webkit-user-select:none; -webkit-tap-highlight-color:transparent;}
+  html,body{
+    width:100%; height:100%; overflow:hidden;
+    background: var(--bg);
+    font-family: 'Courier New', monospace;
+    touch-action:none;
+  }
+  #wrap{
+    position:relative; width:100%; height:100vh;
+    display:flex; align-items:center; justify-content:center;
+    background: radial-gradient(circle at 50% 20%, #0a1420 0%, #05060a 70%);
+  }
+  canvas{
+    display:block;
+    background: var(--bg);
+    box-shadow: 0 0 60px rgba(57,255,143,0.08) inset;
+    max-width:100%; max-height:100vh;
+  }
+
+  /* HUD */
+  #hud{
+    position:absolute; top:0; left:0; width:100%;
+    padding: max(18px, env(safe-area-inset-top)) 20px 18px;
+    display:flex; justify-content:space-between; align-items:flex-start;
+    pointer-events:none; z-index:5;
+  }
+  #score{
+    color:var(--white); font-size:28px; font-weight:bold;
+    text-shadow: 0 0 10px var(--blue), 0 0 20px var(--blue);
+    letter-spacing:1px;
+  }
+  #combo{
+    color:var(--green); font-size:18px; font-weight:bold;
+    text-shadow: 0 0 8px var(--green);
+    min-height:24px;
+    opacity:0; transition: opacity 0.15s;
+  }
+  #combo.show{opacity:1;}
+  #level{
+    color: rgba(255,255,255,0.5); font-size:12px; text-align:right;
+    letter-spacing:2px; text-transform:uppercase;
+  }
+  #best{
+    color: rgba(255,255,255,0.35); font-size:11px; text-align:right; margin-top:4px;
+  }
+
+  /* Center flash text */
+  #flash{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    font-size:30px; font-weight:bold; color:var(--green);
+    text-shadow: 0 0 16px var(--green);
+    opacity:0; pointer-events:none; z-index:6;
+    letter-spacing:2px;
+  }
+
+  /* Overlays */
+  .overlay{
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: rgba(2,3,6,0.92);
+    z-index:10; text-align:center; padding:20px;
+    overflow-y:auto;
+  }
+  .hidden{display:none !important;}
+  .title-main{
+    font-size:54px; font-weight:bold; letter-spacing:4px;
+    color:var(--green);
+    text-shadow: 0 0 10px var(--green), 0 0 30px var(--green), 0 0 60px var(--blue);
+    margin-bottom:6px;
+  }
+  .title-sub{
+    color: var(--blue); font-size:13px; letter-spacing:6px; margin-bottom:40px;
+    text-shadow: 0 0 8px var(--blue);
+  }
+  .btn{
+    background: transparent;
+    border: 2px solid var(--green);
+    color: var(--green);
+    font-family:'Courier New', monospace;
+    font-size:18px; font-weight:bold; letter-spacing:3px;
+    padding: 16px 46px;
+    cursor:pointer;
+    text-shadow: 0 0 8px var(--green);
+    box-shadow: 0 0 14px var(--green-soft), inset 0 0 14px rgba(57,255,143,0.06);
+    transition: all 0.12s;
+    margin-top: 10px;
+  }
+  .btn:active{ transform: scale(0.95); background: rgba(57,255,143,0.12); }
+  .btn-blue{ border-color:var(--blue); color:var(--blue); text-shadow:0 0 8px var(--blue); box-shadow:0 0 14px rgba(47,216,255,0.35);}
+  .hint{
+    color: rgba(255,255,255,0.4); font-size:12px; margin-top:30px; letter-spacing:1px;
+  }
+  .gameover-score{
+    font-size:64px; color:var(--white); font-weight:bold;
+    text-shadow: 0 0 16px var(--red), 0 0 30px var(--orange);
+    margin: 6px 0 2px;
+  }
+  .gameover-label{
+    color: rgba(255,255,255,0.5); font-size:12px; letter-spacing:3px; margin-bottom:18px;
+  }
+  .newbest{
+    color: var(--green); font-size:13px; letter-spacing:2px; margin-bottom:10px;
+    text-shadow: 0 0 8px var(--green);
+    opacity:0; animation: pop 0.5s ease forwards;
+  }
+  @keyframes pop{ from{opacity:0; transform:scale(0.7);} to{opacity:1; transform:scale(1);} }
+
+  .shop-row{ display:flex; gap:14px; margin: 18px 0; flex-wrap:wrap; justify-content:center; max-width:320px;}
+  .skin{
+    width:70px; height:70px; border:2px solid rgba(255,255,255,0.15);
+    display:flex; align-items:center; justify-content:center; position:relative;
+    cursor:pointer; background: rgba(255,255,255,0.02);
+  }
+  .skin.locked{ opacity:0.35; }
+  .skin.selected{ border-color:var(--green); box-shadow:0 0 14px var(--green-soft); }
+  .skin .cost{
+    position:absolute; bottom:2px; right:4px; font-size:9px; color:var(--blue);
+  }
+  .data-count{
+    color:var(--blue); font-size:14px; letter-spacing:2px; margin-bottom:6px;
+    text-shadow:0 0 8px var(--blue);
+  }
+
+  .btn-row{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+  .btn-small{ padding:13px 26px; font-size:14px; }
+
+  #nameEntry{ display:flex; gap:8px; margin: 14px 0 18px; align-items:center; }
+  #nameInput{
+    background: rgba(255,255,255,0.04);
+    border: 2px solid var(--blue);
+    color: var(--white);
+    font-family:'Courier New', monospace;
+    font-size:16px; letter-spacing:2px;
+    text-align:center; text-transform:uppercase;
+    padding: 10px 8px;
+    width: 130px;
+    outline:none;
+    box-shadow: 0 0 10px rgba(47,216,255,0.25);
+  }
+  #nameInput::placeholder{ color: rgba(255,255,255,0.3); }
+  #saveScoreBtn{
+    background: transparent; border:2px solid var(--blue); color:var(--blue);
+    font-family:'Courier New', monospace; font-weight:bold; letter-spacing:1px;
+    padding: 11px 16px; cursor:pointer; font-size:13px;
+    text-shadow:0 0 8px var(--blue); box-shadow:0 0 10px rgba(47,216,255,0.25);
+  }
+  #saveScoreBtn:disabled{ opacity:0.3; cursor:default; }
+
+  #leaderboardBox{
+    width: 280px; max-height: 180px; overflow-y:auto;
+    border: 1px solid rgba(57,255,143,0.2);
+    background: rgba(255,255,255,0.02);
+    margin-bottom: 16px; padding: 8px 14px;
+  }
+  .lb-title{
+    color: var(--green); font-size:11px; letter-spacing:3px; margin-bottom:8px;
+    text-shadow:0 0 6px var(--green);
+  }
+  .lb-row{
+    display:flex; justify-content:space-between; font-size:13px;
+    padding: 4px 0; color: rgba(255,255,255,0.75);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .lb-row.me{ color: var(--green); text-shadow:0 0 6px var(--green); }
+  .lb-rank{ color: var(--blue); width:24px; display:inline-block; }
+  .lb-empty{ color: rgba(255,255,255,0.3); font-size:12px; text-align:center; padding:10px 0; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+
+  <div id="hud">
+    <div>
+      <div id="score">0</div>
+      <div id="combo">COMBO x1</div>
+    </div>
+    <div>
+      <div id="level">SEVIYE 1</div>
+      <div id="best">EN IYI: 0</div>
+    </div>
+  </div>
+
+  <div id="flash"></div>
+
+  <!-- START SCREEN -->
+  <div class="overlay" id="startScreen">
+    <div class="title-main">CYBER DASH</div>
+    <div class="title-sub">RISK ET // HAYATTA KAL</div>
+    <div style="color:rgba(255,255,255,0.55); font-size:13px; max-width:280px; line-height:1.7; margin-bottom:10px;">
+      Engellere kayarak kaç, enerji küplerini topla.<br>
+      Engellere ne kadar <span style="color:var(--green);">yakın</span> geçersen o kadar çok kombo kazanırsın.
+    </div>
+    <button class="btn" id="startBtn">BASLAT</button>
+    <button class="btn btn-blue" id="shopBtnStart">KOZMETIKLER</button>
+    <div class="hint">← KAYDIR &nbsp;&nbsp;|&nbsp;&nbsp; KAYDIR →</div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div class="overlay hidden" id="gameOverScreen">
+    <div id="newBestTag" class="newbest hidden">YENI REKOR!</div>
+    <div class="gameover-label">SISTEM COKTU</div>
+    <div class="gameover-score" id="finalScore">0</div>
+    <div class="gameover-label" id="finalCombo">MAX KOMBO x1</div>
+
+    <div id="nameEntry">
+      <input type="text" id="nameInput" placeholder="ISMIN" maxlength="10">
+      <button id="saveScoreBtn">KAYDET</button>
+    </div>
+
+    <div id="leaderboardBox">
+      <div class="lb-title">SKOR TABLOSU</div>
+      <div id="leaderboardList"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-small" id="retryBtn">TEKRAR DENE</button>
+      <button class="btn btn-blue btn-small" id="menuBtnOver">ANA MENU</button>
+    </div>
+    <button class="btn btn-blue btn-small" id="shopBtnOver" style="margin-top:10px;">KOZMETIKLER</button>
+  </div>
+
+  <!-- SHOP SCREEN -->
+  <div class="overlay hidden" id="shopScreen">
+    <div class="title-sub" style="margin-bottom:6px;">NEON KOSTUMLER</div>
+    <div class="data-count">DATA: <span id="dataCount">0</span></div>
+    <div class="shop-row" id="skinRow"></div>
+    <div class="title-sub" style="margin-bottom:6px; margin-top:10px;">KUYRUK EFEKTLERI</div>
+    <div class="shop-row" id="trailRow"></div>
+    <button class="btn" id="closeShopBtn">KAPAT</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+
+  // ---------- Responsive sizing ----------
+  let W, H, LANE_W, LANES_X;
+  function resize(){
+    const maxW = Math.min(window.innerWidth, 480);
+    const maxH = window.innerHeight;
+    W = maxW; H = maxH;
+    canvas.width = W; canvas.height = H;
+    LANE_W = W / 3;
+    LANES_X = [LANE_W*0.5, LANE_W*1.5, LANE_W*2.5];
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- Persistent data ----------
+  let data = parseInt(localStorage.getItem('cd_data')||'0');
+  let bestScore = parseInt(localStorage.getItem('cd_best')||'0');
+  let ownedSkins = JSON.parse(localStorage.getItem('cd_skins')||'["0"]');
+  let ownedTrails = JSON.parse(localStorage.getItem('cd_trails')||'["0"]');
+  let selectedSkin = parseInt(localStorage.getItem('cd_skin_sel')||'0');
+  let selectedTrail = parseInt(localStorage.getItem('cd_trail_sel')||'0');
+
+  function saveData(){
+    localStorage.setItem('cd_data', data);
+    localStorage.setItem('cd_best', bestScore);
+    localStorage.setItem('cd_skins', JSON.stringify(ownedSkins));
+    localStorage.setItem('cd_trails', JSON.stringify(ownedTrails));
+    localStorage.setItem('cd_skin_sel', selectedSkin);
+    localStorage.setItem('cd_trail_sel', selectedTrail);
+  }
+
+  const SKINS = [
+    {name:'Klasik', color:'#39ff8f', cost:0, shape:'tri'},
+    {name:'Mavi Faz', color:'#2fd8ff', cost:40, shape:'tri'},
+    {name:'Mor Sinyal', color:'#a23bff', cost:90, shape:'diamond'},
+    {name:'Kirmizi Alarm', color:'#ff3b6b', cost:140, shape:'diamond'},
+    {name:'Turuncu Cekirdek', color:'#ff8a2b', cost:190, shape:'hex'},
+    {name:'Altin Protokol', color:'#ffd23b', cost:260, shape:'hex'},
+    {name:'Buz Kristal', color:'#7df9ff', cost:320, shape:'star'},
+    {name:'Pembe Glitch', color:'#ff5fd1', cost:380, shape:'star'},
+    {name:'Beyaz Tekil', color:'#f4fff8', cost:450, shape:'circle'},
+    {name:'Siyah Delik', color:'#5b5bff', cost:550, shape:'circle'},
+  ];
+  const TRAILS = [
+    {name:'Yok', cost:0, style:'none'},
+    {name:'Ince Cizgi', cost:35, style:'line'},
+    {name:'Kalin Cizgi', cost:80, style:'thickline'},
+    {name:'Parcacik Tozu', cost:140, style:'particles'},
+    {name:'Elektrik Arki', cost:220, style:'spark'},
+    {name:'Cift Helix', cost:300, style:'helix'},
+    {name:'Kuyruklu Yildiz', cost:400, style:'comet'},
+    {name:'Hologram', cost:500, style:'hologram'},
+  ];
+
+  // ---------- Game state ----------
+  let state = 'menu'; // menu, playing, gameover, shop
+  let playerLane = 1; // 0,1,2
+  let playerX, playerVisX;
+  let dragStartX = null;
+  let dragging = false;
+
+  let obstacles = [];
+  let pickups = [];
+  let particles = [];
+  let trailPoints = [];
+
+  let score = 0;
+  let combo = 1;
+  let comboTimer = 0;
+  let speed = 4.2;
+  let baseSpeed = 4.2;
+  let spawnTimer = 0;
+  let spawnInterval = 75;
+  let elapsedFrames = 0;
+  let currentLevel = 1;
+  let lastAnnouncedLevel = 1;
+  let maxComboReached = 1;
+  let shakeAmt = 0;
+  let glitchTimer = 0;
+  let nextGlitch = 600;
+  let endless = false;
+
+  // Seviye eşikleri artan aralıklarla büyür (daha yavaş ilerleme için aralıklar büyütüldü)
+  const LEVEL_THRESHOLDS = (function(){
+    const arr = [0];
+    let gap = 22;
+    for(let i=0;i<60;i++){
+      arr.push(arr[arr.length-1] + gap);
+      gap += 14;
+    }
+    return arr;
+  })();
+
+  function levelFromScore(s){
+    let lvl = 1;
+    for(let i=1;i<LEVEL_THRESHOLDS.length;i++){
+      if(s >= LEVEL_THRESHOLDS[i]) lvl = i+1; else break;
+    }
+    return lvl;
+  }
+
+  function levelFeatures(lvl){
+    return {
+      label: 'SEVIYE ' + lvl,
+      speedMul: 1 + Math.min((lvl-1) * 0.07, 2.4),
+      lanesShift: lvl >= 2,
+      nearMiss: lvl >= 3,
+      glitch: lvl >= 5,
+      randomSpawn: lvl >= 7
+    };
+  }
+
+  function laneX(l){ return LANES_X[l]; }
+
+  function resetGame(){
+    playerLane = 1;
+    playerX = laneX(1);
+    playerVisX = playerX;
+    obstacles = [];
+    pickups = [];
+    particles = [];
+    trailPoints = [];
+    score = 0;
+    combo = 1;
+    comboTimer = 0;
+    speed = baseSpeed;
+    spawnTimer = 0;
+    spawnInterval = 75;
+    elapsedFrames = 0;
+    currentLevel = 1;
+    lastAnnouncedLevel = 1;
+    maxComboReached = 1;
+    shakeAmt = 0;
+    glitchTimer = 0;
+    nextGlitch = 500 + Math.random()*300;
+    endless = false;
+    updateHUD();
+  }
+
+  function updateHUD(){
+    document.getElementById('score').textContent = Math.floor(score);
+    document.getElementById('level').textContent = levelFeatures(currentLevel).label;
+    document.getElementById('best').textContent = 'EN IYI: ' + bestScore;
+    const comboEl = document.getElementById('combo');
+    if(combo > 1){
+      comboEl.textContent = 'COMBO x' + combo;
+      comboEl.classList.add('show');
+    } else {
+      comboEl.classList.remove('show');
+    }
+  }
+
+  function flashText(text, color){
+    const f = document.getElementById('flash');
+    f.textContent = text;
+    f.style.color = color || 'var(--green)';
+    f.style.textShadow = '0 0 16px ' + (color||'#39ff8f');
+    f.style.opacity = '1';
+    f.style.transform = 'translate(-50%,-50%) scale(1.15)';
+    clearTimeout(f._t1); clearTimeout(f._t2);
+    f._t1 = setTimeout(()=>{ f.style.transform = 'translate(-50%,-50%) scale(1)'; }, 80);
+    f._t2 = setTimeout(()=>{ f.style.opacity = '0'; }, 450);
+  }
+
+  // ---------- Spawning ----------
+  function spawnObstacle(){
+    const lvl = levelFeatures(currentLevel);
+    let lane = Math.floor(Math.random()*3);
+    const wide = currentLevel >= 3 && Math.random() < 0.4;
+    obstacles.push({
+      lane: lane, x: laneX(lane), y: -60,
+      w: wide ? 64 : 46, h: 46,
+      driftPhase: Math.random()*Math.PI*2,
+      drift: lvl.lanesShift ? (8 + Math.random()*14) : 0,
+      passed: false, nearMissGiven:false
+    });
+    // sometimes spawn a pickup nearby in a different lane
+    if(Math.random() < 0.55){
+      let plane = Math.floor(Math.random()*3);
+      pickups.push({lane:plane, x:laneX(plane), y:-160 - Math.random()*60, r:14, taken:false});
+    }
+  }
+
+  function spawnPickupOnly(){
+    let plane = Math.floor(Math.random()*3);
+    pickups.push({lane:plane, x:laneX(plane), y:-40, r:14, taken:false});
+  }
+
+  // ---------- Particles ----------
+  function burst(x, y, color, count){
+    for(let i=0;i<count;i++){
+      const ang = Math.random()*Math.PI*2;
+      const spd = 1.5 + Math.random()*3.5;
+      particles.push({
+        x, y, vx: Math.cos(ang)*spd, vy: Math.sin(ang)*spd,
+        life: 26 + Math.random()*14, maxLife: 40, color
+      });
+    }
+  }
+
+  // ---------- Input: mouse / touch (pointer events) ----------
+  canvas.style.touchAction = 'none';
+  canvas.style.cursor = 'pointer';
+
+  function startDrag(clientX, pointerId){
+    if(state !== 'playing') return;
+    dragging = true;
+    dragStartX = clientX;
+    if(pointerId !== undefined && canvas.setPointerCapture){
+      try{ canvas.setPointerCapture(pointerId); }catch(e){}
+    }
+  }
+  function moveDrag(clientX){
+    if(!dragging || state !== 'playing') return;
+    const dx = clientX - dragStartX;
+    const threshold = 24;
+    if(dx > threshold){
+      playerLane = Math.min(2, playerLane+1);
+      dragStartX = clientX;
+    } else if(dx < -threshold){
+      playerLane = Math.max(0, playerLane-1);
+      dragStartX = clientX;
+    }
+  }
+  function releaseDrag(){
+    dragging = false;
+    playerLane = 1; // return to safe center lane on release
+  }
+
+  canvas.addEventListener('pointerdown', e=>{ startDrag(e.clientX, e.pointerId); });
+  canvas.addEventListener('pointermove', e=>{ moveDrag(e.clientX); });
+  canvas.addEventListener('pointerup', releaseDrag);
+  canvas.addEventListener('pointercancel', releaseDrag);
+  canvas.addEventListener('pointerleave', ()=>{ if(dragging) releaseDrag(); });
+
+  // Fallback: plain mouse events (in case pointer events are blocked by browser/embed context)
+  canvas.addEventListener('mousedown', e=>{ startDrag(e.clientX); });
+  window.addEventListener('mousemove', e=>{ moveDrag(e.clientX); });
+  window.addEventListener('mouseup', ()=>{ if(dragging) releaseDrag(); });
+
+  // Fallback: touch events
+  canvas.addEventListener('touchstart', e=>{
+    if(e.touches[0]) startDrag(e.touches[0].clientX);
+  }, {passive:true});
+  canvas.addEventListener('touchmove', e=>{
+    if(e.touches[0]) moveDrag(e.touches[0].clientX);
+  }, {passive:true});
+  canvas.addEventListener('touchend', releaseDrag);
+
+  // ---------- Input: keyboard ----------
+  window.addEventListener('keydown', e=>{
+    if(state !== 'playing') return;
+    if(e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A'){
+      playerLane = Math.max(0, playerLane-1);
+    } else if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D'){
+      playerLane = Math.min(2, playerLane+1);
+    }
+  });
+  window.addEventListener('keyup', e=>{
+    if(e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D'){
+      if(state === 'playing') playerLane = 1; // return to safe lane on key release, same as swipe
+    }
+  });
+
+  // ---------- Leaderboard ----------
+  function getLeaderboard(){
+    try{ return JSON.parse(localStorage.getItem('cd_leaderboard')||'[]'); }
+    catch(e){ return []; }
+  }
+  function saveLeaderboard(list){
+    localStorage.setItem('cd_leaderboard', JSON.stringify(list));
+  }
+  function addToLeaderboard(name, sc){
+    const list = getLeaderboard();
+    list.push({name: name || 'ANONIM', score: sc});
+    list.sort((a,b)=>b.score-a.score);
+    const trimmed = list.slice(0, 10);
+    saveLeaderboard(trimmed);
+    return trimmed;
+  }
+  function renderLeaderboard(highlightScore){
+    const list = getLeaderboard();
+    const box = document.getElementById('leaderboardList');
+    if(list.length === 0){
+      box.innerHTML = '<div class="lb-empty">HENUZ KAYIT YOK</div>';
+      return;
+    }
+    box.innerHTML = list.map((row, i)=>{
+      const isMe = highlightScore !== undefined && row.score === highlightScore;
+      return '<div class="lb-row' + (isMe?' me':'') + '"><span><span class="lb-rank">'+(i+1)+'.</span>'+escapeHtml(row.name)+'</span><span>'+row.score+'</span></div>';
+    }).join('');
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  // ---------- Game Over ----------
+  let scoreSaved = false;
+  function gameOver(){
+    state = 'gameover';
+    const isNew = score > bestScore;
+    if(isNew) bestScore = Math.floor(score);
+    saveData();
+    scoreSaved = false;
+    document.getElementById('finalScore').textContent = Math.floor(score);
+    document.getElementById('finalCombo').textContent = 'MAX KOMBO x' + maxComboReached;
+    document.getElementById('newBestTag').classList.toggle('hidden', !isNew);
+    document.getElementById('gameOverScreen').classList.remove('hidden');
+    document.getElementById('startScreen').classList.add('hidden');
+    const nameInput = document.getElementById('nameInput');
+    nameInput.value = '';
+    nameInput.disabled = false;
+    document.getElementById('saveScoreBtn').disabled = false;
+    document.getElementById('saveScoreBtn').textContent = 'KAYDET';
+    renderLeaderboard();
+    playGlitchSound();
+  }
+
+  // ---------- Audio (lightweight synth, no external files) ----------
+  let audioCtx;
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+  function tone(freq, dur, type, vol){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = vol || 0.08;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    osc.stop(audioCtx.currentTime + dur);
+  }
+  function playPickupSound(){ tone(880, 0.12, 'sine', 0.06); tone(1320, 0.1, 'sine', 0.04); }
+  function playLevelUpSound(){ tone(523, 0.1, 'square', 0.05); setTimeout(()=>tone(784, 0.15,'square',0.06), 90); }
+  function playNearMissSound(c){ tone(440 + c*60, 0.15, 'square', 0.05); }
+  function playGlitchSound(){
+    if(!audioCtx) return;
+    const dur = 0.35;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type='sawtooth';
+    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime+dur);
+    gain.gain.value = 0.12;
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+dur);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+dur);
+  }
+
+  // ---------- Update ----------
+  function update(){
+    elapsedFrames++;
+
+    // level progression
+    currentLevel = levelFromScore(score);
+    if(currentLevel > lastAnnouncedLevel){
+      lastAnnouncedLevel = currentLevel;
+      flashText('SEVIYE ' + currentLevel + '!', '#2fd8ff');
+      playLevelUpSound();
+      shakeAmt = Math.max(shakeAmt, 6);
+    }
+    const lvl = levelFeatures(currentLevel);
+    endless = currentLevel >= 8;
+    speed = baseSpeed * lvl.speedMul * (endless ? (1 + Math.min(elapsedFrames/9000, 0.8)) : 1);
+
+    // player visual smoothing toward target lane
+    playerX = laneX(playerLane);
+    playerVisX += (playerX - playerVisX) * 0.28;
+
+    trailPoints.push({x: playerVisX, y: H*0.78});
+    if(trailPoints.length > 14) trailPoints.shift();
+
+    // spawn
+    spawnTimer++;
+    let interval = Math.max(30, spawnInterval - currentLevel*6);
+    if(spawnTimer > interval){
+      spawnTimer = 0;
+      spawnObstacle();
+    }
+
+    // score over time (slow base trickle)
+    score += 0.045 * combo;
+
+    // combo decay
+    if(comboTimer > 0){
+      comboTimer--;
+      if(comboTimer === 0){ combo = 1; }
+    }
+
+    // glitch effect
+    if(lvl.glitch){
+      glitchTimer--;
+      if(glitchTimer <= 0 && nextGlitch <= 0){
+        glitchTimer = 18 + Math.random()*10;
+        nextGlitch = 480 + Math.random()*420;
+      }
+      nextGlitch--;
+    }
+    if(shakeAmt > 0) shakeAmt *= 0.85;
+
+    const playerY = H*0.78;
+    const hitRadiusX = 20;
+
+    // obstacles
+    for(let i=obstacles.length-1;i>=0;i--){
+      const o = obstacles[i];
+      o.y += speed;
+      if(lvl.lanesShift){
+        o.driftPhase += 0.02;
+        o.x = laneX(o.lane) + Math.sin(o.driftPhase) * o.drift;
+      }
+      // collision check near player's Y band
+      if(!o.passed && o.y > playerY - 50 && o.y < playerY + 50){
+        const dx = Math.abs(o.x - playerVisX);
+        const minSafe = (o.w/2) + hitRadiusX;
+        if(dx < minSafe - 6){
+          // collision
+          gameOver();
+          burst(playerVisX, playerY, '#ff3b3b', 30);
+          shakeAmt = 14;
+          return;
+        } else if(lvl.nearMiss && dx < minSafe + 26){
+          if(!o.nearMissGiven){
+            o.nearMissGiven = true;
+            const closeness = 1 - Math.max(0, (dx-(minSafe-6)))/26;
+            const gain = Math.max(1, Math.round(closeness*4));
+            combo = Math.min(combo + gain, 16);
+            maxComboReached = Math.max(maxComboReached, combo);
+            comboTimer = 90;
+            score += 5 * combo;
+            burst(playerVisX, playerY-10, '#39ff8f', 14 + gain*4);
+            flashText('COMBO x'+combo, '#39ff8f');
+            playNearMissSound(combo);
+          }
+        }
+      }
+      if(o.y - o.h > H + 50) { obstacles.splice(i,1); continue; }
+      if(o.y > playerY + 80) o.passed = true;
+    }
+
+    // pickups
+    for(let i=pickups.length-1;i>=0;i--){
+      const p = pickups[i];
+      p.y += speed;
+      if(!p.taken && Math.abs(p.y - playerY) < 26){
+        const dx = Math.abs(laneX(p.lane) - playerVisX);
+        if(dx < 24){
+          p.taken = true;
+          score += 8;
+          data += 1;
+          burst(p.x, p.y, '#2fd8ff', 18);
+          playPickupSound();
+        }
+      }
+      if(p.y > H + 30) pickups.splice(i,1);
+    }
+    pickups = pickups.filter(p=>!p.taken || true).filter(p=>p.y <= H+30);
+    pickups = pickups.filter(p=>!(p.taken)); // remove taken immediately after burst
+
+    // particles
+    for(let i=particles.length-1;i>=0;i--){
+      const pt = particles[i];
+      pt.x += pt.vx; pt.y += pt.vy;
+      pt.vx *= 0.96; pt.vy *= 0.96;
+      pt.life--;
+      if(pt.life <= 0) particles.splice(i,1);
+    }
+
+    updateHUD();
+  }
+
+  // ---------- Draw ----------
+  let gridOffset = 0;
+  function draw(){
+    ctx.save();
+    if(shakeAmt > 0.3){
+      ctx.translate((Math.random()-0.5)*shakeAmt, (Math.random()-0.5)*shakeAmt);
+    }
+    ctx.fillStyle = '#05060a';
+    ctx.fillRect(-20,-20,W+40,H+40);
+
+    // grid background
+    gridOffset = (gridOffset + (state==='playing'?speed*0.5:0.6)) % 40;
+    ctx.strokeStyle = 'rgba(47,216,255,0.07)';
+    ctx.lineWidth = 1;
+    for(let y=-40; y<H+40; y+=40){
+      ctx.beginPath();
+      ctx.moveTo(0, y+gridOffset);
+      ctx.lineTo(W, y+gridOffset);
+      ctx.stroke();
+    }
+    // lane dividers
+    ctx.strokeStyle = 'rgba(57,255,143,0.12)';
+    for(let i=1;i<3;i++){
+      ctx.beginPath();
+      ctx.moveTo(LANE_W*i, 0);
+      ctx.lineTo(LANE_W*i, H);
+      ctx.stroke();
+    }
+
+    // glitch overlay
+    const lvl = levelFeatures(currentLevel);
+    if(state==='playing' && lvl.glitch && glitchTimer > 0){
+      ctx.save();
+      for(let i=0;i<5;i++){
+        const gy = Math.random()*H;
+        const gh = 4 + Math.random()*10;
+        ctx.fillStyle = Math.random()<0.5 ? 'rgba(255,59,59,0.12)' : 'rgba(47,216,255,0.12)';
+        ctx.fillRect(0, gy, W, gh);
+      }
+      ctx.restore();
+    }
+
+    if(state === 'playing'){
+      // trail
+      drawTrail(TRAILS[selectedTrail].style, SKINS[selectedSkin].color);
+
+      // obstacles
+      obstacles.forEach(o=>{
+        ctx.save();
+        ctx.translate(o.x, o.y);
+        const grad = ctx.createLinearGradient(0,-o.h/2,0,o.h/2);
+        grad.addColorStop(0, '#ff8a2b');
+        grad.addColorStop(1, '#ff3b3b');
+        ctx.fillStyle = grad;
+        ctx.shadowColor = '#ff3b3b';
+        ctx.shadowBlur = 18;
+        ctx.fillRect(-o.w/2, -o.h/2, o.w, o.h);
+        ctx.restore();
+      });
+
+      // pickups
+      pickups.forEach(p=>{
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.shadowColor = '#2fd8ff';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#2fd8ff';
+        ctx.beginPath();
+        ctx.arc(0,0,p.r,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // player
+      const skin = SKINS[selectedSkin];
+      ctx.save();
+      ctx.translate(playerVisX, H*0.78);
+      ctx.shadowColor = skin.color;
+      ctx.shadowBlur = 22;
+      ctx.fillStyle = skin.color;
+      drawShape(skin.shape, 20);
+      ctx.restore();
+    }
+
+    // particles
+    particles.forEach(pt=>{
+      const a = pt.life/pt.maxLife;
+      ctx.fillStyle = pt.color;
+      ctx.globalAlpha = Math.max(0,a);
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
+
+    ctx.restore();
+  }
+
+  function drawTrail(style, color){
+    if(style === 'none' || trailPoints.length < 2) return;
+    if(style === 'line' || style === 'thickline'){
+      ctx.beginPath();
+      ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+      for(let i=1;i<trailPoints.length;i++) ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+      ctx.strokeStyle = color + '55';
+      ctx.lineWidth = style==='thickline' ? 7 : 3;
+      ctx.stroke();
+    } else if(style === 'spark'){
+      ctx.beginPath();
+      ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+      for(let i=1;i<trailPoints.length;i++) ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+      ctx.strokeStyle = color + '70';
+      ctx.lineWidth = 5;
+      ctx.shadowColor = color; ctx.shadowBlur = 14;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    } else if(style === 'particles'){
+      trailPoints.forEach((p,i)=>{
+        const a = i/trailPoints.length;
+        ctx.globalAlpha = a*0.6;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x + (Math.random()-0.5)*6, p.y, 2.5, 0, Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+    } else if(style === 'helix'){
+      for(let i=0;i<trailPoints.length;i++){
+        const p = trailPoints[i];
+        const off = Math.sin(i*0.8 + elapsedFrames*0.15) * 8;
+        ctx.globalAlpha = i/trailPoints.length;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(p.x + off, p.y, 2.5, 0, Math.PI*2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x - off, p.y, 2.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    } else if(style === 'comet'){
+      ctx.beginPath();
+      ctx.moveTo(trailPoints[0].x, trailPoints[0].y);
+      for(let i=1;i<trailPoints.length;i++) ctx.lineTo(trailPoints[i].x, trailPoints[i].y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.shadowColor = color; ctx.shadowBlur = 20;
+      ctx.globalAlpha = 0.5;
+      ctx.stroke();
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+      const last = trailPoints[trailPoints.length-1];
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fill();
+    } else if(style === 'hologram'){
+      trailPoints.forEach((p,i)=>{
+        const a = i/trailPoints.length;
+        ctx.strokeStyle = color + Math.floor(a*60+10).toString(16).padStart(2,'0');
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(p.x - 10*a, p.y);
+        ctx.lineTo(p.x + 10*a, p.y);
+        ctx.stroke();
+      });
+    }
+  }
+
+  function drawShape(shape, s){
+    ctx.beginPath();
+    if(shape==='tri'){
+      ctx.moveTo(0,-s); ctx.lineTo(s*0.85,s*0.7); ctx.lineTo(-s*0.85,s*0.7); ctx.closePath();
+    } else if(shape==='diamond'){
+      ctx.moveTo(0,-s); ctx.lineTo(s*0.75,0); ctx.lineTo(0,s); ctx.lineTo(-s*0.75,0); ctx.closePath();
+    } else if(shape==='hex'){
+      for(let i=0;i<6;i++){
+        const ang = Math.PI/3*i - Math.PI/2;
+        const x = Math.cos(ang)*s*0.8, y = Math.sin(ang)*s*0.8;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+    } else if(shape==='star'){
+      const spikes = 5, outerR = s*0.9, innerR = s*0.4;
+      for(let i=0;i<spikes*2;i++){
+        const ang = Math.PI/spikes*i - Math.PI/2;
+        const r = i%2===0 ? outerR : innerR;
+        const x = Math.cos(ang)*r, y = Math.sin(ang)*r;
+        if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+    } else if(shape==='circle'){
+      ctx.arc(0,0,s*0.8,0,Math.PI*2);
+    }
+    ctx.fill();
+  }
+
+  // ---------- Main loop ----------
+  function loop(){
+    if(state === 'playing') update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Shop UI ----------
+  function renderShop(){
+    document.getElementById('dataCount').textContent = data;
+    const skinRow = document.getElementById('skinRow');
+    skinRow.innerHTML = '';
+    SKINS.forEach((s, i)=>{
+      const owned = ownedSkins.includes(String(i));
+      const div = document.createElement('div');
+      div.className = 'skin' + (owned? '' : ' locked') + (selectedSkin===i ? ' selected':'');
+      const mini = document.createElement('canvas');
+      mini.width = 50; mini.height = 50;
+      const mctx = mini.getContext('2d');
+      mctx.translate(25,28);
+      mctx.fillStyle = s.color;
+      mctx.shadowColor = s.color; mctx.shadowBlur = 10;
+      const oldFill = ctx.fillStyle;
+      // reuse drawShape logic with mctx
+      (function(mc){
+        mc.beginPath();
+        const sh = s.shape, sz = 16;
+        if(sh==='tri'){ mc.moveTo(0,-sz); mc.lineTo(sz*0.85,sz*0.7); mc.lineTo(-sz*0.85,sz*0.7); mc.closePath(); }
+        else if(sh==='diamond'){ mc.moveTo(0,-sz); mc.lineTo(sz*0.75,0); mc.lineTo(0,sz); mc.lineTo(-sz*0.75,0); mc.closePath(); }
+        else if(sh==='hex'){ for(let k=0;k<6;k++){ const ang=Math.PI/3*k - Math.PI/2; const x=Math.cos(ang)*sz*0.8,y=Math.sin(ang)*sz*0.8; if(k===0) mc.moveTo(x,y); else mc.lineTo(x,y); } mc.closePath(); }
+        else if(sh==='star'){ const spikes=5, outerR=sz*0.9, innerR=sz*0.4; for(let k=0;k<spikes*2;k++){ const ang=Math.PI/spikes*k - Math.PI/2; const r = k%2===0?outerR:innerR; const x=Math.cos(ang)*r,y=Math.sin(ang)*r; if(k===0) mc.moveTo(x,y); else mc.lineTo(x,y); } mc.closePath(); }
+        else if(sh==='circle'){ mc.arc(0,0,sz*0.8,0,Math.PI*2); }
+        mc.fill();
+      })(mctx);
+      div.appendChild(mini);
+      if(!owned){
+        const cost = document.createElement('div');
+        cost.className = 'cost'; cost.textContent = s.cost;
+        div.appendChild(cost);
+      }
+      div.onclick = ()=>{
+        if(owned){ selectedSkin = i; saveData(); renderShop(); }
+        else if(data >= s.cost){ data -= s.cost; ownedSkins.push(String(i)); selectedSkin = i; saveData(); renderShop(); }
+      };
+      skinRow.appendChild(div);
+    });
+
+    const trailRow = document.getElementById('trailRow');
+    trailRow.innerHTML = '';
+    TRAILS.forEach((t,i)=>{
+      const owned = ownedTrails.includes(String(i));
+      const div = document.createElement('div');
+      div.className = 'skin' + (owned? '' : ' locked') + (selectedTrail===i ? ' selected':'');
+      div.style.display='flex'; div.style.alignItems='center'; div.style.justifyContent='center';
+      div.style.color = 'rgba(255,255,255,0.6)'; div.style.fontSize='9px'; div.style.textAlign='center';
+      div.textContent = t.name;
+      if(!owned){
+        const cost = document.createElement('div');
+        cost.className='cost'; cost.textContent = t.cost;
+        div.appendChild(cost);
+      }
+      div.onclick = ()=>{
+        if(owned){ selectedTrail = i; saveData(); renderShop(); }
+        else if(data >= t.cost){ data -= t.cost; ownedTrails.push(String(i)); selectedTrail = i; saveData(); renderShop(); }
+      };
+      trailRow.appendChild(div);
+    });
+  }
+
+  // ---------- Screen management ----------
+  function showScreen(id){
+    ['startScreen','gameOverScreen','shopScreen'].forEach(s=>{
+      document.getElementById(s).classList.toggle('hidden', s!==id);
+    });
+  }
+
+  document.getElementById('startBtn').onclick = ()=>{
+    ensureAudio();
+    resetGame();
+    state = 'playing';
+    showScreen(null);
+  };
+  document.getElementById('retryBtn').onclick = ()=>{
+    resetGame();
+    state = 'playing';
+    showScreen(null);
+  };
+  document.getElementById('menuBtnOver').onclick = ()=>{
+    state = 'menu';
+    showScreen('startScreen');
+  };
+  document.getElementById('saveScoreBtn').onclick = ()=>{
+    if(scoreSaved) return;
+    const nameInput = document.getElementById('nameInput');
+    const name = (nameInput.value || 'ANONIM').trim().slice(0,10).toUpperCase() || 'ANONIM';
+    const finalScore = Math.floor(score);
+    addToLeaderboard(name, finalScore);
+    renderLeaderboard(finalScore);
+    scoreSaved = true;
+    nameInput.disabled = true;
+    document.getElementById('saveScoreBtn').disabled = true;
+    document.getElementById('saveScoreBtn').textContent = 'KAYDEDILDI';
+  };
+  document.getElementById('nameInput').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') document.getElementById('saveScoreBtn').click();
+  });
+  document.getElementById('shopBtnStart').onclick = ()=>{ renderShop(); showScreen('shopScreen'); };
+  document.getElementById('shopBtnOver').onclick = ()=>{ renderShop(); showScreen('shopScreen'); };
+  document.getElementById('closeShopBtn').onclick = ()=>{
+    if(state === 'gameover') showScreen('gameOverScreen');
+    else showScreen('startScreen');
+  };
+
+  updateHUD();
+  loop();
+
+  // PWA: service worker kaydi (cevrimdisi calisma icin)
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+    });
+  }
+})();
+</script>
+</body>
+</html>

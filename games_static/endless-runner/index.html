@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Runner">
+<meta name="theme-color" content="#0d1424">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Endless Runner</title>
+<style>
+  :root{
+    --bg-top:#1b2a4a;
+    --bg-bottom:#0d1424;
+    --accent:#ffd166;
+    --accent2:#06d6a0;
+    --danger:#ef476f;
+    --panel:#10182b;
+    --text:#f4f4f9;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    height:100%;
+    height:100dvh;
+    background:#000;
+    font-family:'Segoe UI',Arial,sans-serif;
+    color:var(--text);
+    overflow:hidden;
+    -webkit-user-select:none;user-select:none;
+  }
+  #game-wrap{
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  canvas{
+    background:linear-gradient(to bottom, var(--bg-top), var(--bg-bottom));
+    display:block;
+    max-width:100%;
+    max-height:100%;
+    touch-action:none;
+  }
+  #hud{
+    position:absolute;
+    top:14px;left:14px;right:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    pointer-events:none;
+    font-weight:600;
+    font-size:18px;
+    text-shadow:0 2px 4px rgba(0,0,0,.6);
+  }
+  #hud .left, #hud .right{display:flex; flex-direction:column; gap:4px;}
+  #hud .right{align-items:flex-end;}
+  .pill{
+    background:rgba(0,0,0,.35);
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:14px;
+  }
+  #combo-pill{
+    background:rgba(255,209,102,.18);
+    color:var(--accent);
+    font-weight:800;
+    opacity:0;
+    transition:opacity .2s, transform .2s;
+    transform:scale(.8);
+  }
+  #combo-pill.show{opacity:1; transform:scale(1);}
+  #level-pill{background:rgba(157,78,221,.25); color:#d9b8ff; font-weight:700;}
+  #mute-btn{
+    position:absolute; top:14px; left:50%; transform:translateX(-50%);
+    pointer-events:auto; background:rgba(0,0,0,.35); border:none; color:var(--text);
+    width:34px;height:34px;border-radius:50%; font-size:15px; cursor:pointer; z-index:6;
+  }
+  #powerup-bar{
+    display:flex;
+    gap:6px;
+    margin-top:4px;
+  }
+  .pu-icon{
+    width:26px;height:26px;
+    border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+    background:rgba(255,255,255,.15);
+    border:2px solid rgba(255,255,255,.4);
+  }
+  .pu-icon.active{
+    border-color:var(--accent2);
+    box-shadow:0 0 10px var(--accent2);
+  }
+
+  #overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(5,8,18,.9);
+    backdrop-filter:blur(3px);
+    text-align:center;
+    padding:20px;
+    gap:12px;
+    overflow-y:auto;
+  }
+  #overlay h1{
+    margin:0;
+    font-size:clamp(26px,6vw,42px);
+    color:var(--accent);
+    text-shadow:0 4px 10px rgba(0,0,0,.5);
+    letter-spacing:1px;
+  }
+  #overlay p{margin:0; opacity:.85; max-width:420px; line-height:1.5; font-size:14px;}
+  .btn{
+    background:linear-gradient(135deg,var(--accent),#ff9f1c);
+    color:#222;
+    border:none;
+    padding:12px 28px;
+    font-size:17px;
+    font-weight:700;
+    border-radius:30px;
+    cursor:pointer;
+    box-shadow:0 6px 0 rgba(0,0,0,.25);
+    transition:transform .1s;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.25);}
+  .btn.secondary{
+    background:rgba(255,255,255,.1);
+    color:var(--text);
+    box-shadow:0 6px 0 rgba(0,0,0,.15);
+    border:1px solid rgba(255,255,255,.25);
+  }
+  .btn:disabled{opacity:.4; cursor:not-allowed; box-shadow:none;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+
+  .skin-select{
+    display:flex;
+    gap:10px;
+    margin-top:6px;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:420px;
+  }
+  .skin-opt{
+    width:58px;height:58px;
+    border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    border:3px solid transparent;
+    background:rgba(255,255,255,.08);
+    position:relative;
+  }
+  .skin-opt canvas{pointer-events:none;}
+  .skin-opt.selected{
+    border-color:var(--accent2);
+    box-shadow:0 0 12px var(--accent2);
+  }
+  .skin-opt.locked{opacity:.35; cursor:not-allowed;}
+  .skin-opt .lock-badge{
+    position:absolute; bottom:-6px; right:-6px;
+    background:#000; border-radius:50%;
+    width:18px;height:18px; font-size:10px;
+    display:flex; align-items:center; justify-content:center;
+  }
+
+  table.leaderboard{
+    width:100%;
+    max-width:380px;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  table.leaderboard td, table.leaderboard th{
+    padding:5px 6px;
+    text-align:left;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  table.leaderboard th{color:var(--accent); font-weight:700;}
+  table.leaderboard tr.me{background:rgba(6,214,160,.12);}
+
+  #toast{
+    position:absolute;
+    top:70px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(0,0,0,.6);
+    padding:8px 18px;
+    border-radius:20px;
+    font-size:14px;
+    opacity:0;
+    transition:opacity .3s, top .3s;
+    pointer-events:none;
+    white-space:nowrap;
+    z-index:5;
+  }
+  #toast.show{opacity:1; top:90px;}
+
+  #mobile-controls{
+    position:absolute;
+    bottom:18px;
+    left:0;right:0;
+    display:flex;
+    justify-content:space-between;
+    padding:0 24px;
+    pointer-events:none;
+  }
+  #mobile-controls button{
+    pointer-events:auto;
+    width:78px;height:78px;
+    border-radius:50%;
+    border:none;
+    background:rgba(255,255,255,.12);
+    color:var(--text);
+    font-size:13px;
+    font-weight:700;
+    backdrop-filter:blur(2px);
+  }
+  #mobile-controls button:active{background:rgba(255,255,255,.28);}
+
+  .tab-bar{display:flex; gap:8px; margin-bottom:4px; flex-wrap:wrap; justify-content:center;}
+  .tab-btn{
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    color:var(--text);
+    padding:6px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .tab-btn.active{background:var(--accent2); color:#06281f; font-weight:700;}
+
+  .challenge-box{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:12px;
+    padding:10px 16px;
+    font-size:13px;
+    max-width:380px;
+    width:100%;
+  }
+  .challenge-box b{color:var(--accent);}
+  .progress-bar{
+    width:100%;
+    height:8px;
+    background:rgba(255,255,255,.1);
+    border-radius:6px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--accent2);
+    width:0%;
+    transition:width .3s;
+  }
+
+  .stat-strip{
+    display:flex; gap:14px; font-size:13px; opacity:.9; flex-wrap:wrap; justify-content:center;
+  }
+  .stat-strip span b{color:var(--accent);}
+
+  #name-input{
+    padding:8px 14px;
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08);
+    color:var(--text);
+    font-size:15px;
+    text-align:center;
+    width:200px;
+  }
+  #name-input::placeholder{color:rgba(255,255,255,.4);}
+
+  .ach-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:8px;
+    max-width:420px;
+    max-height:260px;
+    overflow-y:auto;
+    width:100%;
+  }
+  .ach-item{
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:10px;
+    padding:8px;
+    font-size:12px;
+    text-align:left;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .ach-item.locked{opacity:.4;}
+  .ach-item .ach-icon{font-size:22px;}
+  .ach-popup{
+    position:absolute;
+    top:130px;
+    left:50%;
+    transform:translateX(-50%) translateY(-10px);
+    background:linear-gradient(135deg,#2a2150,#1b1438);
+    border:2px solid var(--accent);
+    border-radius:14px;
+    padding:10px 18px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    opacity:0;
+    transition:opacity .35s, transform .35s;
+    z-index:10;
+    box-shadow:0 8px 24px rgba(0,0,0,.5);
+  }
+  .ach-popup.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .ach-popup .ach-icon{font-size:28px;}
+  .ach-popup .ach-text b{display:block; color:var(--accent); font-size:13px;}
+  .ach-popup .ach-text span{font-size:11px; opacity:.8;}
+</style>
+</head>
+<body>
+<div id="game-wrap">
+  <canvas id="game" width="480" height="800"></canvas>
+
+  <button id="mute-btn">🔊</button>
+  <div id="hud">
+    <div class="left">
+      <div class="pill" id="score-pill">Skor: 0</div>
+      <div class="pill" id="coin-pill">🪙 0</div>
+      <div class="pill" id="level-pill">Seviye 1</div>
+      <div class="pill" id="combo-pill">🔥 x2 KOMBO</div>
+      <div id="powerup-bar"></div>
+    </div>
+    <div class="right">
+      <div class="pill" id="best-pill">En İyi: 0</div>
+      <div class="pill" id="speed-pill">Hız: 1.0x</div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <div id="ach-popup" class="ach-popup">
+    <div class="ach-icon">🏆</div>
+    <div class="ach-text"><b>Başarım Açıldı</b><span></span></div>
+  </div>
+
+  <div id="mobile-controls">
+    <button id="btn-crouch">⬇ EĞİL</button>
+    <button id="btn-jump">⬆ ZIPLA</button>
+  </div>
+
+  <div id="overlay"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== AYARLAR ===================== */
+const CANVAS_W = 480, CANVAS_H = 800;
+const GROUND_Y = 620;
+const GRAVITY = 0.0019;
+const JUMP_VELOCITY = -0.85;
+const BASE_SPEED = 0.32;
+const MAX_SPEED = 1.05;
+const SPEED_RAMP = 0.000006;
+const STORAGE_KEY = "runner_save_v2";
+const COMBO_WINDOW = 1400; // ms - bu süre içinde para toplarsan kombo büyür
+const SCORE_PER_LEVEL = 250; // her bu kadar skorda 1 seviye
+
+// Her seviyede arka plan rengi ve zorluk çarpanı değişir (sonsuz döngü)
+const LEVEL_THEMES = [
+  {top:"#1b2a4a", bottom:"#0d1424"},
+  {top:"#2a1b4a", bottom:"#140d24"},
+  {top:"#4a1b2e", bottom:"#240d14"},
+  {top:"#1b4a3a", bottom:"#0d2419"},
+  {top:"#4a3a1b", bottom:"#241d0d"},
+];
+
+/* ===================== ONLINE LEADERBOARD (opsiyonel) =====================
+   Bu dosya tek başına çalışan statik bir HTML olduğu için gerçek paylaşımlı
+   bir leaderboard'a sahip olmak istersen ücretsiz bir backend (Supabase,
+   Firebase, vb.) kurup REST endpoint'ini aşağıya yapıştırman gerekir.
+   ENDPOINT boş kalırsa oyun otomatik olarak sadece yerel (cihaz içi) modda
+   çalışır - hiçbir hata vermez.
+   Beklenen API:
+     GET  {ENDPOINT}            -> [{name,score,coins,date}, ...]
+     POST {ENDPOINT}  body:json -> {name,score,coins,date}
+============================================================================ */
+const ONLINE_LEADERBOARD = {
+  ENDPOINT: "", // örn: "https://xxxx.supabase.co/rest/v1/scores"
+  HEADERS: {},  // örn: {"apikey":"...", "Authorization":"Bearer ...", "Content-Type":"application/json"}
+  enabled(){ return !!this.ENDPOINT; },
+  async fetchTop(limit){
+    if(!this.enabled()) return null;
+    try{
+      const res = await fetch(this.ENDPOINT + `?order=score.desc&limit=${limit||20}`, {headers:this.HEADERS});
+      if(!res.ok) throw new Error("status "+res.status);
+      return await res.json();
+    }catch(e){ console.warn("Online leaderboard okunamadı, yerel mod kullanılıyor.", e); return null; }
+  },
+  async submit(entry){
+    if(!this.enabled()) return false;
+    try{
+      const res = await fetch(this.ENDPOINT, {
+        method:"POST",
+        headers: Object.assign({"Content-Type":"application/json"}, this.HEADERS),
+        body: JSON.stringify(entry)
+      });
+      return res.ok;
+    }catch(e){ console.warn("Online skor gönderilemedi, sadece yerel kaydedildi.", e); return false; }
+  }
+};
+
+const SKINS = [
+  {id:"fox",   name:"Tilki",  unlock:0,    body:"#ff7b54", head:"#ffb86b", accent:"#fff3e0"},
+  {id:"cat",   name:"Kedi",   unlock:0,    body:"#6c5ce7", head:"#a29bfe", accent:"#fff"},
+  {id:"robot", name:"Robot",  unlock:300,  body:"#7d8597", head:"#adb5bd", accent:"#06d6a0"},
+  {id:"ninja", name:"Ninja",  unlock:800,  body:"#22223b", head:"#4a4e69", accent:"#ef476f"},
+  {id:"dino",  name:"Dino",   unlock:1500, body:"#2a9d8f", head:"#52b788", accent:"#ffd166"},
+  {id:"gold",  name:"Altın",  unlock:3000, body:"#caa647", head:"#ffd166", accent:"#fff8e1"},
+];
+
+const POWERUP_TYPES = {
+  shield:  {icon:"🛡️", label:"Kalkan",   duration:6000, color:"#4cc9f0"},
+  magnet:  {icon:"🧲", label:"Mıknatıs",  duration:7000, color:"#9d4edd"},
+  speed:   {icon:"⚡", label:"Hız",       duration:5000, color:"#ffd166"},
+};
+
+const ACHIEVEMENTS = [
+  {id:"score_100",  icon:"🥉", label:"100 Skor",     desc:"Bir koşuda 100 puan yap",        check:s=>s.runScore>=100},
+  {id:"score_500",  icon:"🥈", label:"500 Skor",     desc:"Bir koşuda 500 puan yap",        check:s=>s.runScore>=500},
+  {id:"score_1000", icon:"🥇", label:"1000 Skor",    desc:"Bir koşuda 1000 puan yap",       check:s=>s.runScore>=1000},
+  {id:"score_2500", icon:"🏆", label:"Efsane Koşu",  desc:"Bir koşuda 2500 puan yap",       check:s=>s.runScore>=2500},
+  {id:"score_5000", icon:"👑", label:"Ölümsüz",      desc:"Bir koşuda 5000 puan yap",       check:s=>s.runScore>=5000},
+  {id:"coins_50",   icon:"🪙", label:"Para Avcısı",  desc:"Bir koşuda 50 para topla",       check:s=>s.runCoins>=50},
+  {id:"coins_100_run", icon:"💵", label:"Vurgun",    desc:"Bir koşuda 100 para topla",      check:s=>s.runCoins>=100},
+  {id:"coins_total_300", icon:"💰", label:"Hazine",  desc:"Toplamda 300 para topla",        check:s=>s.totalCoins>=300},
+  {id:"coins_total_1000", icon:"🏦", label:"Banker", desc:"Toplamda 1000 para topla",       check:s=>s.totalCoins>=1000},
+  {id:"combo_5",    icon:"🔥", label:"Kombo Ustası", desc:"x5 kombo yap",                   check:s=>s.maxCombo>=5},
+  {id:"combo_10",   icon:"💥", label:"Kombo Canavarı",desc:"x10 kombo yap",                 check:s=>s.maxCombo>=10},
+  {id:"powerup_3",  icon:"✨", label:"Güçlendirici", desc:"Bir koşuda 3 power-up topla",     check:s=>s.runPowerups>=3},
+  {id:"powerup_total_25", icon:"🌟", label:"Şanslı", desc:"Toplamda 25 power-up topla",      check:s=>s.totalPowerups>=25},
+  {id:"jumps_1000", icon:"🦘", label:"Zıplama Kralı",desc:"Toplamda 1000 kez zıpla",         check:s=>s.totalJumps>=1000},
+  {id:"jumps_total_100", icon:"🐇", label:"Hareketli",desc:"Toplamda 100 kez zıpla",         check:s=>s.totalJumps>=100},
+  {id:"runs_10",    icon:"🎮", label:"Alışkanlık",   desc:"Toplam 10 koşu tamamla",          check:s=>s.totalRuns>=10},
+  {id:"runs_50",    icon:"🕹️", label:"Bağımlı",      desc:"Toplam 50 koşu tamamla",          check:s=>s.totalRuns>=50},
+  {id:"level_5",    icon:"📈", label:"Tırmanış",     desc:"Seviye 5'e ulaş",                check:s=>s.maxLevel>=5},
+  {id:"level_10",   icon:"🚀", label:"Zirve",        desc:"Seviye 10'a ulaş",               check:s=>s.maxLevel>=10},
+  {id:"streak_3",   icon:"📅", label:"3 Gün Üst Üste",desc:"3 gün üst üste oyna",            check:s=>s.streak>=3},
+  {id:"streak_7",   icon:"🔥", label:"Haftalık Seri",desc:"7 gün üst üste oyna",             check:s=>s.streak>=7},
+  {id:"streak_30",  icon:"🌟", label:"Aylık Seri",   desc:"30 gün üst üste oyna",            check:s=>s.streak>=30},
+  {id:"all_skins",  icon:"🎭", label:"Koleksiyoncu", desc:"Tüm karakterleri aç",             check:s=>s.unlockedSkinCount>=SKINS.length},
+];
+
+/* ===================== KAYIT / SAVE ===================== */
+function defaultSave(){
+  return {
+    playerName:"",
+    best: 0,
+    totalCoins: 0,
+    totalJumps: 0,
+    totalPowerups: 0,
+    totalRuns: 0,
+    maxLevel: 1,
+    maxCombo: 0,
+    scores: [],
+    selectedSkin: "fox",
+    dailyChallenge: null,
+    achievements: [],
+    streak: 0,
+    lastPlayDate: null,
+    soundOn: true,
+  };
+}
+function loadSave(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultSave();
+    return Object.assign(defaultSave(), JSON.parse(raw));
+  }catch(e){ return defaultSave(); }
+}
+function save(state){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+let saveData = loadSave();
+
+/* ===================== GÜNLÜK STREAK ===================== */
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function yesterdayStr(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function updateStreak(){
+  const t = todayStr();
+  if(saveData.lastPlayDate === t) return; // bugün zaten sayıldı
+  if(saveData.lastPlayDate === yesterdayStr()){
+    saveData.streak += 1;
+  } else {
+    saveData.streak = 1;
+  }
+  saveData.lastPlayDate = t;
+  save(saveData);
+}
+
+/* ===================== GÜNLÜK CHALLENGE ===================== */
+function challengeTemplates(){
+  return [
+    {type:"coins", target:30, text:"Bir koşuda 30 para topla"},
+    {type:"score", target:500, text:"500 puan skor yap"},
+    {type:"distance", target:600, text:"600m mesafe kat et"},
+    {type:"powerups", target:3, text:"Bir koşuda 3 power-up topla"},
+    {type:"jumps", target:20, text:"Bir koşuda 20 kez zıpla"},
+    {type:"combo", target:4, text:"x4 kombo yap"},
+  ];
+}
+function ensureDailyChallenge(){
+  const t = todayStr();
+  if(!saveData.dailyChallenge || saveData.dailyChallenge.date !== t){
+    const templates = challengeTemplates();
+    const idx = Math.abs(t.split("-").reduce((a,c)=>a+parseInt(c),0)) % templates.length;
+    const tpl = templates[idx];
+    saveData.dailyChallenge = {date:t, type:tpl.type, target:tpl.target, text:tpl.text, progress:0, done:false};
+    save(saveData);
+  }
+  return saveData.dailyChallenge;
+}
+
+/* ===================== BAŞARIM KONTROLÜ ===================== */
+let pendingAchievementPopups = [];
+function checkAchievements(runStats){
+  const ctx = {
+    runScore: runStats.score,
+    runCoins: runStats.coins,
+    totalCoins: saveData.totalCoins,
+    maxCombo: Math.max(saveData.maxCombo, runStats.maxCombo),
+    runPowerups: runStats.powerups,
+    totalPowerups: saveData.totalPowerups,
+    totalJumps: saveData.totalJumps,
+    totalRuns: saveData.totalRuns,
+    maxLevel: saveData.maxLevel,
+    streak: saveData.streak,
+    unlockedSkinCount: SKINS.filter(s=>saveData.best>=s.unlock).length,
+  };
+  saveData.maxCombo = ctx.maxCombo;
+  ACHIEVEMENTS.forEach(a=>{
+    if(!saveData.achievements.includes(a.id) && a.check(ctx)){
+      saveData.achievements.push(a.id);
+      pendingAchievementPopups.push(a);
+    }
+  });
+  save(saveData);
+}
+function showNextAchievementPopup(){
+  if(pendingAchievementPopups.length===0) return;
+  const a = pendingAchievementPopups.shift();
+  SFX.achievement();
+  const el = document.getElementById("ach-popup");
+  el.querySelector(".ach-icon").textContent = a.icon;
+  el.querySelector(".ach-text b").textContent = "Başarım Açıldı: " + a.label;
+  el.querySelector(".ach-text span").textContent = a.desc;
+  el.classList.add("show");
+  setTimeout(()=>{
+    el.classList.remove("show");
+    setTimeout(showNextAchievementPopup, 400);
+  }, 2400);
+}
+
+/* ===================== DOM ===================== */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const overlay = document.getElementById("overlay");
+const scorePill = document.getElementById("score-pill");
+const coinPill = document.getElementById("coin-pill");
+const bestPill = document.getElementById("best-pill");
+const speedPill = document.getElementById("speed-pill");
+const comboPill = document.getElementById("combo-pill");
+const powerupBar = document.getElementById("powerup-bar");
+const toastEl = document.getElementById("toast");
+const btnJumpMobile = document.getElementById("btn-jump");
+const btnCrouchMobile = document.getElementById("btn-crouch");
+
+// Menüde dinamik oluşturulan elemanlar - let ile, her render'da yeniden bağlanır
+let skinSelectEl = null;
+let challengeBoxEl = null;
+let leaderboardTable = null;
+
+let toastTimeout = null;
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(()=> toastEl.classList.remove("show"), 1600);
+}
+
+/* ===================== SES MOTORU (Web Audio - dosya gerektirmez) ===================== */
+const SFX = (function(){
+  let actx = null;
+  function ctxReady(){
+    if(!actx){
+      try{ actx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ return null; }
+    }
+    if(actx.state === "suspended") actx.resume();
+    return actx;
+  }
+  function tone(freq, duration, type, gainVal, glideTo){
+    if(!saveData.soundOn) return;
+    const ac = ctxReady();
+    if(!ac) return;
+    const osc = ac.createOscillator();
+    const gain = ac.createGain();
+    osc.type = type || "sine";
+    osc.frequency.setValueAtTime(freq, ac.currentTime);
+    if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo, ac.currentTime + duration);
+    gain.gain.setValueAtTime(gainVal||0.15, ac.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + duration);
+    osc.connect(gain); gain.connect(ac.destination);
+    osc.start();
+    osc.stop(ac.currentTime + duration);
+  }
+  return {
+    jump(){ tone(420,0.14,"square",0.12,640); },
+    coin(){ tone(880,0.09,"triangle",0.13,1400); },
+    powerup(){ tone(300,0.25,"sawtooth",0.12,900); },
+    crash(){ tone(180,0.35,"sawtooth",0.18,40); },
+    achievement(){ tone(523,0.12,"triangle",0.15,784); setTimeout(()=>tone(784,0.18,"triangle",0.15,1046),120); },
+    levelup(){ tone(440,0.1,"triangle",0.14,880); setTimeout(()=>tone(660,0.16,"triangle",0.14,1320),100); },
+    click(){ tone(300,0.05,"square",0.08); },
+  };
+})();
+function toggleSound(){
+  saveData.soundOn = !saveData.soundOn;
+  save(saveData);
+  document.getElementById("mute-btn").textContent = saveData.soundOn ? "🔊" : "🔇";
+}
+
+/* ===================== KARAKTER ÇİZİMİ (vektör: kafa/gövde/kol/bacak) ===================== */
+function drawCharacter(g, x, y, w, h, skinId, runPhase, crouching){
+  // x,y: sol-üst köşe; w,h: genel kutu boyutu
+  const skin = SKINS.find(s=>s.id===skinId) || SKINS[0];
+  const cx = x + w/2;
+  const legSwing = crouching ? 0 : Math.sin(runPhase)*0.5;
+  const armSwing = crouching ? 0 : Math.sin(runPhase+Math.PI)*0.5;
+
+  const headR = w*0.26;
+  const bodyH = crouching ? h*0.42 : h*0.46;
+  const bodyW = w*0.5;
+  const bodyTop = y + headR*1.5;
+  const legLen = crouching ? h*0.12 : h*0.30;
+  const armLen = h*0.26;
+
+  g.save();
+  g.translate(cx, 0);
+
+  // bacaklar
+  g.strokeStyle = skin.body;
+  g.lineWidth = w*0.16;
+  g.lineCap = "round";
+  const hipY = bodyTop + bodyH;
+  [[-1,legSwing],[1,-legSwing]].forEach(([side,swing])=>{
+    g.beginPath();
+    g.moveTo(side*bodyW*0.2, hipY);
+    g.lineTo(side*bodyW*0.2 + swing*10, hipY + legLen);
+    g.stroke();
+  });
+
+  // kollar
+  g.strokeStyle = skin.head;
+  g.lineWidth = w*0.13;
+  [[-1,armSwing],[1,-armSwing]].forEach(([side,swing])=>{
+    g.beginPath();
+    g.moveTo(side*bodyW*0.55, bodyTop + bodyH*0.15);
+    g.lineTo(side*bodyW*0.55 + swing*12, bodyTop + bodyH*0.15 + armLen);
+    g.stroke();
+  });
+
+  // gövde
+  g.fillStyle = skin.body;
+  roundRectPath(g, -bodyW/2, bodyTop, bodyW, bodyH, 10);
+  g.fill();
+
+  // gövde aksanı (göğüs şeridi)
+  g.fillStyle = skin.accent;
+  roundRectPath(g, -bodyW/2+4, bodyTop+bodyH*0.25, bodyW-8, bodyH*0.22, 6);
+  g.fill();
+
+  // kafa
+  g.fillStyle = skin.head;
+  g.beginPath();
+  g.arc(0, y+headR, headR, 0, Math.PI*2);
+  g.fill();
+
+  // gözler
+  g.fillStyle = "#1b1b2a";
+  g.beginPath();
+  g.arc(-headR*0.35, y+headR-2, headR*0.13, 0, Math.PI*2);
+  g.arc(headR*0.35, y+headR-2, headR*0.13, 0, Math.PI*2);
+  g.fill();
+
+  // kulak/aksesuar (skin'e göre küçük fark)
+  g.fillStyle = skin.accent;
+  if(skinId==="fox" || skinId==="cat"){
+    g.beginPath();
+    g.moveTo(-headR*0.7,y+headR*0.3); g.lineTo(-headR*0.3,y-headR*0.5); g.lineTo(-headR*0.1,y+headR*0.2); g.closePath(); g.fill();
+    g.beginPath();
+    g.moveTo(headR*0.7,y+headR*0.3); g.lineTo(headR*0.3,y-headR*0.5); g.lineTo(headR*0.1,y+headR*0.2); g.closePath(); g.fill();
+  } else if(skinId==="robot"){
+    g.fillRect(-headR*0.1, y-headR*0.9, headR*0.2, headR*0.5);
+    g.beginPath(); g.arc(0,y-headR*0.9,headR*0.18,0,Math.PI*2); g.fill();
+  } else if(skinId==="ninja"){
+    roundRectPath(g, -headR*1.05, y+headR*0.55, headR*2.1, headR*0.4, 4);
+    g.fill();
+  } else if(skinId==="dino"){
+    for(let i=-2;i<=2;i++){
+      g.beginPath();
+      g.moveTo(i*headR*0.3, y-headR*0.7);
+      g.lineTo(i*headR*0.3+headR*0.15, y-headR*1.15);
+      g.lineTo(i*headR*0.3+headR*0.3, y-headR*0.7);
+      g.closePath(); g.fill();
+    }
+  } else if(skinId==="gold"){
+    g.beginPath();
+    g.moveTo(-headR*0.5,y-headR*0.6); g.lineTo(0,y-headR*1.3); g.lineTo(headR*0.5,y-headR*0.6);
+    g.closePath(); g.fill();
+  }
+
+  g.restore();
+}
+function roundRectPath(g,x,y,w,h,r){
+  g.beginPath();
+  g.moveTo(x+r,y);
+  g.arcTo(x+w,y,x+w,y+h,r);
+  g.arcTo(x+w,y+h,x,y+h,r);
+  g.arcTo(x,y+h,x,y,r);
+  g.arcTo(x,y,x+w,y,r);
+  g.closePath();
+}
+
+function drawSkinPreview(canvasEl, skinId, locked){
+  const c = canvasEl.getContext("2d");
+  c.clearRect(0,0,canvasEl.width,canvasEl.height);
+  if(locked) c.globalAlpha = 0.5;
+  drawCharacter(c, 4, 4, canvasEl.width-8, canvasEl.height-10, skinId, 1.2, false);
+}
+
+/* ===================== UI: SKIN SEÇİMİ ===================== */
+function renderSkinSelect(){
+  if(!skinSelectEl) return;
+  skinSelectEl.innerHTML = "";
+  SKINS.forEach(skin=>{
+    const unlocked = saveData.best >= skin.unlock;
+    const wrap = document.createElement("div");
+    wrap.className = "skin-opt" + (skin.id===saveData.selectedSkin?" selected":"") + (!unlocked?" locked":"");
+    wrap.title = unlocked ? skin.name : `${skin.name} (En iyi skor gerekli: ${skin.unlock})`;
+    const cv = document.createElement("canvas");
+    cv.width = 44; cv.height = 50;
+    wrap.appendChild(cv);
+    if(!unlocked){
+      const badge = document.createElement("div");
+      badge.className = "lock-badge";
+      badge.textContent = "🔒";
+      wrap.appendChild(badge);
+    }
+    skinSelectEl.appendChild(wrap);
+    drawSkinPreview(cv, skin.id, !unlocked);
+    if(unlocked){
+      wrap.addEventListener("click", ()=>{
+        saveData.selectedSkin = skin.id;
+        save(saveData);
+        renderSkinSelect();
+      });
+    }
+  });
+}
+
+/* ===================== UI: CHALLENGE ===================== */
+function renderChallenge(){
+  if(!challengeBoxEl) return;
+  const c = ensureDailyChallenge();
+  const pct = Math.min(100, Math.round((c.progress / c.target) * 100));
+  challengeBoxEl.innerHTML = `
+    <div>🎯 <b>Günlük Görev:</b> ${c.text} ${c.done ? "✅" : ""}</div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${c.done?100:pct}%"></div></div>
+  `;
+}
+
+/* ===================== UI: LEADERBOARD ===================== */
+function renderLeaderboard(highlightIndex){
+  if(!leaderboardTable) return;
+  const rows = [...saveData.scores].sort((a,b)=>b.score-a.score).slice(0,10);
+  leaderboardTable.innerHTML = rows.map((r,i)=>`
+    <tr class="${i===highlightIndex?'me':''}"><td>${i+1}</td><td>${escapeHtml(r.name||"Oyuncu")}</td><td>${r.score}</td><td>${r.coins}</td><td>${r.date}</td></tr>
+  `).join("") || `<tr><td colspan="5" style="opacity:.6">Henüz skor yok</td></tr>`;
+
+  if(ONLINE_LEADERBOARD.enabled()){
+    leaderboardTable.insertAdjacentHTML("beforebegin", `<caption style="text-align:left;font-size:11px;opacity:.7;padding:4px 0;">⏳ Online skorlar yükleniyor...</caption>`);
+    ONLINE_LEADERBOARD.fetchTop(10).then(onlineRows=>{
+      if(!onlineRows) return;
+      const cap = leaderboardTable.parentElement.querySelector("caption");
+      if(cap) cap.textContent = "🌍 Online Skor Tablosu";
+      leaderboardTable.innerHTML = onlineRows.slice(0,10).map((r,i)=>`
+        <tr><td>${i+1}</td><td>${escapeHtml(r.name||"Oyuncu")}</td><td>${r.score}</td><td>${r.coins||0}</td><td>${r.date||""}</td></tr>
+      `).join("");
+    });
+  }
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+/* ===================== UI: BAŞARIMLAR ===================== */
+function renderAchievements(container){
+  container.innerHTML = ACHIEVEMENTS.map(a=>{
+    const unlocked = saveData.achievements.includes(a.id);
+    return `<div class="ach-item ${unlocked?'':'locked'}">
+      <div class="ach-icon">${unlocked?a.icon:"🔒"}</div>
+      <div><b style="font-size:12px;">${a.label}</b><br><span style="opacity:.75">${a.desc}</span></div>
+    </div>`;
+  }).join("");
+}
+
+/* ===================== OYUN MOTORU ===================== */
+let game = null;
+let running = false;
+let lastTime = 0;
+
+class Player{
+  constructor(skinId){
+    this.skinId = skinId;
+    this.x = 90;
+    this.width = 56;
+    this.height = 78;
+    this.crouchHeight = 46;
+    this.y = GROUND_Y - this.height;
+    this.vy = 0;
+    this.onGround = true;
+    this.jumpsUsed = 0;
+    this.maxJumps = 2;
+    this.crouching = false;
+    this.runFrame = 0;
+    this.invulnTimer = 0;
+  }
+  rect(){
+    const h = this.crouching ? this.crouchHeight : this.height;
+    const y = this.crouching ? (GROUND_Y - h) : this.y;
+    return {x:this.x+10, y:y, w:this.width-20, h:h};
+  }
+  jump(){
+    if(this.jumpsUsed < this.maxJumps){
+      this.vy = JUMP_VELOCITY;
+      this.onGround = false;
+      this.jumpsUsed++;
+      return true;
+    }
+    return false;
+  }
+  setCrouch(state){ if(this.onGround) this.crouching = state; }
+  update(dt){
+    this.y += this.vy * dt;
+    this.vy += GRAVITY * dt;
+    if(this.y >= GROUND_Y - this.height){
+      this.y = GROUND_Y - this.height;
+      if(!this.onGround){ this.onGround = true; this.jumpsUsed = 0; }
+    } else { this.onGround = false; }
+    this.runFrame += dt * 0.012;
+    if(this.invulnTimer > 0) this.invulnTimer -= dt;
+  }
+  draw(ctx, shieldActive){
+    const h = this.crouching ? this.crouchHeight : this.height;
+    const drawY = this.crouching ? (GROUND_Y - h) : this.y;
+    ctx.save();
+    if(this.invulnTimer > 0 && Math.floor(this.invulnTimer/100)%2===0){ ctx.globalAlpha = 0.4; }
+
+    ctx.beginPath();
+    ctx.ellipse(this.x + this.width/2, GROUND_Y+6, this.width*0.45, 8, 0,0,Math.PI*2);
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fill();
+
+    if(shieldActive){
+      ctx.beginPath();
+      ctx.arc(this.x+this.width/2, drawY + h/2, Math.max(this.width,h)/1.5, 0, Math.PI*2);
+      ctx.strokeStyle = "rgba(76,201,240,0.8)";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+    }
+
+    drawCharacter(ctx, this.x, drawY, this.width, h, this.skinId, this.runFrame, this.crouching);
+    ctx.restore();
+  }
+}
+
+class Obstacle{
+  constructor(x, type){
+    this.type = type;
+    this.x = x;
+    if(type==="box"){ this.w=46; this.h=46; this.y=GROUND_Y-this.h; }
+    else if(type==="tallbox"){ this.w=40; this.h=90; this.y=GROUND_Y-this.h; }
+    else if(type==="hole"){ this.w=90; this.h=18; this.y=GROUND_Y-4; }
+    else if(type==="bird"){ this.w=50; this.h=36; this.y=GROUND_Y-150-Math.random()*40; }
+  }
+  rect(){ return {x:this.x, y:this.y, w:this.w, h:this.h}; }
+  draw(ctx){
+    ctx.save();
+    if(this.type==="box"){
+      ctx.fillStyle="#8d5524"; ctx.fillRect(this.x,this.y,this.w,this.h);
+      ctx.strokeStyle="#5c3a17"; ctx.lineWidth=3; ctx.strokeRect(this.x,this.y,this.w,this.h);
+    } else if(this.type==="tallbox"){
+      ctx.fillStyle="#5c4033"; ctx.fillRect(this.x,this.y,this.w,this.h);
+      ctx.strokeStyle="#3a2a20"; ctx.lineWidth=3; ctx.strokeRect(this.x,this.y,this.w,this.h);
+    } else if(this.type==="hole"){
+      ctx.fillStyle="#05060a"; ctx.beginPath();
+      ctx.ellipse(this.x+this.w/2, this.y+this.h/2, this.w/2, this.h, 0,0,Math.PI*2);
+      ctx.fill();
+    } else if(this.type==="bird"){
+      ctx.fillStyle="#e0e0e0";
+      ctx.beginPath();
+      ctx.ellipse(this.x+this.w/2, this.y+this.h/2, this.w*0.4, this.h*0.3,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(this.x, this.y+this.h/2);
+      ctx.lineTo(this.x-12, this.y+this.h*0.2);
+      ctx.lineTo(this.x-2, this.y+this.h*0.5);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+class Coin{
+  constructor(x,y){ this.x=x; this.y=y; this.r=12; this.collected=false; this.angle=Math.random()*10; }
+  rect(){ return {x:this.x-this.r, y:this.y-this.r, w:this.r*2, h:this.r*2}; }
+  draw(ctx){
+    if(this.collected) return;
+    this.angle += 0.15;
+    ctx.save();
+    ctx.translate(this.x,this.y);
+    ctx.scale(Math.abs(Math.cos(this.angle))*0.6+0.4,1);
+    ctx.beginPath(); ctx.arc(0,0,this.r,0,Math.PI*2);
+    ctx.fillStyle="#ffd166"; ctx.fill();
+    ctx.strokeStyle="#c9920f"; ctx.lineWidth=2; ctx.stroke();
+    ctx.restore();
+  }
+}
+
+class PowerupItem{
+  constructor(x,y,type){ this.x=x; this.y=y; this.type=type; this.r=15; this.collected=false; this.t=0; }
+  rect(){ return {x:this.x-this.r, y:this.y-this.r, w:this.r*2, h:this.r*2}; }
+  draw(ctx){
+    if(this.collected) return;
+    this.t += 0.08;
+    const info = POWERUP_TYPES[this.type];
+    ctx.save();
+    ctx.translate(this.x, this.y + Math.sin(this.t)*4);
+    ctx.beginPath(); ctx.arc(0,0,this.r+4,0,Math.PI*2);
+    ctx.fillStyle = info.color + "55"; ctx.fill();
+    ctx.font="20px serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(info.icon, 0, 1);
+    ctx.restore();
+  }
+}
+
+function rectsOverlap(a,b){
+  return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y;
+}
+
+class Game{
+  constructor(){
+    this.player = new Player(saveData.selectedSkin);
+    this.obstacles = [];
+    this.coins = [];
+    this.powerups = [];
+    this.elapsed = 0;
+    this.distance = 0;
+    this.score = 0;
+    this.coinCount = 0;
+    this.speed = BASE_SPEED;
+    this.spawnTimer = 0;
+    this.nextSpawnGap = 900;
+    this.gameOver = false;
+    this.activePowerups = {};
+    this.stats = {jumps:0, powerupsCollected:0};
+    this.bgOffset = 0;
+    this.comboCount = 0;
+    this.comboTimer = 0;
+    this.maxCombo = 0;
+    this.level = 1;
+  }
+
+  spawnPattern(){
+    const startX = CANVAS_W + 40;
+    const r = Math.random();
+    let type;
+    if(r < 0.32) type="box";
+    else if(r < 0.55) type="tallbox";
+    else if(r < 0.8) type="hole";
+    else type="bird";
+    this.obstacles.push(new Obstacle(startX, type));
+
+    if(Math.random() < 0.7){
+      const coinY = type==="bird" ? GROUND_Y-220 : GROUND_Y-120;
+      const count = 3 + Math.floor(Math.random()*4);
+      for(let i=0;i<count;i++){
+        this.coins.push(new Coin(startX + 90 + i*34, coinY + Math.sin(i*0.8)*18));
+      }
+    }
+    if(Math.random() < 0.12){
+      const types = Object.keys(POWERUP_TYPES);
+      const t = types[Math.floor(Math.random()*types.length)];
+      this.powerups.push(new PowerupItem(startX + 200, GROUND_Y-160, t));
+    }
+  }
+
+  activatePowerup(type){
+    this.activePowerups[type] = POWERUP_TYPES[type].duration;
+    this.stats.powerupsCollected++;
+    SFX.powerup();
+    showToast(`${POWERUP_TYPES[type].icon} ${POWERUP_TYPES[type].label} aktif!`);
+    renderPowerupBar(this);
+  }
+
+  collectCoin(){
+    this.coinCount++;
+    SFX.coin();
+    this.comboTimer = COMBO_WINDOW;
+    this.comboCount++;
+    if(this.comboCount > this.maxCombo) this.maxCombo = this.comboCount;
+    if(this.comboCount >= 2){
+      comboPill.textContent = `🔥 x${this.comboCount} KOMBO`;
+      comboPill.classList.add("show");
+    }
+    // kombo 2'den itibaren ekstra skor bonusu
+    if(this.comboCount >= 2) this.score += this.comboCount;
+  }
+
+  update(dt){
+    if(this.gameOver) return;
+    this.elapsed += dt;
+    this.speed = Math.min(MAX_SPEED, BASE_SPEED + this.elapsed * SPEED_RAMP);
+    let effSpeed = this.speed;
+    if(this.activePowerups.speed > 0) effSpeed *= 1.6;
+
+    const moveAmount = effSpeed * dt;
+    this.distance += moveAmount;
+    this.score = Math.floor(this.distance * 0.5) + this.coinCount * 5 + this.score*0; // tutarlılık
+    this.score = Math.floor(this.distance * 0.5) + this.coinCount * 5;
+
+    const newLevel = Math.max(1, Math.floor(this.score / SCORE_PER_LEVEL) + 1);
+    if(newLevel !== this.level){
+      this.level = newLevel;
+      if(this.level > saveData.maxLevel) saveData.maxLevel = this.level;
+      SFX.levelup();
+      showToast(`📈 Seviye ${this.level}!`);
+    }
+    document.getElementById("level-pill").textContent = "Seviye " + this.level;
+
+    this.bgOffset = (this.bgOffset + moveAmount*0.3) % CANVAS_W;
+
+    for(const k in this.activePowerups){
+      if(this.activePowerups[k] > 0){
+        this.activePowerups[k] -= dt;
+        if(this.activePowerups[k] <= 0){ this.activePowerups[k]=0; renderPowerupBar(this); }
+      }
+    }
+
+    // kombo zamanlayıcı
+    if(this.comboTimer > 0){
+      this.comboTimer -= dt;
+      if(this.comboTimer <= 0){
+        this.comboCount = 0;
+        comboPill.classList.remove("show");
+      }
+    }
+
+    this.spawnTimer += dt;
+    if(this.spawnTimer > this.nextSpawnGap){
+      this.spawnTimer = 0;
+      const levelFactor = Math.max(0.55, 1 - (Math.max(1,this.level)-1)*0.05); // her seviyede biraz daha sık engel
+      this.nextSpawnGap = Math.max(380, (900 - this.elapsed*0.02 + Math.random()*300) * levelFactor);
+      this.spawnPattern();
+    }
+
+    this.player.update(dt);
+
+    this.obstacles.forEach(o=> o.x -= moveAmount);
+    this.coins.forEach(c=> c.x -= moveAmount);
+    this.powerups.forEach(p=> p.x -= moveAmount);
+
+    this.obstacles = this.obstacles.filter(o=> o.x + o.w > -50);
+    this.coins = this.coins.filter(c=> c.x + c.r > -50 && !c.collected);
+    this.powerups = this.powerups.filter(p=> p.x + p.r > -50 && !p.collected);
+
+    if(this.activePowerups.magnet > 0){
+      const pcx = this.player.x + this.player.width/2;
+      const pcy = this.player.y + this.player.height/2;
+      this.coins.forEach(c=>{
+        const dx = pcx - c.x, dy = pcy - c.y;
+        const dist = Math.hypot(dx,dy);
+        if(dist < 220){ c.x += dx*0.12; c.y += dy*0.12; }
+      });
+    }
+
+    const prect = this.player.rect();
+
+    this.coins.forEach(c=>{
+      if(!c.collected && rectsOverlap(prect, c.rect())){
+        c.collected = true;
+        this.collectCoin();
+      }
+    });
+
+    this.powerups.forEach(p=>{
+      if(!p.collected && rectsOverlap(prect, p.rect())){
+        p.collected = true;
+        this.activatePowerup(p.type);
+      }
+    });
+
+    if(this.player.invulnTimer <= 0){
+      for(const o of this.obstacles){
+        if(rectsOverlap(prect, o.rect())){
+          if(this.activePowerups.shield > 0){
+            this.activePowerups.shield = 0;
+            this.player.invulnTimer = 700;
+            renderPowerupBar(this);
+            showToast("🛡️ Kalkan seni kurtardı!");
+            o.x = -9999;
+          } else {
+            this.endGame();
+          }
+          break;
+        }
+      }
+    }
+
+    updateHud(this);
+  }
+
+  recordJump(){ this.stats.jumps++; }
+
+  endGame(){
+    this.gameOver = true;
+    running = false;
+    SFX.crash();
+
+    saveData.totalCoins += this.coinCount;
+    saveData.totalJumps += this.stats.jumps;
+    saveData.totalPowerups += this.stats.powerupsCollected;
+    saveData.totalRuns += 1;
+    if(this.level > saveData.maxLevel) saveData.maxLevel = this.level;
+    const isNewBest = this.score > saveData.best;
+    if(isNewBest) saveData.best = this.score;
+
+    const c = ensureDailyChallenge();
+    if(!c.done){
+      let val = 0;
+      if(c.type==="coins") val = this.coinCount;
+      else if(c.type==="score") val = this.score;
+      else if(c.type==="distance") val = Math.floor(this.distance/10);
+      else if(c.type==="powerups") val = this.stats.powerupsCollected;
+      else if(c.type==="jumps") val = this.stats.jumps;
+      else if(c.type==="combo") val = this.maxCombo;
+      c.progress = Math.max(c.progress, val);
+      if(c.progress >= c.target){ c.done = true; }
+    }
+
+    checkAchievements({
+      score:this.score, coins:this.coinCount, maxCombo:this.maxCombo, powerups:this.stats.powerupsCollected
+    });
+
+    save(saveData);
+    showGameOverScreen(this);
+  }
+
+  draw(ctx){
+    ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+    const themeIdx = ((Math.max(1,this.level)-1) % LEVEL_THEMES.length + LEVEL_THEMES.length) % LEVEL_THEMES.length;
+    const theme = LEVEL_THEMES[themeIdx] || LEVEL_THEMES[0];
+    const grad = ctx.createLinearGradient(0,0,0,CANVAS_H);
+    grad.addColorStop(0, theme.top);
+    grad.addColorStop(1, theme.bottom);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+    drawBackground(ctx, this.bgOffset);
+    ctx.fillStyle = "#2b3a55";
+    ctx.fillRect(0, GROUND_Y, CANVAS_W, CANVAS_H-GROUND_Y);
+    ctx.strokeStyle = "#3e5374"; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0,GROUND_Y); ctx.lineTo(CANVAS_W,GROUND_Y); ctx.stroke();
+
+    this.obstacles.forEach(o=>o.draw(ctx));
+    this.coins.forEach(c=>c.draw(ctx));
+    this.powerups.forEach(p=>p.draw(ctx));
+    this.player.draw(ctx, this.activePowerups.shield > 0);
+  }
+}
+
+function drawBackground(ctx, offset){
+  ctx.save();
+  ctx.fillStyle = "rgba(255,255,255,0.04)";
+  for(let i=-1;i<3;i++){
+    const baseX = i*220 - offset%220;
+    ctx.beginPath();
+    ctx.moveTo(baseX, GROUND_Y);
+    ctx.lineTo(baseX+110, GROUND_Y-160);
+    ctx.lineTo(baseX+220, GROUND_Y);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/* ===================== HUD ===================== */
+function updateHud(g){
+  scorePill.textContent = "Skor: " + g.score;
+  coinPill.textContent = "🪙 " + g.coinCount;
+  bestPill.textContent = "En İyi: " + Math.max(saveData.best, g.score);
+  speedPill.textContent = "Hız: " + (g.speed/BASE_SPEED).toFixed(1) + "x";
+}
+function renderPowerupBar(g){
+  powerupBar.innerHTML = "";
+  Object.keys(POWERUP_TYPES).forEach(type=>{
+    const active = g.activePowerups[type] > 0;
+    const div = document.createElement("div");
+    div.className = "pu-icon" + (active?" active":"");
+    div.textContent = POWERUP_TYPES[type].icon;
+    powerupBar.appendChild(div);
+  });
+}
+
+/* ===================== EKRANLAR ===================== */
+function showGameOverScreen(g){
+  const isNewBest = g.score >= saveData.best;
+  overlay.innerHTML = `
+    <h1>${isNewBest ? "🏆 YENİ REKOR!" : "💥 OYUN BİTTİ"}</h1>
+    <div class="stat-strip">
+      <span>Skor: <b>${g.score}</b></span>
+      <span>Para: <b>${g.coinCount}</b></span>
+      <span>En Yüksek Kombo: <b>x${g.maxCombo}</b></span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input id="name-input" placeholder="İsmini yaz" maxlength="14" value="${escapeHtml(saveData.playerName||"")}">
+      <button class="btn" id="save-score-btn">💾 Kaydet</button>
+    </div>
+    <div class="challenge-box" id="challenge-box"></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="lb">Skor Tablosu</button>
+      <button class="tab-btn" data-tab="ach">Başarımlar</button>
+    </div>
+    <div id="tab-lb">
+      <table class="leaderboard" id="leaderboard-table">
+        <thead><tr><th>#</th><th>İsim</th><th>Skor</th><th>Para</th><th>Tarih</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="tab-ach" style="display:none;">
+      <div class="ach-grid" id="ach-grid"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="retry-btn">🔁 Tekrar Oyna</button>
+      <button class="btn secondary" id="menu-btn">🏠 Menü</button>
+    </div>
+  `;
+  overlay.style.display = "flex";
+
+  challengeBoxEl = document.getElementById("challenge-box");
+  leaderboardTable = document.getElementById("leaderboard-table").querySelector("tbody");
+  renderChallenge();
+  renderLeaderboard(-1);
+  renderAchievements(document.getElementById("ach-grid"));
+
+  let savedAlready = false;
+  const nameInput = document.getElementById("name-input");
+  const saveBtn = document.getElementById("save-score-btn");
+  saveBtn.addEventListener("click", ()=>{
+    if(savedAlready) return;
+    const name = (nameInput.value || "Oyuncu").trim().slice(0,14) || "Oyuncu";
+    saveData.playerName = name;
+    const entry = {name, score:g.score, coins:g.coinCount, date:new Date().toLocaleDateString("tr-TR")};
+    saveData.scores.push(entry);
+    saveData.scores = saveData.scores.sort((a,b)=>b.score-a.score).slice(0,30);
+    save(saveData);
+    ONLINE_LEADERBOARD.submit(entry); // başarısız olursa sessizce yerel kalır
+    savedAlready = true;
+    saveBtn.textContent = "✅ Kaydedildi";
+    saveBtn.disabled = true;
+    const idx = [...saveData.scores].sort((a,b)=>b.score-a.score).findIndex(r=>r===saveData.scores.find(s=>s.score===g.score && s.name===name));
+    renderLeaderboard(idx);
+    showToast("Skor tabloya kaydedildi!");
+  });
+
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-lb").style.display = btn.dataset.tab==="lb" ? "" : "none";
+      document.getElementById("tab-ach").style.display = btn.dataset.tab==="ach" ? "" : "none";
+    });
+  });
+
+  document.getElementById("retry-btn").addEventListener("click", startGame);
+  document.getElementById("menu-btn").addEventListener("click", buildMainMenu);
+
+  // başarım popup'larını sırayla göster
+  setTimeout(showNextAchievementPopup, 600);
+}
+
+function buildMainMenu(){
+  overlay.innerHTML = `
+    <h1>🏃 ENDLESS RUNNER</h1>
+    <p>Space / Yukarı ok / Dokun = Zıpla (havadayken tekrar bas = Double Jump)<br>
+       Aşağı ok / Eğil butonu = Çömel</p>
+    <div class="stat-strip">
+      <span>En İyi: <b>${saveData.best}</b></span>
+      <span>Toplam Para: <b>${saveData.totalCoins}</b></span>
+      <span>Seri: <b>🔥 ${saveData.streak} gün</b></span>
+    </div>
+    <div>
+      <div style="margin-bottom:6px; font-size:13px; opacity:.8;">Karakter Seç</div>
+      <div class="skin-select" id="skin-select"></div>
+    </div>
+    <div class="challenge-box" id="challenge-box"></div>
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="play">Oyna</button>
+      <button class="tab-btn" data-tab="leaderboard">Skor Tablosu</button>
+      <button class="tab-btn" data-tab="ach">Başarımlar</button>
+    </div>
+    <div id="tab-play">
+      <div class="row"><button class="btn" id="start-btn">▶ BAŞLA</button></div>
+    </div>
+    <div id="tab-leaderboard" style="display:none;">
+      <table class="leaderboard" id="leaderboard-table">
+        <thead><tr><th>#</th><th>İsim</th><th>Skor</th><th>Para</th><th>Tarih</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="tab-ach" style="display:none;">
+      <div class="ach-grid" id="ach-grid"></div>
+    </div>
+  `;
+  overlay.style.display = "flex";
+
+  skinSelectEl = document.getElementById("skin-select");
+  challengeBoxEl = document.getElementById("challenge-box");
+  leaderboardTable = document.getElementById("leaderboard-table").querySelector("tbody");
+
+  renderSkinSelect();
+  renderChallenge();
+
+  document.getElementById("start-btn").addEventListener("click", startGame);
+  document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-play").style.display = btn.dataset.tab==="play" ? "" : "none";
+      document.getElementById("tab-leaderboard").style.display = btn.dataset.tab==="leaderboard" ? "" : "none";
+      document.getElementById("tab-ach").style.display = btn.dataset.tab==="ach" ? "" : "none";
+      if(btn.dataset.tab==="leaderboard") renderLeaderboard(-1);
+      if(btn.dataset.tab==="ach") renderAchievements(document.getElementById("ach-grid"));
+    });
+  });
+}
+
+/* ===================== OYUNU BAŞLAT ===================== */
+function startGame(){
+  running = false; // önceki döngü varsa kesinlikle durdur
+  updateStreak();
+  overlay.style.display = "none";
+  comboPill.classList.remove("show");
+  game = new Game();
+  renderPowerupBar(game);
+  updateHud(game);
+  running = true;
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function loop(now){
+  if(!running) return;
+  const dt = Math.min(40, now - lastTime);
+  lastTime = now;
+  game.update(dt);
+  game.draw(ctx);
+  if(running) requestAnimationFrame(loop);
+}
+
+/* ===================== KONTROLLER ===================== */
+function doJump(){
+  if(!running || !game || game.gameOver) return;
+  if(game.player.jump()){ game.recordJump(); SFX.jump(); }
+}
+function doCrouch(state){
+  if(!running || !game || game.gameOver) return;
+  game.player.setCrouch(state);
+}
+
+window.addEventListener("keydown", (e)=>{
+  if(e.code === "Space" || e.code === "ArrowUp"){ e.preventDefault(); doJump(); }
+  else if(e.code === "ArrowDown"){ e.preventDefault(); doCrouch(true); }
+});
+window.addEventListener("keyup", (e)=>{
+  if(e.code === "ArrowDown"){ doCrouch(false); }
+});
+canvas.addEventListener("pointerdown", ()=>{ doJump(); });
+btnJumpMobile.addEventListener("pointerdown", (e)=>{ e.preventDefault(); doJump(); });
+btnCrouchMobile.addEventListener("pointerdown", (e)=>{ e.preventDefault(); doCrouch(true); });
+btnCrouchMobile.addEventListener("pointerup", (e)=>{ e.preventDefault(); doCrouch(false); });
+btnCrouchMobile.addEventListener("pointerleave", ()=>{ doCrouch(false); });
+
+/* ===================== İLK YÜKLEME ===================== */
+document.getElementById("mute-btn").textContent = saveData.soundOn ? "🔊" : "🔇";
+document.getElementById("mute-btn").addEventListener("click", toggleSound);
+ensureDailyChallenge();
+buildMainMenu();
+
+})();
+</script>
+</body>
+</html>

@@ -348,25 +348,47 @@ def not_found(e):
 
 
 
+GAMES_STATIC_DIR = os.path.join(BASE_DIR, "games_static")
+
+
 @app.route("/oyna/<slug>")
 def play(slug):
     """
     Oyunun kendisini burada göstereceğiz.
 
-    Entegrasyon için iki yöntemden biri kullanılabilir:
-    1) Blueprint: Oyunun kendi Flask uygulamasını bir Blueprint'e çevirip
-       burada import + register_blueprint ile bağlamak (tek sunucu, tek port).
-    2) iframe: Oyunu ayrı bir process/port'ta çalıştırıp play.html içinde
-       <iframe src="..."> ile göstermek.
+    İki entegrasyon yöntemi kullanılıyor:
+    1) Statik oyunlar: games_static/<slug>/index.html olarak duran, tek
+       dosyalık (harici bağımlılığı olmayan) HTML/JS oyunlar -- bunlar
+       otomatik olarak algılanıp trailing-slash'li adrese yönlendirilir.
+    2) Blueprint: Rise of the Bosses gibi kendi Flask API'sine ihtiyaç
+       duyan oyunlar -- bkz. games_blueprints/.
 
-    Oyunun dosyaları admin panelden yüklendiğinde games/<slug>/ altına
-    kaydediliyor; gerçek bağlantıyı birlikte yaparız.
+    Hiçbiri yoksa (henüz bağlanmamış oyun) placeholder ekran gösterilir.
     """
     project = store.get_project(slug)
     if not project:
         abort(404)
+    if os.path.exists(os.path.join(GAMES_STATIC_DIR, slug, "index.html")):
+        store.bump_play(slug)
+        return redirect(url_for("play_static_index", slug=slug))
     store.bump_play(slug)
     return render_template("play.html", p=project)
+
+
+@app.route("/oyna/<slug>/")
+def play_static_index(slug):
+    game_dir = os.path.join(GAMES_STATIC_DIR, slug)
+    if not os.path.exists(os.path.join(game_dir, "index.html")):
+        abort(404)
+    return send_from_directory(game_dir, "index.html")
+
+
+@app.route("/oyna/<slug>/<path:filename>")
+def play_static_asset(slug, filename):
+    game_dir = os.path.join(GAMES_STATIC_DIR, slug)
+    if not os.path.exists(game_dir):
+        abort(404)
+    return send_from_directory(game_dir, filename)
 
 
 @app.route("/indir/<slug>")
