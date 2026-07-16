@@ -30,7 +30,7 @@
   <div class="cart-label">{{ p.name }}</div>
   <div class="cart-desc">{{ p.desc }}</div>
   <div class="cart-tags">
-    {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+    {% for t in p.tags %}<a href="{{ url_for('tag_page', tag=t) }}" class="tag">{{ t }}</a>{% endfor %}
   </div>
   <div class="stat-badge" style="margin-bottom:14px;">
     {% if p.kind == 'oyun' %}

@@ -1,10 +1,12 @@
 {% extends "base.html" %}
+{% from "_card.html" import render_card %}
 {% block title %}{{ p.name }} — Murnova Dünyası{% endblock %}
 {% block meta_desc %}{{ p.tagline or p.desc }}{% endblock %}
 {% block og_title %}{{ p.name }} — Murnova Dünyası{% endblock %}
 {% block og_desc %}{{ p.tagline or p.desc }}{% endblock %}
 {% block twitter_title %}{{ p.name }}{% endblock %}
 {% block twitter_desc %}{{ p.tagline or p.desc }}{% endblock %}
+{% block body_attrs %} data-detail-page="{{ p.slug }}"{% endblock %}
 {% block content %}
 
 <header class="detail-hero">
@@ -42,6 +44,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" style="vertical-align:-2px; margin-right:6px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Linki Kopyala
       </button>
+      <button type="button" class="btn btn-ghost like-btn {{ 'liked' if liked }}" data-slug="{{ p.slug }}">
+        <svg viewBox="0 0 24 24" fill="{{ 'currentColor' if liked else 'none' }}" stroke="currentColor" stroke-width="2" width="15" height="15" style="vertical-align:-2px; margin-right:6px;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="like-count">{{ like_count }}</span>
+      </button>
     </div>
   </div>
 </header>
@@ -60,6 +66,12 @@
       {% endif %}
     {% endif %}
 
+    {% if p.youtube_url %}
+    <div class="youtube-embed">
+      <iframe src="https://www.youtube.com/embed/{{ p.youtube_url }}" title="{{ p.name }} video" frameborder="0" allowfullscreen loading="lazy"></iframe>
+    </div>
+    {% endif %}
+
     <p style="max-width:60ch; color:var(--text-dim); font-size:1rem; margin-bottom:20px;">{{ p.desc }}</p>
 
     {% if p.features %}
@@ -71,7 +83,7 @@
     {% endif %}
 
     <div class="cart-tags" style="margin-top:20px;">
-      {% for t in p.tags %}<span class="tag">{{ t }}</span>{% endfor %}
+      {% for t in p.tags %}<a href="{{ url_for('tag_page', tag=t) }}" class="tag">{{ t }}</a>{% endfor %}
     </div>
 
     {% if p.gallery %}
@@ -103,6 +115,44 @@
       <li>{{ entry }}</li>
       {% endfor %}
     </ul>
+    {% endif %}
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:48px; margin-bottom:14px;">Yorumlar ({{ comments|length }})</h2>
+
+    {% if comments %}
+    <div class="comment-list">
+      {% for c in comments %}
+      <div class="comment-item">
+        <div class="comment-head"><strong>{{ c.name }}</strong></div>
+        <p>{{ c.text }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim); font-size:0.9rem; margin-bottom:20px;">Henüz yorum yok — ilk yorumu sen yaz.</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('submit_comment', slug=p.slug) }}" class="comment-form">
+      <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="form-field">
+        <label for="c-name">Adın (opsiyonel)</label>
+        <input type="text" id="c-name" name="name" placeholder="Misafir" maxlength="40">
+      </div>
+      <div class="form-field">
+        <label for="c-text">Yorumun</label>
+        <textarea id="c-text" name="text" required maxlength="600" placeholder="Ne düşünüyorsun?"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Yorumu Gönder</button>
+      <p class="form-hint">Yorumun, onaylandıktan sonra herkese görünür olacak.</p>
+    </form>
+
+    {% if similar %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:56px; margin-bottom:20px;">Benzer İçerikler</h2>
+    <div class="rack">
+      {% for sp in similar %}
+        {{ render_card(sp, categories, stats) }}
+      {% endfor %}
+    </div>
     {% endif %}
   </div>
 </section>

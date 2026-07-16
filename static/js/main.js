@@ -170,3 +170,117 @@
   });
 })();
 
+
+// ---------- Beğeni butonu ----------
+(function () {
+  document.querySelectorAll(".like-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const slug = btn.dataset.slug;
+      fetch("/begen/" + slug, { method: "POST" })
+        .then((r) => r.json())
+        .then((data) => {
+          btn.classList.toggle("liked", data.liked);
+          btn.querySelector(".like-count").textContent = data.count;
+          btn.classList.add("pop");
+          setTimeout(() => btn.classList.remove("pop"), 250);
+        })
+        .catch(() => {});
+    });
+  });
+})();
+
+// ---------- Ses efekti aç/kapa + tıklama sesleri ----------
+(function () {
+  const root = document.documentElement;
+  const saved = localStorage.getItem("murnova-sound");
+  if (saved === "off") root.setAttribute("data-sound", "off");
+
+  let audioCtx = null;
+  function beep(freq, dur) {
+    if (root.getAttribute("data-sound") === "off") return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + dur);
+    } catch (e) {}
+  }
+
+  document.addEventListener("click", function (e) {
+    const soundBtn = e.target.closest(".sound-toggle");
+    if (soundBtn) {
+      const next = root.getAttribute("data-sound") === "off" ? "on" : "off";
+      if (next === "off") root.setAttribute("data-sound", "off");
+      else root.removeAttribute("data-sound");
+      localStorage.setItem("murnova-sound", next);
+      beep(440, 0.08);
+      return;
+    }
+    if (e.target.closest(".btn, .mini-btn, .like-btn, .chip-btn")) {
+      beep(520, 0.06);
+    }
+  });
+})();
+
+// ---------- Ziyaretçi rozetleri (localStorage tabanlı, eğlence amaçlı) ----------
+(function () {
+  if (!document.body.dataset.detailPage) return;
+  let visited = JSON.parse(localStorage.getItem("murnova-visited") || "[]");
+  const slug = document.body.dataset.detailPage;
+  if (!visited.includes(slug)) visited.push(slug);
+  localStorage.setItem("murnova-visited", JSON.stringify(visited));
+
+  const milestones = { 1: "İlk keşif! 🎉", 3: "3 farklı içerik denedin 🔥", 5: "5 kartuş keşfettin ⭐", 10: "Gerçek bir kaşifsin 🏆" };
+  const count = visited.length;
+  if (milestones[count] && !sessionStorage.getItem("badge-" + count)) {
+    sessionStorage.setItem("badge-" + count, "1");
+    const toast = document.createElement("div");
+    toast.className = "badge-toast";
+    toast.textContent = milestones[count];
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add("show"));
+    setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3200);
+  }
+})();
+
+// ---------- Easter egg: Konami kodu ----------
+(function () {
+  const seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let pos = 0;
+  document.addEventListener("keydown", function (e) {
+    pos = (e.key === seq[pos]) ? pos + 1 : 0;
+    if (pos === seq.length) {
+      pos = 0;
+      triggerEasterEgg();
+    }
+  });
+
+  function triggerEasterEgg() {
+    const overlay = document.createElement("div");
+    overlay.className = "easter-egg-overlay";
+    overlay.innerHTML = '<div class="easter-egg-msg">🐍 KARTUŞ MODU AÇILDI 🐍</div>';
+    document.body.appendChild(overlay);
+    for (let i = 0; i < 30; i++) {
+      const bit = document.createElement("span");
+      bit.className = "confetti-bit";
+      bit.style.left = Math.random() * 100 + "vw";
+      bit.style.animationDelay = (Math.random() * 0.6) + "s";
+      bit.style.background = ["#FFB347", "#5EEAD4", "#FF5D5D"][i % 3];
+      overlay.appendChild(bit);
+    }
+    setTimeout(() => overlay.remove(), 2800);
+  }
+})();
+
+// ---------- PWA: service worker kaydı ----------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("/static/sw.js").catch(function () {});
+  });
+}

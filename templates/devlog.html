@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Devlog — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Devlog</h1>
+    <p class="detail-tagline">Geliştirme sürecinden kısa notlar.</p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap" style="max-width:720px;">
+    {% if entries %}
+      {% for e in entries %}
+      <div class="devlog-entry">
+        <div class="devlog-date">{{ e.created_at[:10] }}</div>
+        <h3>{{ e.title }}</h3>
+        <p>{{ e.body }}</p>
+      </div>
+      {% endfor %}
+    {% else %}
+    <p style="color:var(--text-dim);">Henüz bir devlog kaydı yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

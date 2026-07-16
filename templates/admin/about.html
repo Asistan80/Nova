@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Hakkımda Düzenle — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Hakkımda Sayfasını Düzenle</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="form-grid" style="max-width:640px;">
+      <div class="form-field">
+        <label for="bio">Tanıtım Yazısı</label>
+        <textarea id="bio" name="bio" style="min-height:160px;">{{ about.bio }}</textarea>
+      </div>
+      <div class="form-field">
+        <label for="tools">Kullandığın Araçlar (virgülle ayır)</label>
+        <input type="text" id="tools" name="tools" value="{{ about.tools|join(', ') }}" placeholder="Python, Flask, Photoshop">
+      </div>
+      <div class="form-field">
+        <label for="photo">Fotoğraf</label>
+        <input type="file" id="photo" name="photo" accept="image/*">
+        {% if about.photo %}<p class="form-hint">Mevcut: {{ about.photo }}</p>{% endif %}
+      </div>
+      <button type="submit" class="btn btn-primary" style="justify-self:start;">Kaydet</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

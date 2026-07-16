@@ -6,7 +6,13 @@
   <div class="wrap">
     <div class="admin-head">
       <h1>Yönetim Paneli</h1>
-      <div style="display:flex; gap:12px;">
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{{ url_for('admin_comments') }}" class="btn btn-ghost">
+          Yorumlar{% if pending_count %} <span class="tag" style="color:var(--boss-red); border-color:var(--boss-red); margin-left:4px;">{{ pending_count }} bekliyor</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin_devlog') }}" class="btn btn-ghost">Devlog</a>
+        <a href="{{ url_for('admin_about') }}" class="btn btn-ghost">Hakkımda</a>
+        <a href="{{ url_for('admin_roadmap') }}" class="btn btn-ghost">Yol Haritası</a>
         <a href="{{ url_for('admin_new') }}" class="btn btn-primary">+ Yeni Proje</a>
         <a href="{{ url_for('admin_logout') }}" class="btn btn-ghost">Çıkış yap</a>
       </div>
@@ -26,11 +32,20 @@
 
     {% for key, c in categories.items() %}
     <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin:32px 0 14px;">{{ c.label }}</h2>
+
+    <div class="bulk-bar" data-kind="{{ key }}" style="display:none; gap:10px; margin-bottom:10px;">
+      <button type="button" class="mini-btn bulk-action" data-action="yayina-al">Yayına Al</button>
+      <button type="button" class="mini-btn bulk-action" data-action="gizle">Gizle</button>
+      <button type="button" class="mini-btn bulk-action danger" data-action="sil">Sil</button>
+      <span class="bulk-count" style="font-size:0.8rem; color:var(--text-dim); align-self:center;"></span>
+    </div>
+
     <table class="admin-table" data-kind="{{ key }}">
-      <thead><tr><th></th><th>Ad</th><th>Durum</th><th>{{ 'Oynama' if key == 'oyun' else 'İndirme' }}</th><th></th></tr></thead>
+      <thead><tr><th><input type="checkbox" class="select-all"></th><th></th><th>Ad</th><th>Durum</th><th>{{ 'Oynama' if key == 'oyun' else 'İndirme' }}</th><th></th></tr></thead>
       <tbody>
         {% for p in by_kind[key] %}
         <tr draggable="true" data-slug="{{ p.slug }}">
+          <td><input type="checkbox" class="row-select" value="{{ p.slug }}"></td>
           <td style="color:var(--text-dim); cursor:grab;">⠿⠿</td>
           <td>{{ p.name }}{% if not p.get('published', True) %} <span class="tag" style="color:var(--boss-red); border-color:var(--boss-red);">taslak</span>{% endif %}</td>
           <td>{{ p.status }}</td>
@@ -43,7 +58,7 @@
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="5" style="color:var(--text-dim);">Henüz {{ c.singular|lower }} eklenmedi.</td></tr>
+        <tr><td colspan="6" style="color:var(--text-dim);">Henüz {{ c.singular|lower }} eklenmedi.</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -52,7 +67,7 @@
 </section>
 
 <script>
-  // Basit sürükle-bırak sıralama -- her kategori tablosu kendi içinde bağımsız.
+  // Sürükle-bırak sıralama
   document.querySelectorAll('.admin-table[data-kind]').forEach(function (table) {
     const kind = table.dataset.kind;
     const tbody = table.querySelector('tbody');
@@ -64,13 +79,11 @@
       dragEl = tr;
       tr.classList.add('dragging');
     });
-
     tbody.addEventListener('dragend', function () {
       if (dragEl) dragEl.classList.remove('dragging');
       dragEl = null;
       persistOrder();
     });
-
     tbody.addEventListener('dragover', function (e) {
       e.preventDefault();
       const tr = e.target.closest('tr[draggable="true"]');
@@ -79,17 +92,47 @@
       const after = (e.clientY - rect.top) > rect.height / 2;
       tbody.insertBefore(dragEl, after ? tr.nextSibling : tr);
     });
-
     function persistOrder() {
-      const order = Array.from(tbody.querySelectorAll('tr[data-slug]')).map(function (tr) {
-        return tr.dataset.slug;
-      });
+      const order = Array.from(tbody.querySelectorAll('tr[data-slug]')).map(function (tr) { return tr.dataset.slug; });
       fetch('/admin/sirala/' + kind, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(order),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(order),
       }).catch(function () {});
     }
+  });
+
+  // Toplu işlemler
+  document.querySelectorAll('table.admin-table[data-kind]').forEach(function (table) {
+    const kind = table.dataset.kind;
+    const bulkBar = document.querySelector('.bulk-bar[data-kind="' + kind + '"]');
+    const selectAll = table.querySelector('.select-all');
+    const rowChecks = () => Array.from(table.querySelectorAll('.row-select'));
+
+    function updateBar() {
+      const checked = rowChecks().filter(function (c) { return c.checked; });
+      bulkBar.style.display = checked.length ? 'flex' : 'none';
+      bulkBar.querySelector('.bulk-count').textContent = checked.length + ' seçili';
+    }
+
+    table.addEventListener('change', function (e) {
+      if (e.target.classList.contains('row-select') || e.target === selectAll) {
+        if (e.target === selectAll) {
+          rowChecks().forEach(function (c) { c.checked = selectAll.checked; });
+        }
+        updateBar();
+      }
+    });
+
+    bulkBar.querySelectorAll('.bulk-action').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const action = btn.dataset.action;
+        const slugs = rowChecks().filter(function (c) { return c.checked; }).map(function (c) { return c.value; });
+        if (!slugs.length) return;
+        if (action === 'sil' && !confirm(slugs.length + ' öğe silinsin mi? Bu geri alınamaz.')) return;
+        fetch('/admin/toplu/' + action, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slugs: slugs }),
+        }).then(function () { location.reload(); }).catch(function () {});
+      });
+    });
   });
 </script>
 

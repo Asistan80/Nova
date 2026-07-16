@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Devlog Yönetimi — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Devlog Yönetimi</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <form method="POST" class="form-grid" style="margin-bottom:40px; max-width:640px;">
+      <div class="form-field">
+        <label for="title">Başlık</label>
+        <input type="text" id="title" name="title" required>
+      </div>
+      <div class="form-field">
+        <label for="body">Not</label>
+        <textarea id="body" name="body" required style="min-height:120px;"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="justify-self:start;">Ekle</button>
+    </form>
+
+    {% for e in entries %}
+    <div class="devlog-entry">
+      <div class="devlog-date">{{ e.created_at[:10] }}</div>
+      <h3>{{ e.title }}</h3>
+      <p>{{ e.body }}</p>
+      <form method="POST" action="{{ url_for('admin_devlog_delete', entry_id=e.id) }}" onsubmit="return confirm('Silinsin mi?');" style="margin-top:10px;">
+        <button type="submit" class="danger" style="font-size:0.8rem; padding:7px 12px; border-radius:7px; border:1px solid var(--line); background:transparent; color:var(--text-dim); cursor:pointer;">Sil</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}

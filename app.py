@@ -1,6 +1,6 @@
 import os
 from functools import wraps
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 
 from flask import (
     Flask, render_template, send_from_directory, abort, request,
@@ -90,7 +90,8 @@ def _sync_projects_json(message):
 @app.before_request
 def _count_visit():
     ep = request.endpoint or ""
-    if ep in ("index", "category_list", "category_detail"):
+    if ep in ("index", "category_list", "category_detail", "tag_page", "search_page",
+              "devlog_page", "about_page", "roadmap_page"):
         store.bump_visit()
 
 
@@ -157,6 +158,16 @@ def category_list(group_slug):
     )
 
 
+def _get_visitor_id():
+    vid = session.get("site_visitor_id")
+    if not vid:
+        import uuid as _uuid
+        vid = _uuid.uuid4().hex
+        session["site_visitor_id"] = vid
+        session.permanent = True
+    return vid
+
+
 @app.route("/kategori/<group_slug>/<slug>")
 def category_detail(group_slug, slug):
     group = cat.group_by_slug(group_slug)
@@ -165,15 +176,20 @@ def category_detail(group_slug, slug):
     project = store.get_project(slug)
     if not project or cat.group_for_kind(project["kind"]) != group_slug:
         abort(404)
-    if not project.get("published", True) and not session.get("is_admin"):
+    if not store.is_visible(project) and not session.get("is_admin"):
         abort(404)
     stats = store.get_stats()
     leaderboard = None
     if project["slug"] == "rise-of-the-bosses":
         leaderboard = _rise_of_the_bosses_leaderboard()
+    visitor_id = _get_visitor_id()
     return render_template(
         "detail.html", p=project, stats=stats,
         category=cat.CATEGORIES[project["kind"]], leaderboard=leaderboard,
+        like_count=store.like_count(slug), liked=store.has_liked(slug, visitor_id),
+        comments=store.comments_for(slug),
+        similar=store.similar_projects(project),
+        categories=cat.CATEGORIES,
     )
 
 
@@ -191,6 +207,101 @@ def _rise_of_the_bosses_leaderboard(limit=5):
         return []
     entries = sorted(entries, key=lambda e: e.get("score", 0), reverse=True)
     return entries[:limit]
+
+
+@app.route("/begen/<slug>", methods=["POST"])
+def like_project(slug):
+    project = store.get_project(slug)
+    if not project:
+        abort(404)
+    visitor_id = _get_visitor_id()
+    count, liked = store.toggle_like(slug, visitor_id)
+    return {"count": count, "liked": liked}
+
+
+@app.route("/yorum/<slug>", methods=["POST"])
+def submit_comment(slug):
+    project = store.get_project(slug)
+    if not project:
+        abort(404)
+    group = cat.group_for_kind(project["kind"])
+    redirect_url = url_for("category_detail", group_slug=group, slug=slug)
+
+    # Honeypot: gerçek kullanıcılar bu alanı görmez/doldurmaz, botlar genelde doldurur.
+    if request.form.get("website"):
+        return redirect(redirect_url)
+
+    text = request.form.get("text", "").strip()
+    if not text:
+        flash("Yorum boş olamaz.")
+        return redirect(redirect_url)
+
+    # Basit oturum bazlı hız sınırlama (20 saniyede bir yorum)
+    last = session.get("last_comment_at")
+    now_ts = datetime.now(timezone.utc).timestamp()
+    if last and now_ts - last < 20:
+        flash("Çok hızlı yorum gönderdin, biraz bekle.")
+        return redirect(redirect_url)
+    session["last_comment_at"] = now_ts
+
+    name = request.form.get("name", "").strip()
+    store.add_comment(slug, name, text)
+    flash("Yorumun gönderildi — onaylandıktan sonra görünecek.")
+    return redirect(redirect_url)
+
+
+@app.route("/etiket/<tag>")
+def tag_page(tag):
+    items = store.projects_with_tag(tag)
+    return render_template("tag.html", tag=tag, items=items, categories=cat.CATEGORIES, stats=store.get_stats())
+
+
+@app.route("/ara")
+def search_page():
+    q = request.args.get("q", "")
+    results = store.search_projects(q) if q else []
+    return render_template("search.html", query=q, results=results, categories=cat.CATEGORIES, stats=store.get_stats())
+
+
+@app.route("/feed.xml")
+def feed_xml():
+    root = request.url_root.rstrip("/")
+    items = store.recent_projects(limit=20)
+    body = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<rss version="2.0"><channel>',
+        '<title>Murnova Dünyası</title>',
+        f'<link>{root}/</link>',
+        '<description>MuBiKu&apos;nun oyun, uygulama ve medya vitrini</description>',
+    ]
+    for p in items:
+        group = cat.group_for_kind(p["kind"])
+        link = f"{root}/kategori/{group}/{p['slug']}"
+        import html as _html
+        body.append("<item>")
+        body.append(f"<title>{_html.escape(p['name'])}</title>")
+        body.append(f"<link>{link}</link>")
+        body.append(f"<guid>{link}</guid>")
+        body.append(f"<description>{_html.escape(p.get('tagline') or p.get('desc',''))}</description>")
+        body.append(f"<pubDate>{p.get('created_at','')}</pubDate>")
+        body.append("</item>")
+    body.append("</channel></rss>")
+    return "\n".join(body), 200, {"Content-Type": "application/rss+xml; charset=utf-8"}
+
+
+@app.route("/devlog")
+def devlog_page():
+    return render_template("devlog.html", entries=store.all_devlog_entries())
+
+
+@app.route("/hakkimda")
+def about_page():
+    return render_template("about.html", about=store.get_about())
+
+
+@app.route("/yol-haritasi")
+def roadmap_page():
+    return render_template("roadmap.html", items=store.all_roadmap_items())
 
 
 @app.route("/rastgele")
@@ -220,7 +331,7 @@ def sitemap_xml():
     for g in cat.GROUPS.values():
         urls.append(f"{root}/kategori/{g['slug']}")
     for p in store.all_projects():
-        if not p.get("published", True):
+        if not store.is_visible(p):
             continue
         group = cat.group_for_kind(p["kind"])
         urls.append(f"{root}/kategori/{group}/{p['slug']}")
@@ -237,6 +348,7 @@ def not_found(e):
 
 
 
+@app.route("/oyna/<slug>")
 def play(slug):
     """
     Oyunun kendisini burada göstereceğiz.
@@ -305,6 +417,7 @@ def admin_dashboard():
         categories=cat.CATEGORIES,
         stats=store.get_stats(),
         visit_chart=store.last_n_days(14),
+        pending_count=len(store.pending_comments()),
     )
 
 
@@ -315,6 +428,141 @@ def admin_reorder(kind):
     store.reorder_kind(kind, order)
     _sync_projects_json(f"sıralama güncellendi: {kind}")
     return {"ok": True}
+
+
+@app.route("/admin/yorumlar")
+@login_required
+def admin_comments():
+    projects_by_slug = {p["slug"]: p for p in store.all_projects()}
+    pending = store.pending_comments()
+    approved = [c for c in store.all_comments() if c.get("approved")]
+    approved.sort(key=lambda c: c["created_at"], reverse=True)
+    return render_template(
+        "admin/comments.html",
+        pending=pending, approved=approved, projects_by_slug=projects_by_slug,
+    )
+
+
+@app.route("/admin/yorum-onayla/<comment_id>", methods=["POST"])
+@login_required
+def admin_approve_comment(comment_id):
+    store.approve_comment(comment_id)
+    return redirect(url_for("admin_comments"))
+
+
+@app.route("/admin/yorum-sil/<comment_id>", methods=["POST"])
+@login_required
+def admin_delete_comment(comment_id):
+    store.delete_comment(comment_id)
+    return redirect(url_for("admin_comments"))
+
+
+@app.route("/admin/toplu/<action>", methods=["POST"])
+@login_required
+def admin_bulk(action):
+    data = request.get_json(force=True) or {}
+    slugs = data.get("slugs", [])
+    if action == "yayina-al":
+        store.bulk_set_published(slugs, True)
+    elif action == "gizle":
+        store.bulk_set_published(slugs, False)
+    elif action == "sil":
+        for slug in slugs:
+            project = store.get_project(slug)
+            if project:
+                _cleanup_project_files(project)
+        store.bulk_delete(slugs)
+    else:
+        return {"ok": False, "error": "bilinmeyen işlem"}, 400
+    _sync_projects_json(f"toplu işlem: {action} ({len(slugs)} öğe)")
+    return {"ok": True}
+
+
+@app.route("/admin/devlog", methods=["GET", "POST"])
+@login_required
+def admin_devlog():
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        body = request.form.get("body", "").strip()
+        if title and body:
+            store.add_devlog_entry(title, body)
+            flash("Devlog kaydı eklendi.")
+        return redirect(url_for("admin_devlog"))
+    return render_template("admin/devlog.html", entries=store.all_devlog_entries())
+
+
+@app.route("/admin/devlog/sil/<entry_id>", methods=["POST"])
+@login_required
+def admin_devlog_delete(entry_id):
+    store.delete_devlog_entry(entry_id)
+    return redirect(url_for("admin_devlog"))
+
+
+@app.route("/admin/hakkimda", methods=["GET", "POST"])
+@login_required
+def admin_about():
+    if request.method == "POST":
+        about = store.get_about()
+        about["bio"] = request.form.get("bio", "").strip()
+        about["tools"] = [t.strip() for t in request.form.get("tools", "").split(",") if t.strip()]
+        photo = request.files.get("photo")
+        if photo and photo.filename and ext_ok(photo.filename, ALLOWED_IMAGE_EXT):
+            ext = photo.filename.rsplit(".", 1)[1].lower()
+            fname = f"about.{ext}"
+            local_path = os.path.join(COVERS_DIR, fname)
+            photo.save(local_path)
+            _compress_image(local_path)
+            about["photo"] = fname
+        store.save_about(about)
+        flash("Hakkımda sayfası güncellendi.")
+        return redirect(url_for("admin_about"))
+    return render_template("admin/about.html", about=store.get_about())
+
+
+@app.route("/admin/yol-haritasi", methods=["GET", "POST"])
+@login_required
+def admin_roadmap():
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        desc = request.form.get("desc", "").strip()
+        eta = request.form.get("eta", "").strip()
+        if title:
+            store.add_roadmap_item(title, desc, eta)
+            flash("Yol haritasına eklendi.")
+        return redirect(url_for("admin_roadmap"))
+    return render_template("admin/roadmap.html", items=store.all_roadmap_items())
+
+
+@app.route("/admin/yol-haritasi/sil/<item_id>", methods=["POST"])
+@login_required
+def admin_roadmap_delete(item_id):
+    store.delete_roadmap_item(item_id)
+    return redirect(url_for("admin_roadmap"))
+
+
+def _extract_youtube_id(url):
+    if not url:
+        return ""
+    import re as _re
+    m = _re.search(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})", url)
+    if m:
+        return m.group(1)
+    if len(url) == 11:
+        return url
+    return ""
+
+
+def _parse_publish_at(value):
+    """HTML datetime-local girdisini ISO formatına çevirir, boşsa None döner."""
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
+    except ValueError:
+        return None
 
 
 def _project_from_form(form, existing=None):
@@ -332,6 +580,8 @@ def _project_from_form(form, existing=None):
         "changelog": changelog,
         "version": form.get("version", "").strip() or "1.0",
         "published": form.get("published") == "on",
+        "youtube_url": _extract_youtube_id(form.get("youtube_url", "").strip()),
+        "publish_at": _parse_publish_at(form.get("publish_at", "").strip()),
     }
     if existing:
         merged = dict(existing)

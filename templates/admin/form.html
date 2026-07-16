@@ -91,6 +91,17 @@
         {% if p and p.get('has_game_files') %}<p class="form-hint">Bu proje için dosyalar zaten yüklü.</p>{% endif %}
       </div>
 
+      <div class="form-field" data-field-for="oyun,uygulama">
+        <label for="youtube_url">YouTube Video Linki (opsiyonel)</label>
+        <input type="text" id="youtube_url" name="youtube_url" value="{{ p.youtube_url if p else '' }}" placeholder="https://youtube.com/watch?v=...">
+      </div>
+
+      <div class="form-field">
+        <label for="publish_at">İleri Tarihli Yayınlama (opsiyonel — boş bırakırsan hemen yayında)</label>
+        <input type="datetime-local" id="publish_at" name="publish_at" value="{{ p.publish_at[:16] if p and p.publish_at else '' }}">
+        <p class="form-hint">Bu tarihe kadar proje "Yayında" işaretli olsa bile ziyaretçilere görünmez.</p>
+      </div>
+
       <div class="form-field">
         <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
           <input type="checkbox" name="published" id="published" style="width:auto;" {{ 'checked' if not p or p.get('published', True) }}>

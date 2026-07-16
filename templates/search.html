@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_card.html" import render_card %}
+{% block title %}"{{ query }}" için sonuçlar — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Arama sonuçları</h1>
+    <p class="detail-tagline">"{{ query }}" için {{ results|length }} sonuç bulundu.</p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    {% if results %}
+    <div class="rack">
+      {% for p in results %}
+        {{ render_card(p, categories, stats) }}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Hiçbir şey bulunamadı — farklı bir kelime dene.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

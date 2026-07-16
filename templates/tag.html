@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% from "_card.html" import render_card %}
+{% block title %}#{{ tag }} — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">#{{ tag }}</h1>
+    <p class="detail-tagline">Bu etiketi taşıyan {{ items|length }} içerik.</p>
+    <div class="hero-cta">
+      <a href="{{ url_for('index') }}" class="btn btn-ghost">← Anasayfaya dön</a>
+    </div>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    {% if items %}
+    <div class="rack">
+      {% for p in items %}
+        {{ render_card(p, categories, stats) }}
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Bu etikette henüz içerik yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

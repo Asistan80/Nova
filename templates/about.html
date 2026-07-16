@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Hakkımda — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Hakkımda</h1>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    <div class="about-hero">
+      {% if about.photo %}
+      <img class="about-photo" src="{{ url_for('static', filename='uploads/covers/' ~ about.photo) }}" alt="MuBiKu">
+      {% else %}
+      <div class="about-photo-fallback">MB</div>
+      {% endif %}
+      <div style="flex:1; min-width:260px;">
+        <p style="color:var(--text-dim); max-width:60ch; white-space:pre-line;">{{ about.bio or "Henüz bir tanıtım yazısı eklenmedi." }}</p>
+        {% if about.tools %}
+        <div class="about-tools">
+          {% for t in about.tools %}<span class="tag">{{ t }}</span>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

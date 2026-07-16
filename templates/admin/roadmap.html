@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Yol Haritası Yönetimi — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Yol Haritası Yönetimi</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <form method="POST" class="form-grid" style="margin-bottom:40px; max-width:640px;">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="title">Başlık</label>
+          <input type="text" id="title" name="title" required>
+        </div>
+        <div class="form-field">
+          <label for="eta">Tahmini Zaman (ör: "Ağustos 2026")</label>
+          <input type="text" id="eta" name="eta">
+        </div>
+      </div>
+      <div class="form-field">
+        <label for="desc">Açıklama</label>
+        <textarea id="desc" name="desc"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" style="justify-self:start;">Ekle</button>
+    </form>
+
+    <div class="roadmap-list">
+      {% for i in items %}
+      <div class="roadmap-item">
+        {% if i.eta %}<div class="eta">{{ i.eta }}</div>{% endif %}
+        <h3>{{ i.title }}</h3>
+        {% if i.desc %}<p>{{ i.desc }}</p>{% endif %}
+        <form method="POST" action="{{ url_for('admin_roadmap_delete', item_id=i.id) }}" onsubmit="return confirm('Silinsin mi?');" style="margin-top:10px;">
+          <button type="submit" style="font-size:0.8rem; padding:7px 12px; border-radius:7px; border:1px solid var(--line); background:transparent; color:var(--text-dim); cursor:pointer;">Sil</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

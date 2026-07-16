@@ -151,7 +151,8 @@ section.shelf{ padding:60px 0 120px; }
 .cart-desc{ font-size:0.9rem; color:var(--text-dim); margin-bottom:20px; min-height:58px; }
 
 .cart-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
-.tag{ font-size:0.72rem; padding:5px 10px; border-radius:6px; background: rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--text-dim); }
+.tag{ font-size:0.72rem; padding:5px 10px; border-radius:6px; background: rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--text-dim); display:inline-block; text-decoration:none; transition: all .15s ease; }
+a.tag:hover{ border-color:var(--teal); color:var(--teal); }
 
 .cart-actions{ display:flex; gap:10px; }
 .mini-btn{
@@ -650,3 +651,150 @@ img.skeleton{
 }
 .error-404 h1{ font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin:18px 0 10px; }
 .error-404 p{ color:var(--text-dim); max-width:44ch; margin-bottom:28px; }
+
+/* ================================================================
+   BEĞENİ BUTONU
+   ================================================================ */
+.like-btn svg{ transition: transform .2s ease; }
+.like-btn.liked{ color: var(--boss-red); border-color: var(--boss-red); }
+.like-btn.liked svg{ color: var(--boss-red); }
+.like-btn.pop svg{ transform: scale(1.3); }
+
+/* ================================================================
+   YORUMLAR
+   ================================================================ */
+.comment-list{ display:grid; gap:12px; margin-bottom:32px; max-width:60ch; }
+.comment-item{
+  padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+}
+.comment-head strong{ font-size:0.88rem; color:var(--amber); }
+.comment-item p{ font-size:0.9rem; color:var(--text-dim); margin-top:4px; }
+
+.comment-form{ max-width:60ch; display:grid; gap:16px; margin-bottom:20px; }
+.comment-form textarea{ min-height:90px; }
+
+.hp-field{
+  position:absolute !important; left:-9999px !important; width:1px; height:1px; opacity:0;
+}
+
+/* ================================================================
+   ADMİN: YORUM MODERASYON KARTLARI
+   ================================================================ */
+.comment-mod-list{ display:grid; gap:14px; margin-bottom:20px; }
+.comment-mod-card{
+  padding:16px 20px; background:var(--surface); border:1px solid var(--line); border-radius:10px;
+}
+.comment-mod-meta{ display:flex; gap:12px; align-items:center; margin-bottom:6px; font-size:0.85rem; }
+.comment-mod-meta strong{ color:var(--amber); }
+.comment-mod-meta span{ color:var(--text-dim); }
+.comment-mod-card p{ font-size:0.92rem; color:var(--text); margin-bottom:10px; }
+
+/* ================================================================
+   YOUTUBE GÖMME
+   ================================================================ */
+.youtube-embed{
+  position:relative; width:100%; padding-top:56.25%; margin-bottom:28px;
+  border-radius:14px; overflow:hidden; border:1px solid var(--line); background:var(--bg-deep);
+}
+.youtube-embed iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+/* ================================================================
+   DEVLOG
+   ================================================================ */
+.devlog-entry{
+  padding:26px 28px; background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  margin-bottom:20px;
+}
+.devlog-entry .devlog-date{ font-family:'IBM Plex Mono',monospace; font-size:0.75rem; color:var(--teal); margin-bottom:8px; }
+.devlog-entry h3{ font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin-bottom:10px; }
+.devlog-entry p{ color:var(--text-dim); font-size:0.92rem; white-space:pre-line; }
+
+/* ================================================================
+   HAKKIMDA
+   ================================================================ */
+.about-hero{ display:flex; gap:36px; align-items:center; flex-wrap:wrap; margin-bottom:36px; }
+.about-photo{ width:160px; height:160px; border-radius:20px; object-fit:cover; border:1px solid var(--line); }
+.about-photo-fallback{
+  width:160px; height:160px; border-radius:20px; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, var(--amber), var(--boss-red)); font-family:'Space Grotesk',sans-serif;
+  font-size:2.5rem; font-weight:700; color:#211405;
+}
+.about-tools{ display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; }
+
+/* ================================================================
+   YOL HARİTASI
+   ================================================================ */
+.roadmap-list{ display:grid; gap:16px; max-width:64ch; }
+.roadmap-item{
+  padding:20px 24px; background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  border-left:3px solid var(--teal);
+}
+.roadmap-item .eta{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--teal); text-transform:uppercase; }
+.roadmap-item h3{ font-family:'Space Grotesk',sans-serif; font-size:1.05rem; margin:6px 0; }
+.roadmap-item p{ color:var(--text-dim); font-size:0.88rem; }
+
+/* ================================================================
+   ARAMA
+   ================================================================ */
+.nav-search{ position:relative; }
+.nav-search input{
+  width:180px; padding:8px 12px 8px 34px; border-radius:8px; border:1px solid var(--line);
+  background:var(--surface); color:var(--text); font-size:0.85rem;
+}
+.nav-search svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); width:14px; height:14px; color:var(--text-dim); }
+@media (max-width:900px){ .nav-search{ display:none; } }
+
+/* ================================================================
+   ERİŞİLEBİLİRLİK: içeriğe atla
+   ================================================================ */
+.skip-link{
+  position:absolute; left:-999px; top:auto; background:var(--amber); color:#211405;
+  padding:10px 18px; border-radius:8px; z-index:1000; font-weight:700;
+}
+.skip-link:focus{ left:16px; top:16px; }
+
+.footer-links{ display:flex; gap:20px; flex-wrap:wrap; }
+.footer-links a{ font-size:0.82rem; color:var(--text-dim); transition:color .15s ease; }
+.footer-links a:hover{ color:var(--amber); }
+
+/* Ses aç/kapa ikon geçişi (tema butonuyla aynı mantık) */
+.sound-toggle .icon-sound-off{ display:none; }
+:root[data-sound="off"] .sound-toggle .icon-sound-on{ display:none; }
+:root[data-sound="off"] .sound-toggle .icon-sound-off{ display:block; }
+
+/* ================================================================
+   ZİYARETÇİ ROZETİ (toast)
+   ================================================================ */
+.badge-toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+  background: var(--surface); border:1px solid var(--amber-dim); color:var(--text);
+  padding:14px 24px; border-radius:12px; font-weight:700; font-size:0.9rem;
+  opacity:0; transition: opacity .35s ease, transform .35s ease; z-index:300;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+}
+.badge-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ================================================================
+   EASTER EGG
+   ================================================================ */
+.easter-egg-overlay{
+  position:fixed; inset:0; z-index:400; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  background: rgba(10,8,16,0.35);
+  animation: ee-fade 2.8s ease forwards;
+}
+@keyframes ee-fade{ 0%{ opacity:0; } 10%{ opacity:1; } 80%{ opacity:1; } 100%{ opacity:0; } }
+.easter-egg-msg{
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.6rem;
+  color:var(--amber); text-shadow:0 0 20px rgba(255,179,71,0.6);
+}
+.confetti-bit{
+  position:absolute; top:-20px; width:10px; height:10px; border-radius:2px;
+  animation: confetti-fall 2.2s ease-in forwards;
+}
+@keyframes confetti-fall{
+  to{ transform: translateY(100vh) rotate(360deg); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){
+  .easter-egg-overlay, .confetti-bit{ animation:none; display:none; }
+}

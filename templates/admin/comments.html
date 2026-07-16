@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Yorumlar — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Yorumlar</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin-bottom:14px;">
+      Onay bekleyenler ({{ pending|length }})
+    </h2>
+    {% if pending %}
+    <div class="comment-mod-list">
+      {% for c in pending %}
+      <div class="comment-mod-card">
+        <div class="comment-mod-meta">
+          <strong>{{ c.name }}</strong>
+          <span>{{ projects_by_slug.get(c.slug, {}).get('name', c.slug) }}</span>
+        </div>
+        <p>{{ c.text }}</p>
+        <div class="admin-actions">
+          <form method="POST" action="{{ url_for('admin_approve_comment', comment_id=c.id) }}">
+            <button type="submit" style="color:var(--teal); border-color:var(--teal);">Onayla</button>
+          </form>
+          <form method="POST" action="{{ url_for('admin_delete_comment', comment_id=c.id) }}" onsubmit="return confirm('Bu yorum silinsin mi?');">
+            <button type="submit" class="danger">Sil</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim); margin-bottom:36px;">Onay bekleyen yorum yok.</p>
+    {% endif %}
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.2rem; margin:36px 0 14px;">
+      Yayındaki yorumlar ({{ approved|length }})
+    </h2>
+    {% if approved %}
+    <div class="comment-mod-list">
+      {% for c in approved %}
+      <div class="comment-mod-card">
+        <div class="comment-mod-meta">
+          <strong>{{ c.name }}</strong>
+          <span>{{ projects_by_slug.get(c.slug, {}).get('name', c.slug) }}</span>
+        </div>
+        <p>{{ c.text }}</p>
+        <div class="admin-actions">
+          <form method="POST" action="{{ url_for('admin_delete_comment', comment_id=c.id) }}" onsubmit="return confirm('Bu yorum silinsin mi?');">
+            <button type="submit" class="danger">Sil</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Henüz yayında yorum yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Yol Haritası — Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Yol Haritası</h1>
+    <p class="detail-tagline">Yakında gelecek projelerin teaser listesi.</p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    {% if items %}
+    <div class="roadmap-list">
+      {% for i in items %}
+      <div class="roadmap-item">
+        {% if i.eta %}<div class="eta">{{ i.eta }}</div>{% endif %}
+        <h3>{{ i.title }}</h3>
+        {% if i.desc %}<p>{{ i.desc }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Şu an planlanan bir şey listelenmedi.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}
