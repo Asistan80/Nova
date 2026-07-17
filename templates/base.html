@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Murnova Dünyası — Oyun & Uygulama Rafı{% endblock %}</title>
+<title>{% block title %}Derin Murnova Dünyası — Üret · Keşfet · Paylaş{% endblock %}</title>
 <meta name="description" content="{% block meta_desc %}MuBiKu'nun geliştirdiği oyun ve uygulamaların toplandığı kişisel vitrin — tarayıcıda oyna, indir, keşfet.{% endblock %}">
 
 <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='img/favicon-32.png') }}">
@@ -13,13 +13,13 @@
 <meta name="theme-color" content="#16121F">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="{% block og_title %}Murnova Dünyası — Oyun & Uygulama Rafı{% endblock %}">
+<meta property="og:title" content="{% block og_title %}Derin Murnova Dünyası — Üret · Keşfet · Paylaş{% endblock %}">
 <meta property="og:description" content="{% block og_desc %}MuBiKu'nun geliştirdiği oyun ve uygulamaların toplandığı kişisel vitrin.{% endblock %}">
-<meta property="og:image" content="{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}">
+<meta property="og:image" content="{% block og_image %}{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}{% endblock %}">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{% block twitter_title %}Murnova Dünyası{% endblock %}">
+<meta name="twitter:title" content="{% block twitter_title %}Derin Murnova Dünyası{% endblock %}">
 <meta name="twitter:description" content="{% block twitter_desc %}Oyunlarımı ve uygulamalarımı keşfet.{% endblock %}">
-<meta name="twitter:image" content="{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}">
+<meta name="twitter:image" content="{% block twitter_image %}{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}{% endblock %}">
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
@@ -31,7 +31,7 @@
 
 <nav>
   <div class="wrap">
-    <a href="{{ url_for('index') }}" class="brand"><span class="chip"></span>Murnova Dünyası</a>
+    <a href="{{ url_for('index') }}" class="brand"><img src="{{ url_for('static', filename='img/logo-mark.png') }}" alt="" class="brand-mark">Derin Murnova Dünyası</a>
     <div style="display:flex; align-items:center; gap:20px;">
       <div class="navlinks">
         <a href="{{ url_for('category_list', group_slug='oyunlar') }}">Oyunlar</a>
@@ -69,13 +69,14 @@
 <footer>
   <div class="wrap">
     <div>
-      <p>© 2026 Murnova Dünyası — MuBiKu</p>
+      <p>© 2026 Derin Murnova Dünyası — MuBiKu</p>
       <p>{% block footer_extra %}Yeni kartuşlar geliştirildikçe rafa eklenir.{% endblock %}</p>
     </div>
     <div class="footer-links">
       <a href="{{ url_for('about_page') }}">Hakkımda</a>
       <a href="{{ url_for('devlog_page') }}">Devlog</a>
       <a href="{{ url_for('roadmap_page') }}">Yol Haritası</a>
+      <a href="{{ url_for('stats_page') }}">İstatistikler</a>
       <a href="{{ url_for('feed_xml') }}">RSS</a>
       <a href="mailto:murnovadunyasi@gmail.com">İletişim</a>
     </div>

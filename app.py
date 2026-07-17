@@ -91,7 +91,7 @@ def _sync_projects_json(message):
 def _count_visit():
     ep = request.endpoint or ""
     if ep in ("index", "category_list", "category_detail", "tag_page", "search_page",
-              "devlog_page", "about_page", "roadmap_page"):
+              "devlog_page", "about_page", "roadmap_page", "stats_page"):
         store.bump_visit()
 
 
@@ -123,6 +123,34 @@ def admin_logout():
 
 
 # ---------- Halka açık sayfalar ----------
+
+@app.route("/istatistikler")
+def stats_page():
+    stats = store.get_stats()
+    projects = store.all_projects()
+    projects = [p for p in projects if store.is_visible(p)]
+    top_played = sorted(
+        [p for p in projects if p["kind"] == "oyun"],
+        key=lambda p: stats["plays"].get(p["slug"], 0), reverse=True
+    )[:5]
+    top_downloaded = sorted(
+        projects, key=lambda p: stats["downloads"].get(p["slug"], 0), reverse=True
+    )[:5]
+    top_liked = sorted(
+        projects, key=lambda p: stats.get("likes", {}).get(p["slug"], 0), reverse=True
+    )[:5]
+    totals = {
+        "plays": sum(stats.get("plays", {}).values()),
+        "downloads": sum(stats.get("downloads", {}).values()),
+        "likes": sum(stats.get("likes", {}).values()),
+        "projects": len(projects),
+    }
+    return render_template(
+        "stats.html", stats=stats, totals=totals,
+        top_played=top_played, top_downloaded=top_downloaded, top_liked=top_liked,
+        categories=cat.CATEGORIES,
+    )
+
 
 @app.route("/")
 def index():
@@ -183,6 +211,11 @@ def category_detail(group_slug, slug):
     if project["slug"] == "rise-of-the-bosses":
         leaderboard = _rise_of_the_bosses_leaderboard()
     visitor_id = _get_visitor_id()
+    share_image = None
+    if project.get("cover"):
+        share_image = request.url_root.rstrip("/") + url_for("static", filename="uploads/covers/" + project["cover"])
+    elif cat.CATEGORIES[project["kind"]].get("media_kind") and cat.CATEGORIES[project["kind"]].get("preview") == "image" and project.get("download_file"):
+        share_image = request.url_root.rstrip("/") + url_for("media_inline", slug=slug)
     return render_template(
         "detail.html", p=project, stats=stats,
         category=cat.CATEGORIES[project["kind"]], leaderboard=leaderboard,
@@ -190,6 +223,7 @@ def category_detail(group_slug, slug):
         comments=store.comments_for(slug),
         similar=store.similar_projects(project),
         categories=cat.CATEGORIES,
+        share_image=share_image,
     )
 
 

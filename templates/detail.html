@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 {% from "_card.html" import render_card %}
-{% block title %}{{ p.name }} — Murnova Dünyası{% endblock %}
+{% block title %}{{ p.name }} — Derin Murnova Dünyası{% endblock %}
 {% block meta_desc %}{{ p.tagline or p.desc }}{% endblock %}
-{% block og_title %}{{ p.name }} — Murnova Dünyası{% endblock %}
+{% block og_title %}{{ p.name }} — Derin Murnova Dünyası{% endblock %}
 {% block og_desc %}{{ p.tagline or p.desc }}{% endblock %}
 {% block twitter_title %}{{ p.name }}{% endblock %}
 {% block twitter_desc %}{{ p.tagline or p.desc }}{% endblock %}
+{% block og_image %}{% if share_image %}{{ share_image }}{% else %}{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}{% endif %}{% endblock %}
+{% block twitter_image %}{% if share_image %}{{ share_image }}{% else %}{{ request.url_root.rstrip('/') }}{{ url_for('static', filename='img/og-image.png') }}{% endif %}{% endblock %}
 {% block body_attrs %} data-detail-page="{{ p.slug }}"{% endblock %}
 {% block content %}
 

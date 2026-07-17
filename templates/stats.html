@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}İstatistikler — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">İstatistikler</h1>
+    <p class="detail-tagline">Bu vitrinin şu ana kadarki yolculuğu.</p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    <div class="hero-stats" style="margin-bottom:48px;">
+      <div><div class="stat-num">{{ stats.visits }}</div><div class="stat-label">toplam ziyaret</div></div>
+      <div><div class="stat-num">{{ totals.plays }}</div><div class="stat-label">toplam oynama</div></div>
+      <div><div class="stat-num">{{ totals.downloads }}</div><div class="stat-label">toplam indirme</div></div>
+      <div><div class="stat-num">{{ totals.likes }}</div><div class="stat-label">toplam beğeni</div></div>
+      <div><div class="stat-num">{{ totals.projects }}</div><div class="stat-label">yayınlanan içerik</div></div>
+    </div>
+
+    {% if top_played %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:16px;">🎮 En Çok Oynanan Oyunlar</h2>
+    <ul class="leaderboard-list" style="margin-bottom:40px;">
+      {% for p in top_played %}
+      <li>
+        <span class="leaderboard-rank">#{{ loop.index }}</span>
+        <span class="leaderboard-name">{{ p.name }}</span>
+        <span class="leaderboard-score">{{ stats.plays.get(p.slug, 0) }} oynama</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if top_downloaded %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:16px;">⬇️ En Çok İndirilenler</h2>
+    <ul class="leaderboard-list" style="margin-bottom:40px;">
+      {% for p in top_downloaded %}
+      <li>
+        <span class="leaderboard-rank">#{{ loop.index }}</span>
+        <span class="leaderboard-name">{{ p.name }}</span>
+        <span class="leaderboard-score">{{ stats.downloads.get(p.slug, 0) }} indirme</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if top_liked %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.3rem; margin-bottom:16px;">❤️ En Çok Beğenilenler</h2>
+    <ul class="leaderboard-list">
+      {% for p in top_liked %}
+      <li>
+        <span class="leaderboard-rank">#{{ loop.index }}</span>
+        <span class="leaderboard-name">{{ p.name }}</span>
+        <span class="leaderboard-score">{{ stats.likes.get(p.slug, 0) if stats.likes else 0 }} beğeni</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

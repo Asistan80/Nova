@@ -48,10 +48,9 @@ nav{
 }
 nav .wrap{ display:flex; align-items:center; justify-content:space-between; padding:18px 32px; }
 .brand{ display:flex; align-items:center; gap:10px; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.15rem; letter-spacing:0.02em; }
-.brand .chip{
-  width:26px; height:26px; border-radius:6px;
-  background: linear-gradient(135deg, var(--amber), var(--boss-red));
-  box-shadow: 0 0 14px rgba(255,179,71,0.5);
+.brand .brand-mark{
+  width:30px; height:30px; object-fit:contain;
+  filter: drop-shadow(0 0 8px rgba(120,140,255,0.5));
 }
 .navlinks{ display:flex; gap:34px; font-size:0.95rem; font-weight:600; color:var(--text-dim); }
 .navlinks a{ transition: color .2s ease; }

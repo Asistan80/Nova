@@ -37,19 +37,15 @@
     "kind": "uygulama",
     "status": "download",
     "tagline": "Görsel/metinden video üretim motoru",
-    "desc": "Tek bir uygulamada hem görselden videoya (image-to-video) hem de metinden videoya (prompt-to-video) üretim yapabilen video motoru.",
+    "desc": "Tek bir uygulamada hem görselden videoya hem de metinden videoya üretim yapabilen video motoru.",
     "tags": [
       "Flask",
       "moviepy",
       "Runway API"
     ],
     "features": [
-      "Görselden videoya dönüşüm (moviepy tabanlı, tekli/toplu)",
-      "Metinden videoya dönüşüm (Runway API)",
-      "10sn / 30sn / 1dk ve üzeri çıktı süreleri",
-      "Efekt ve animasyon seçenekleri",
-      "Uzun videolar için birleştirme (concatenation)",
-      "Metin bindirme ve arka plan sesi ekleme"
+      "Görselden videoya dönüşüm",
+      "Metinden videoya dönüşüm"
     ],
     "cover": null,
     "gallery": [],
@@ -59,7 +55,9 @@
     "updated_at": "2026-07-13",
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-13T00:00:00+00:00"
+    "created_at": "2026-07-13T00:00:00+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "kutuphane",
