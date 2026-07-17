@@ -1,11 +1,11 @@
 {
-  "name": "Murnova Dünyası",
+  "name": "Derin Murnova Dünyası",
   "short_name": "Murnova",
   "description": "MuBiKu'nun oyun, uygulama ve medya vitrini",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#16121F",
-  "theme_color": "#16121F",
+  "background_color": "#0E0F1A",
+  "theme_color": "#0E0F1A",
   "icons": [
     { "src": "/static/img/favicon-48.png", "sizes": "48x48", "type": "image/png" },
     { "src": "/static/img/favicon-180.png", "sizes": "180x180", "type": "image/png" },
