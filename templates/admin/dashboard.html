@@ -26,8 +26,8 @@
       {% else %}
         <span style="color:var(--boss-red);">●</span> GitHub yedekleme: KAPALI (ortam değişkenleri eksik)
       {% endif %}
-      <form method="POST" action="{{ url_for('admin_sync_test') }}" style="margin-left:auto;">
-        <button type="submit" class="mini-btn">Bağlantıyı Test Et</button>
+      <form method="POST" action="{{ url_for('admin_sync_test') }}" style="margin-left:auto;" id="sync-test-form">
+        <button type="submit" class="mini-btn" id="sync-test-btn">Bağlantıyı Test Et</button>
       </form>
     </div>
 
@@ -145,6 +145,17 @@
       });
     });
   });
+  // Senkronizasyon test butonu -- birkaç saniye sürebilir, bekliyor olduğunu göster
+  var syncForm = document.getElementById('sync-test-form');
+  if (syncForm) {
+    syncForm.addEventListener('submit', function () {
+      var btn = document.getElementById('sync-test-btn');
+      btn.disabled = true;
+      btn.textContent = 'Test ediliyor... (birkaç saniye sürebilir)';
+      btn.style.opacity = '0.7';
+      btn.style.cursor = 'wait';
+    });
+  }
 </script>
 
 {% endblock %}
