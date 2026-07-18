@@ -39,6 +39,68 @@ def is_enabled():
     return _config() is not None
 
 
+def test_connection():
+    """Gerçek bir API çağrısıyla token/repo/izinlerin çalışıp çalışmadığını
+    kontrol eder. (ok, mesaj) döner -- admin panelde gösterilir."""
+    cfg = _config()
+    if not cfg:
+        return False, "GITHUB_TOKEN veya GITHUB_REPO tanımlı değil."
+
+    url = f"{API_ROOT}/repos/{cfg['repo']}"
+    try:
+        r = requests.get(url, headers=_headers(cfg["token"]), timeout=15)
+    except requests.RequestException as e:
+        return False, f"Bağlantı hatası: {e}"
+
+    if r.status_code == 401:
+        return False, "Token geçersiz veya süresi dolmuş (401)."
+    if r.status_code == 403:
+        return False, "Token'ın yetkisi yok / rate limit (403)."
+    if r.status_code == 404:
+        return False, f"Repo bulunamadı: '{cfg['repo']}' (404) — GITHUB_REPO değerini kontrol et (ör. Asistan80/Nova)."
+    if r.status_code != 200:
+        return False, f"Beklenmeyen hata: {r.status_code} {r.text[:200]}"
+
+    data = r.json()
+    permissions = data.get("permissions", {})
+    if not permissions.get("push"):
+        return False, f"Token repoyu görebiliyor ama YAZMA izni yok. Token'ı 'repo' izniyle yeniden oluştur."
+
+    # Yazma testi: küçük bir test dosyası commit'leyip sil
+    test_path = "_sync_test.txt"
+    ok = push_file_content(test_path, "senkronizasyon testi", "sync test")
+    if not ok:
+        return False, "Repoyu görebiliyor ama test dosyası yazılamadı (izin ya da branch adı sorunu olabilir)."
+    delete_file(test_path, "sync test temizliği")
+
+    return True, f"Bağlantı sağlam — '{cfg['repo']}' reposuna '{cfg['branch']}' branch'ine yazabiliyor."
+
+
+def push_file_content(repo_path, text_content, message):
+    """push_file'ın dosya yerine düz metin alan hali (test için)."""
+    cfg = _config()
+    if not cfg:
+        return False
+    url = f"{API_ROOT}/repos/{cfg['repo']}/contents/{repo_path}"
+    headers = _headers(cfg["token"])
+    sha = None
+    try:
+        r = requests.get(url, headers=headers, params={"ref": cfg["branch"]}, timeout=15)
+        if r.status_code == 200:
+            sha = r.json().get("sha")
+    except requests.RequestException:
+        return False
+    content_b64 = base64.b64encode(text_content.encode("utf-8")).decode("utf-8")
+    payload = {"message": message, "content": content_b64, "branch": cfg["branch"]}
+    if sha:
+        payload["sha"] = sha
+    try:
+        r = requests.put(url, headers=headers, json=payload, timeout=30)
+        return r.status_code in (200, 201)
+    except requests.RequestException:
+        return False
+
+
 def push_file(local_path, repo_path, message):
     """local_path'teki dosyayı repo_path konumuna commit'ler (varsa günceller)."""
     cfg = _config()

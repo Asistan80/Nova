@@ -474,7 +474,16 @@ def admin_dashboard():
         stats=store.get_stats(),
         visit_chart=store.last_n_days(14),
         pending_count=len(store.pending_comments()),
+        sync_enabled=github_sync.is_enabled(),
     )
+
+
+@app.route("/admin/senkron-test", methods=["POST"])
+@login_required
+def admin_sync_test():
+    ok, message = github_sync.test_connection()
+    flash(("✅ " if ok else "❌ ") + message)
+    return redirect(url_for("admin_dashboard"))
 
 
 @app.route("/admin/sirala/<kind>", methods=["POST"])
