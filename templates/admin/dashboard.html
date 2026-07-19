@@ -20,7 +20,7 @@
 
     <p class="stat-badge" style="margin-bottom:14px;">Toplam ziyaret: {{ stats.visits }}</p>
 
-    <div style="display:flex; align-items:center; gap:14px; margin-bottom:24px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
       {% if sync_enabled %}
         <span style="color:var(--teal);">●</span> GitHub yedekleme: ortam değişkenleri tanımlı
       {% else %}
@@ -29,6 +29,12 @@
       <form method="POST" action="{{ url_for('admin_sync_test') }}" style="margin-left:auto;" id="sync-test-form">
         <button type="submit" class="mini-btn" id="sync-test-btn">Bağlantıyı Test Et</button>
       </form>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:rgba(76,141,255,0.08); border:1px solid rgba(76,141,255,0.3); border-radius:10px; font-size:0.88rem; color:var(--text-dim);">
+      ⚠️ <strong style="color:var(--text);">Unutma:</strong> Render ücretsiz planda olduğu için, buradan yaptığın değişikliklerin
+      kalıcı olması için <strong style="color:var(--text);">Render → Manual Deploy → Deploy latest commit</strong>
+      yapman gerekiyor — yoksa site "uyuyup uyandığında" bu oturumdaki değişiklikler kaybolabilir.
     </div>
 
     <div class="visit-chart">

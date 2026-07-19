@@ -78,16 +78,34 @@ Admin panelden "Yeni Proje" derken Tür olarak Görsel/GIF/Ses seçtiğinde:
 
 Hiçbir HTML dosyasına dokunmana gerek yok, her şey panelden yönetiliyor.
 
-### ⚠️ Render ücretsiz katmanında önemli bir sınırlama — ve çözümü
+### ⚠️ Render ücretsiz katmanında önemli bir sınırlama — ve gerçek çözümü
 
-Render'ın ücretsiz web servisleri **kalıcı disk içermez** — yani admin
-panelden yüklediğin dosyalar (kapak görseli, galeri, indirilebilir zip'ler)
-sunucu yeniden deploy edildiğinde kaybolabilir.
+Render'ın kendi dokümantasyonuna göre: ücretsiz web servislerinin diski
+**"redeploy, restart VEYA spin-down"da** sıfırlanır. Yani sadece kod
+güncellemesi (redeploy) değil, **15 dakika hareketsizlik sonrası otomatik
+"uyuma" ve bir sonraki ziyarette "uyanma" işleminin kendisi bile** admin
+panelden yüklediğin her şeyi (kapak görseli, yorumlar, Hakkımda yazısı)
+siler — Auto-Deploy açık ya da kapalı olması fark etmez.
 
-**Çözüm: Otomatik GitHub yedeklemesi.** Bu sürümde `github_sync.py` modülü
-var — admin panelden her ekleme/düzenleme/silme/dosya yüklemesinde,
-değişiklik otomatik olarak GitHub reponuza da commit'lenir. Böylece disk
-silinse bile, bir sonraki deploy GitHub'daki güncel veriyi çeker.
+**`github_sync.py`** modülü admin panelden yapılan her değişikliği GitHub
+reponuza commit'ler, yani veri kalıcı olarak *kaybolmaz* (GitHub'da güvende
+durur). Ama bu commit'ler **otomatik olarak siteye geri yansımaz** — çünkü
+"uyanma" bir redeploy değildir, sadece son deploy edilmiş hâli tekrar
+başlatır.
+
+**Bu yüzden ücretsiz planda kalmaya karar verildiyse şu iş akışını
+izlemek gerekiyor:**
+1. Admin panelden istediğin değişikliği yap (kapak yükle, yorum onayla, vb.)
+2. **Render Dashboard → Nova servisi → Manual Deploy → Deploy latest
+   commit** ile elle bir deploy tetikle.
+3. Bu deploy bitene kadar bekle (birkaç dakika) — bundan sonra o
+   değişiklik kalıcı hale gelir, sonraki uyuma/uyanma döngülerinde kaybolmaz.
+
+Admin panelin üstünde bu hatırlatma sürekli görünür durumda.
+
+**Kalıcı ve sorunsuz bir çözüm isteniyorsa:** Render'da ücretli bir plana
+geçip (~7$/ay) **Persistent Disk** eklemek, bu sorunu tamamen ortadan
+kaldırır — manuel deploy'a hiç gerek kalmaz.
 
 ### Kurulumu (Render → Environment sekmesi)
 ```
@@ -96,15 +114,9 @@ GITHUB_REPO   = Asistan80/Nova
 GITHUB_BRANCH = main
 ```
 Bu üç değişken tanımlı değilse, senkronizasyon sessizce devre dışı kalır —
-site normal çalışmaya devam eder, sadece yedekleme yapılmaz.
-
-### Önemli: Render'da "Auto-Deploy"u kapat
-Admin panelin attığı yedekleme commit'leri her push'ta Render'ın otomatik
-yeniden deploy tetiklemesine (ve kısa süreli kesintiye) sebep olmasın diye:
-**Render Dashboard → servis → Settings → Build & Deploy → Auto-Deploy → Off/No**
-
-Bundan sonra kod güncellemesi yapmak istediğimizde **Manual Deploy → Deploy
-latest commit** ile elle tetikleriz.
+site normal çalışmaya devam eder, sadece yedekleme yapılmaz. Admin
+panelindeki **"Bağlantıyı Test Et"** butonuyla bu bağlantıyı istediğin an
+doğrulayabilirsin.
 
 ## Şifreyi değiştirmek
 Render'da: Dashboard → servisin → **Environment** sekmesi → şu değişkenleri ekle:

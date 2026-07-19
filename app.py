@@ -85,6 +85,11 @@ def _sync_projects_json(message):
         github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
 
 
+def _sync_data_file(local_path, repo_filename, message):
+    if github_sync.is_enabled():
+        github_sync.push_file(local_path, f"data/{repo_filename}", message)
+
+
 # ---------- Ziyaretçi sayacı ----------
 
 @app.before_request
@@ -280,6 +285,7 @@ def submit_comment(slug):
 
     name = request.form.get("name", "").strip()
     store.add_comment(slug, name, text)
+    _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yeni yorum: {slug}")
     flash("Yorumun gönderildi — onaylandıktan sonra görünecek.")
     return redirect(redirect_url)
 
@@ -512,6 +518,7 @@ def admin_comments():
 @login_required
 def admin_approve_comment(comment_id):
     store.approve_comment(comment_id)
+    _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yorum onaylandı: {comment_id}")
     return redirect(url_for("admin_comments"))
 
 
@@ -519,6 +526,7 @@ def admin_approve_comment(comment_id):
 @login_required
 def admin_delete_comment(comment_id):
     store.delete_comment(comment_id)
+    _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yorum silindi: {comment_id}")
     return redirect(url_for("admin_comments"))
 
 
@@ -551,6 +559,7 @@ def admin_devlog():
         body = request.form.get("body", "").strip()
         if title and body:
             store.add_devlog_entry(title, body)
+            _sync_data_file(store.DEVLOG_FILE, "devlog.json", f"devlog eklendi: {title}")
             flash("Devlog kaydı eklendi.")
         return redirect(url_for("admin_devlog"))
     return render_template("admin/devlog.html", entries=store.all_devlog_entries())
@@ -560,6 +569,7 @@ def admin_devlog():
 @login_required
 def admin_devlog_delete(entry_id):
     store.delete_devlog_entry(entry_id)
+    _sync_data_file(store.DEVLOG_FILE, "devlog.json", f"devlog silindi: {entry_id}")
     return redirect(url_for("admin_devlog"))
 
 
@@ -578,7 +588,10 @@ def admin_about():
             photo.save(local_path)
             _compress_image(local_path)
             about["photo"] = fname
+            if github_sync.is_enabled():
+                github_sync.push_file(local_path, f"static/uploads/covers/{fname}", "hakkımda fotoğrafı")
         store.save_about(about)
+        _sync_data_file(store.ABOUT_FILE, "about.json", "hakkımda güncellendi")
         flash("Hakkımda sayfası güncellendi.")
         return redirect(url_for("admin_about"))
     return render_template("admin/about.html", about=store.get_about())
@@ -593,6 +606,7 @@ def admin_roadmap():
         eta = request.form.get("eta", "").strip()
         if title:
             store.add_roadmap_item(title, desc, eta)
+            _sync_data_file(store.ROADMAP_FILE, "roadmap.json", f"yol haritası eklendi: {title}")
             flash("Yol haritasına eklendi.")
         return redirect(url_for("admin_roadmap"))
     return render_template("admin/roadmap.html", items=store.all_roadmap_items())
@@ -602,6 +616,7 @@ def admin_roadmap():
 @login_required
 def admin_roadmap_delete(item_id):
     store.delete_roadmap_item(item_id)
+    _sync_data_file(store.ROADMAP_FILE, "roadmap.json", f"yol haritası silindi: {item_id}")
     return redirect(url_for("admin_roadmap"))
 
 
