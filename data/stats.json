@@ -1,13 +1,8 @@
 {
-  "visits": 8,
-  "visits_by_day": {
-    "2026-07-19": 8
-  },
+  "visits": 0,
+  "visits_by_day": {},
   "plays": {},
-  "downloads": {
-    "focuspet": 1,
-    "neon-racer": 1
-  },
+  "downloads": {},
   "likes": {},
   "liked_by": {}
 }

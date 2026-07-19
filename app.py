@@ -163,6 +163,13 @@ def index():
     group_counts = {
         g: len(store.by_group(cat.kinds_in_group(g))) for g in cat.GROUPS
     }
+    playable = [p for p in store.by_kind("oyun") if p.get("status") == "playable"]
+    featured = None
+    with_cover = [p for p in playable if p.get("cover")]
+    if with_cover:
+        featured = with_cover[0]
+    elif playable:
+        featured = playable[0]
     return render_template(
         "index.html",
         stats=stats,
@@ -170,6 +177,7 @@ def index():
         group_counts=group_counts,
         recent=store.recent_projects(6),
         categories=cat.CATEGORIES,
+        featured=featured,
     )
 
 

@@ -24,30 +24,65 @@
     <span class="orb orb-teal"></span>
     <span class="orb orb-red"></span>
   </div>
-  <div class="wrap">
-    <div class="eyebrow hero-in hero-in-1"><span class="dot"></span>Aktif geliştirme — yeni kartuşlar yolda</div>
-    <h1 class="title">
-      <span class="title-line hero-in hero-in-2">Kendi yaptığın her şey,</span>
-      <span class="title-line hero-in hero-in-3"><span class="hl">tek dünyada.</span></span>
-    </h1>
-    <p class="hero-sub hero-in hero-in-4">MuBiKu'nun geliştirdiği oyunlar, uygulamalar, görseller, GIF'ler ve sesler — hepsi burada. Bazılarını tarayıcıda dene, bazılarını indir.</p>
-    <div class="hero-cta hero-in hero-in-5">
-      <a href="#kesfet" class="btn btn-primary">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px; vertical-align:-2px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Keşfetmeye başla
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow hero-in hero-in-1"><span class="dot"></span>Aktif geliştirme — yeni kartuşlar yolda</div>
+      <h1 class="title">
+        <span class="title-line hero-in hero-in-2">Kendi yaptığın her şey,</span>
+        <span class="title-line hero-in hero-in-3"><span class="hl">tek dünyada.</span></span>
+      </h1>
+      <p class="hero-sub hero-in hero-in-4">Bir geliştiricinin garaj laboratuvarına hoş geldin. MuBiKu'nun geliştirdiği oyunlar, uygulamalar, görseller, GIF'ler ve sesler — hepsi burada. Bazılarını tarayıcıda dene, bazılarını indir, beğendiğini beğen.</p>
+      <div class="hero-cta hero-in hero-in-5">
+        <a href="#kesfet" class="btn btn-primary">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="margin-right:8px; vertical-align:-2px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Keşfetmeye başla
+        </a>
+        <a href="#hakkinda" class="btn btn-ghost">Bu site nedir?</a>
+      </div>
+      <div class="hero-stats hero-in hero-in-6">
+        <div><div class="stat-num">{{ group_counts.values()|sum }}</div><div class="stat-label">yayınlanan içerik</div></div>
+        <div><div class="stat-num">{{ group_counts.get('oyunlar', 0) }}</div><div class="stat-label">oyun</div></div>
+        <div><div class="stat-num">{{ stats.visits }}</div><div class="stat-label">ziyaret</div></div>
+      </div>
+    </div>
+
+    {% if featured %}
+    <div class="hero-cartridge hero-in hero-in-4">
+      <a href="{{ url_for('category_detail', group_slug='oyunlar', slug=featured.slug) }}" class="cartridge-card">
+        <div class="cartridge-notch"></div>
+        <div class="cartridge-cover">
+          {% if featured.cover %}
+            <img src="{{ url_for('static', filename='uploads/covers/' ~ featured.cover) }}" alt="{{ featured.name }}">
+          {% else %}
+            <span class="cartridge-fallback">{{ featured.name[:2]|upper }}</span>
+          {% endif %}
+          <span class="cartridge-glow"></span>
+        </div>
+        <div class="cartridge-label">
+          <span class="cartridge-eyebrow">▸ Öne çıkan kartuş</span>
+          <span class="cartridge-name">{{ featured.name }}</span>
+          <span class="cartridge-tag">{{ featured.tagline }}</span>
+        </div>
+        <span class="cartridge-play">Şimdi Oyna →</span>
       </a>
-      <a href="#hakkinda" class="btn btn-ghost">Bu site nedir?</a>
     </div>
-    <div class="hero-stats hero-in hero-in-6">
-      <div><div class="stat-num">{{ group_counts.values()|sum }}</div><div class="stat-label">yayınlanan içerik</div></div>
-      <div><div class="stat-num">{{ group_counts.get('oyunlar', 0) }}</div><div class="stat-label">oyun</div></div>
-      <div><div class="stat-num">{{ stats.visits }}</div><div class="stat-label">ziyaret</div></div>
-    </div>
+    {% endif %}
   </div>
+
   <div class="hero-scroll-cue hero-in hero-in-6" aria-hidden="true">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
   </div>
 </header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    {% for i in range(3) %}
+    <span>ÜRET</span><span class="marquee-dot">·</span>
+    <span>KEŞFET</span><span class="marquee-dot">·</span>
+    <span>PAYLAŞ</span><span class="marquee-dot">·</span>
+    {% endfor %}
+  </div>
+</div>
 
 <section class="shelf" id="kesfet">
   <div class="wrap">
