@@ -105,6 +105,8 @@ def similar_projects(project, limit=4):
     for p in all_projects():
         if p["slug"] == project["slug"] or not is_visible(p):
             continue
+        if p["kind"] != project["kind"]:
+            continue  # sadece ayni kategori icinde (oyun-oyun, uygulama-uygulama) eslestir
         overlap = len({t.lower() for t in p.get("tags", [])} & my_tags)
         if overlap:
             scored.append((overlap, p))

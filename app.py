@@ -233,19 +233,22 @@ def category_detail(group_slug, slug):
 
 
 def _rise_of_the_bosses_leaderboard(limit=5):
-    import json as _json
-    path = os.path.join(
-        BASE_DIR, "games_blueprints", "rise_of_the_bosses", "data", "leaderboard.json"
+    import sqlite3
+    db_path = os.path.join(
+        BASE_DIR, "games_blueprints", "rise_of_the_bosses", "data", "rotb.db"
     )
-    if not os.path.exists(path):
+    if not os.path.exists(db_path):
         return []
     try:
-        with open(path, "r", encoding="utf-8") as f:
-            entries = _json.load(f)
-    except (ValueError, OSError):
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT name, score FROM scores ORDER BY score DESC LIMIT ?", (limit,)
+        ).fetchall()
+        conn.close()
+    except sqlite3.Error:
         return []
-    entries = sorted(entries, key=lambda e: e.get("score", 0), reverse=True)
-    return entries[:limit]
+    return [{"name": r["name"], "score": r["score"], "level": ""} for r in rows]
 
 
 @app.route("/begen/<slug>", methods=["POST"])

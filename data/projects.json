@@ -7,9 +7,10 @@
     "tagline": "Snake Evolution + boss savaşları",
     "desc": "15 boss, prestij sistemi, market/yükseltme mekaniği, günlük görevler, başarımlar, liderlik tablosu ve 10 arenayla genişletilmiş bir Snake Evolution deneyimi.",
     "tags": [
-      "Python / Flask",
-      "HTML Canvas",
-      "TR / EN"
+      "Python",
+      "Flask",
+      "SQLite",
+      "Canvas"
     ],
     "features": [
       "15 farklı boss ve özgün savaş desenleri",
@@ -22,11 +23,13 @@
     ],
     "cover": null,
     "gallery": [],
-    "version": "1.0",
+    "version": "2.0",
     "play_url": "/oyna/rise-of-the-bosses",
     "download_url": null,
     "updated_at": "2026-07-13",
-    "changelog": [],
+    "changelog": [
+      "v2.0 — Oyun sıfırdan yeniden yazıldı: SQLite tabanlı isimli profil/skor sistemi, boss-kazanma donma hatası, tam ekranda HUD kaybolması ve skin görüntüleme hataları düzeltildi."
+    ],
     "has_game_files": true,
     "created_at": "2026-07-13T00:00:00+00:00",
     "published": true
@@ -225,5 +228,36 @@
     "changelog": [],
     "published": true,
     "created_at": "2026-07-16T07:04:38.793191+00:00"
+  },
+  {
+    "slug": "focuspet",
+    "name": "FocusPet",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "Masaüstünde yaşayan, odaklandıkça büyüyen bir ejderha 🐉",
+    "desc": "Şeffaf, her zaman üstte duran bir masaüstü widget'ı. 25 dakikalık Pomodoro seansları tamamladıkça evcil ejderhanız evrim geçirir: Yumurta → Bebek Ejderha → Genç Ejderha → Kadim Ejderha. Bilgisayarına Python + PyQt6 kurulu olması gerekir.",
+    "tags": [
+      "Python",
+      "PyQt6",
+      "Masaüstü",
+      "Pomodoro"
+    ],
+    "features": [
+      "Şeffaf, sürüklenebilir masaüstü penceresi",
+      "25 dakikalık Pomodoro odaklanma sayacı",
+      "4 seviyeli RPG evrim sistemi",
+      "Açlık/bakım mekaniği",
+      "Otomatik kayıt (pet_data.json)",
+      "Duruma göre değişen dinamik konuşma balonu"
+    ],
+    "cover": null,
+    "gallery": [],
+    "version": "1.0",
+    "play_url": null,
+    "download_url": null,
+    "download_file": "focuspet.zip",
+    "changelog": [],
+    "published": true,
+    "created_at": "2026-07-19T16:13:37.139649+00:00"
   }
 ]

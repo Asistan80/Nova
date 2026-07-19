@@ -104,7 +104,7 @@
       <li>
         <span class="leaderboard-rank">#{{ loop.index }}</span>
         <span class="leaderboard-name">{{ entry.name }}</span>
-        <span class="leaderboard-score">{{ entry.score }} puan · lvl {{ entry.level }}</span>
+        <span class="leaderboard-score">{{ entry.score }} puan{% if entry.level %} · lvl {{ entry.level }}{% endif %}</span>
       </li>
       {% endfor %}
     </ul>

@@ -2,327 +2,1111 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>Snake Evolution: Rise of the Bosses</title>
-<link rel="stylesheet" href="{{ url_for('rise_of_the_bosses.static', filename='style.css') }}">
+<title>Rise of the Bosses</title>
+<style>
+  :root{
+    --bg:#0b0e14; --panel:#131826; --panel2:#1b2233; --accent:#7c3aed;
+    --accent2:#22d3ee; --gold:#f5b301; --danger:#ef4444; --good:#22c55e;
+    --text:#e6e9f0; --muted:#8b93a7;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',Tahoma,sans-serif;overflow:hidden;}
+  #app{position:relative;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+  .screen{position:absolute;inset:0;display:none;}
+  .screen.active{display:flex;}
+  #menuScreen{flex-direction:column;align-items:center;justify-content:flex-start;
+    background:radial-gradient(circle at 50% 0%, #1b2233, #0b0e14 70%);overflow-y:auto;padding:24px 12px 60px;}
+  .title{font-size:2.6em;font-weight:800;letter-spacing:1px;margin:10px 0 2px;
+    background:linear-gradient(90deg,var(--accent2),var(--accent),var(--gold));
+    -webkit-background-clip:text;background-clip:text;color:transparent;text-align:center;}
+  .subtitle{color:var(--muted);margin-bottom:18px;text-align:center;font-size:0.95em;}
+  .tabbar{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;}
+  .tabbtn{background:var(--panel);border:1px solid #2a3247;color:var(--text);padding:8px 16px;
+    border-radius:20px;cursor:pointer;font-size:0.9em;transition:.15s;}
+  .tabbtn.active{background:var(--accent);border-color:var(--accent);}
+  .tabbtn:hover{border-color:var(--accent2);}
+  .panelWrap{width:min(920px,95vw);}
+  .panel{display:none;background:var(--panel);border:1px solid #232b3d;border-radius:16px;padding:18px;}
+  .panel.active{display:block;}
+  .statsRow{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+  .statChip{background:var(--panel2);border-radius:10px;padding:8px 14px;font-size:0.85em;display:flex;gap:6px;align-items:center;}
+  .startBtn{background:linear-gradient(90deg,var(--accent),var(--accent2));border:none;color:#fff;
+    font-weight:700;font-size:1.1em;padding:14px 40px;border-radius:14px;cursor:pointer;margin:14px 0;
+    box-shadow:0 6px 20px rgba(124,58,237,.4);transition:.15s;}
+  .startBtn:hover{transform:translateY(-2px);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+  .card{background:var(--panel2);border:2px solid transparent;border-radius:12px;padding:10px;cursor:pointer;
+    text-align:center;transition:.15s;position:relative;}
+  .card:hover{border-color:var(--accent2);}
+  .card.selected{border-color:var(--gold);box-shadow:0 0 12px rgba(245,179,1,.4);}
+  .card.locked{opacity:.4;cursor:not-allowed;}
+  .cardTitle{font-weight:600;font-size:0.85em;margin-top:6px;}
+  .cardSub{font-size:0.7em;color:var(--muted);}
+  .swatch{width:44px;height:44px;border-radius:50%;margin:0 auto;border:2px solid rgba(255,255,255,.2);}
+  .arenaThumb{width:100%;height:50px;border-radius:8px;margin-bottom:4px;}
+  .upgradeRow{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);
+    border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+  .upgradeInfo{font-size:0.85em;}
+  .upgradeInfo b{font-size:1em;}
+  .buyBtn{background:var(--accent);border:none;color:#fff;padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.8em;}
+  .buyBtn:disabled{background:#3a4258;cursor:not-allowed;color:var(--muted);}
+  .achRow{display:flex;gap:10px;align-items:center;background:var(--panel2);border-radius:10px;
+    padding:8px 12px;margin-bottom:6px;font-size:0.85em;}
+  .achRow.locked{opacity:.35;}
+  .achIcon{font-size:1.3em;}
+  .prestigeBox{margin-top:16px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#2b1e46,#1b2233);
+    border:1px solid var(--accent);}
+  .langBtn,.soundBtn{position:fixed;top:14px;right:14px;z-index:50;background:var(--panel);border:1px solid #2a3247;
+    color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer;font-size:0.85em;}
+  .soundBtn{right:100px;}
+  .profileRow{display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:10px;flex-wrap:wrap;}
+  .profileRow input{background:var(--panel2);border:1px solid #2a3247;color:var(--text);border-radius:8px;
+    padding:8px 12px;font-size:0.85em;width:160px;}
+  .profileRow button{background:var(--accent);border:none;color:#fff;padding:8px 14px;border-radius:8px;
+    cursor:pointer;font-size:0.85em;}
+  #profileStatus{font-size:0.78em;color:var(--muted);}
+  .lbRow{display:grid;grid-template-columns:36px 1fr 70px 110px 32px;align-items:center;gap:8px;
+    background:var(--panel2);border-radius:10px;padding:8px 12px;margin-bottom:6px;font-size:0.85em;}
+  .lbRank{color:var(--gold);font-weight:700;}
+  .lbName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lbScore{font-weight:700;text-align:right;}
+  .lbSub{color:var(--muted);font-size:0.85em;text-align:right;}
+  .lbDel{background:transparent;border:1px solid #4a2020;color:#ffb4b4;border-radius:8px;cursor:pointer;
+    padding:4px 8px;}
+  .saveScoreRow{display:flex;gap:8px;align-items:center;margin:8px 0;}
+  .saveScoreRow input{background:var(--panel2);border:1px solid #2a3247;color:var(--text);border-radius:8px;
+    padding:10px 12px;font-size:0.9em;width:180px;}
+  select,.diffBtn{background:var(--panel2);color:var(--text);border:1px solid #2a3247;border-radius:8px;padding:6px 10px;}
+  .diffRow{display:flex;gap:8px;}
+  .diffBtn{cursor:pointer;padding:8px 16px;}
+  .diffBtn.active{background:var(--accent);border-color:var(--accent);}
+
+  #gameScreen{flex-direction:column;align-items:center;justify-content:center;background:#000;}
+  #canvasWrap{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
+  #hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
+    padding:58px 16px 10px;font-size:0.85em;pointer-events:none;z-index:10;}
+  #hud .hudBox{background:rgba(10,12,20,.6);padding:6px 12px;border-radius:8px;pointer-events:auto;}
+  #bossBarWrap{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:min(500px,70vw);z-index:11;
+    display:none;text-align:center;}
+  #bossName{font-size:0.8em;margin-bottom:3px;color:var(--gold);font-weight:700;}
+  #bossBarBg{background:#2a1010;border-radius:8px;height:14px;overflow:hidden;border:1px solid #4a1010;}
+  #bossBarFg{background:linear-gradient(90deg,#ef4444,#f59e0b);height:100%;width:100%;transition:width .15s;}
+  #gameCanvas{background:#111;image-rendering:pixelated;max-width:100%;max-height:100%;}
+  #pauseBtn{position:absolute;bottom:14px;right:14px;z-index:12;background:rgba(20,24,36,.8);
+    border:1px solid #2a3247;color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;}
+  #fullscreenBtn{position:absolute;bottom:14px;right:120px;z-index:12;background:rgba(20,24,36,.8);
+    border:1px solid #2a3247;color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;}
+  #quitBtn{position:absolute;bottom:14px;left:14px;z-index:12;background:rgba(80,20,20,.8);
+    border:1px solid #6a2020;color:var(--text);padding:8px 14px;border-radius:10px;cursor:pointer;}
+  #toastWrap{position:absolute;top:60px;left:50%;transform:translateX(-50%);z-index:20;display:flex;
+    flex-direction:column;gap:6px;align-items:center;}
+  .toast{background:rgba(20,24,36,.95);border:1px solid var(--gold);color:var(--gold);padding:8px 16px;
+    border-radius:10px;font-size:0.85em;animation:fadein .2s;}
+  @keyframes fadein{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+  #pauseOverlay,#gameOverOverlay{position:absolute;inset:0;background:rgba(5,7,12,.85);display:none;
+    flex-direction:column;align-items:center;justify-content:center;z-index:30;gap:12px;text-align:center;}
+  #pauseOverlay.active,#gameOverOverlay.active{display:flex;}
+  .bigBtn{background:var(--accent);border:none;color:#fff;padding:12px 28px;border-radius:12px;
+    cursor:pointer;font-size:1em;font-weight:600;}
+  .ghostBtn{background:transparent;border:1px solid #3a4258;color:var(--text);padding:12px 28px;
+    border-radius:12px;cursor:pointer;}
+  h2{margin:6px 0;}
+  .footNote{color:var(--muted);font-size:0.75em;margin-top:20px;text-align:center;max-width:600px;}
+  ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#2a3247;border-radius:4px;}
+</style>
 </head>
 <body>
-<div class="app">
+<div id="app">
 
-  <div class="title">🐍 SNAKE EVOLUTION</div>
-  <div class="subtitle">Rise of the Bosses</div>
+  <button class="langBtn" id="langBtn" data-i18n="langBtnLabel">TR/EN</button>
+  <button class="soundBtn" id="soundBtn">🔊</button>
 
   <!-- MENU SCREEN -->
-  <div id="menu-screen" class="panel">
-    <div class="menu-grid">
-      <div>
-        <div class="field-row">
-          <label data-i18n="playerNameLabel">Oyuncu Adı</label>
-          <input type="text" id="player-name" maxlength="20" placeholder="İsmini gir..." data-i18n-placeholder="playerNamePlaceholder">
+  <div class="screen active" id="menuScreen">
+    <div class="title">RISE OF THE BOSSES</div>
+    <div class="subtitle" data-i18n="subtitle">Evrimleş, savaş, yüksel.</div>
+
+    <div class="profileRow">
+      <input type="text" id="playerNameInput" placeholder="İsim / Name" maxlength="24">
+      <button id="loadProfileBtn" data-i18n="loadProfile">Yükle</button>
+      <span id="profileStatus"></span>
+    </div>
+
+    <div class="statsRow">
+      <div class="statChip">✨ <span id="essenceLabel"></span>: <b id="essenceVal">0</b></div>
+      <div class="statChip">👑 <span id="prestigeLabel"></span>: <b id="prestigeVal">0</b></div>
+      <div class="statChip">💀 <span id="bossesLabel"></span>: <b id="bossesVal">0/15</b></div>
+      <div class="statChip">🏆 <span id="bestLabel"></span>: <b id="bestVal">0</b></div>
+    </div>
+
+    <div class="tabbar">
+      <button class="tabbtn active" data-tab="play" data-i18n="tabPlay">Oyna</button>
+      <button class="tabbtn" data-tab="market" data-i18n="tabMarket">Market</button>
+      <button class="tabbtn" data-tab="arenas" data-i18n="tabArenas">Arenalar</button>
+      <button class="tabbtn" data-tab="skins" data-i18n="tabSkins">Kostümler</button>
+      <button class="tabbtn" data-tab="ach" data-i18n="tabAch">Başarımlar</button>
+      <button class="tabbtn" data-tab="leaderboard" data-i18n="tabLeaderboard">Skor Tablosu</button>
+      <button class="tabbtn" data-tab="settings" data-i18n="tabSettings">Ayarlar</button>
+    </div>
+
+    <div class="panelWrap">
+      <div class="panel active" id="panel-play">
+        <p data-i18n="playDesc">Yılanını büyüt, orbları ye, patronları yen. Seçtiğin arena ve kostümle savaşa gir.</p>
+        <div style="text-align:center;">
+          <button class="startBtn" id="startRunBtn" data-i18n="startRun">▶ Koşuya Başla</button>
         </div>
+        <div class="footNote" data-i18n="controlsNote">Kontroller: Ok tuşları / WASD. Boss savaşında yılan başını boss'a değdirerek hasar verirsin, projektillerden kaç.</div>
+      </div>
 
-        <div class="field-row">
-          <label data-i18n="modeLabel">Oyun Modu</label>
-          <div class="mode-grid" id="mode-grid">
-            <div class="mode-btn" data-mode="60" data-i18n="mode1">1 Dakika</div>
-            <div class="mode-btn" data-mode="120" data-i18n="mode2">2 Dakika</div>
-            <div class="mode-btn" data-mode="180" data-i18n="mode3">3 Dakika</div>
-            <div class="mode-btn" data-mode="300" data-i18n="mode5">5 Dakika</div>
-            <div class="mode-btn" data-mode="0" data-i18n="modeEndless">Sonsuz Mod</div>
-          </div>
-        </div>
-
-        <div class="field-row">
-          <label data-i18n="difficultyLabel">Zorluk</label>
-          <div class="mode-grid" id="difficulty-grid" style="grid-template-columns: repeat(3, 1fr);">
-            <div class="mode-btn" data-difficulty="easy" data-i18n="diffEasy">Kolay</div>
-            <div class="mode-btn" data-difficulty="normal" data-i18n="diffNormal">Normal</div>
-            <div class="mode-btn" data-difficulty="hard" data-i18n="diffHard">Zor</div>
-          </div>
-        </div>
-
-        <button class="btn-primary" id="start-btn" data-i18n="startBtn">▶ OYUNA BAŞLA</button>
-
-        <div class="btn-row" style="margin-top:10px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
-          <button class="btn-secondary" id="open-market-btn" data-i18n="marketBtn">🛒 Market</button>
-          <button class="btn-secondary" id="open-quests-btn" data-i18n="questsBtn">📅 Görevler</button>
-          <button class="btn-secondary" id="open-achievements-btn" data-i18n="achievementsBtn">🏆 Başarımlar</button>
-          <button class="btn-secondary" id="open-stats-btn" data-i18n="statsBtn">📊 İstatistikler</button>
-          <button class="btn-secondary" id="open-daily-btn" style="position:relative;"><span data-i18n="dailyBtn">🎁 Günlük Ödül</span><span id="daily-dot" class="ping-dot hidden"></span></button>
-          <button class="btn-secondary" id="open-bosses-btn" data-i18n="bossesBtn">🧩 Boss Koleksiyonu</button>
-          <button class="btn-secondary" id="open-settings-btn" data-i18n="settingsBtn">⚙ Ayarlar</button>
-          <button class="btn-secondary" id="open-chests-btn" style="position:relative;"><span data-i18n="chestsBtn">🎰 Boss Sandıkları</span><span id="chest-dot" class="ping-dot hidden"></span></button>
-          <button class="btn-secondary" id="open-skins-btn" style="position:relative;"><span data-i18n="skinsBtn">🎨 Skinler</span><span class="new-badge" data-i18n="newBadge">YENİ</span></button>
-          <button class="btn-secondary" id="open-leaderboard-btn" data-i18n="leaderboardBtn">📋 Skor Tablosu</button>
-          <button class="btn-secondary" id="open-arenas-btn" style="position:relative;"><span data-i18n="arenasBtn">🗺 Arena Seç</span><span class="new-badge" data-i18n="newBadge">YENİ</span></button>
-        </div>
-
-        <div style="margin-top:14px; color:var(--text-dim); font-size:12px; line-height:1.6;" data-i18n="helpText">
-          Fare ile yönünü kontrol et. Yem topla, seviye atla, senden küçük yılanları ye.
-          Süre bitince (veya sonsuz modda periyodik olarak) bir <b style="color:var(--accent2)">Final Boss</b> karşına çıkar —
-          leveline göre kazanır ya da kaybedersin.
+      <div class="panel" id="panel-market">
+        <div id="marketList"></div>
+        <div class="prestigeBox">
+          <h3 style="margin:0 0 6px 0;" data-i18n="prestigeTitle">Prestij</h3>
+          <p style="font-size:0.85em;color:var(--muted);margin:0 0 10px 0;" id="prestigeDesc"></p>
+          <button class="buyBtn" id="prestigeBtn" style="padding:10px 20px;font-size:0.9em;" data-i18n="prestigeBtn">Prestij Yap</button>
         </div>
       </div>
 
-      <div>
-        <div class="panel profile-box" style="padding:14px;">
-          <div class="row"><span class="label" data-i18n="playerLabel">Oyuncu</span><span class="value" id="p-name">Oyuncu</span></div>
-          <div class="row"><span class="label" data-i18n="arenaLabel">🗺 Arenan</span><span class="value" id="p-arena-name">Çayır</span></div>
-          <div class="row"><span class="label" data-i18n="appearanceLabel">🎨 Görünümün</span><span class="value" style="display:flex; align-items:center; gap:8px;"><span id="p-skin-swatch" style="width:16px; height:16px; border-radius:50%; background:#39ff88; display:inline-block; border:1px solid rgba(255,255,255,0.3);"></span><span id="p-skin-name" data-i18n="defaultSkinName">Varsayılan</span></span></div>
-          <div class="row"><span class="label" data-i18n="totalGoldLabel">Toplam Altın</span><span class="value" id="p-gold">0</span></div>
-          <div class="row"><span class="label" data-i18n="bestLevelLabel">En Yüksek Level</span><span class="value" id="p-level">1</span></div>
-          <div class="row"><span class="label" data-i18n="longestSnakeLabel">En Uzun Yılan</span><span class="value" id="p-snake">0</span></div>
-          <div class="row"><span class="label" data-i18n="bossWinsLabel">Boss Galibiyeti</span><span class="value" id="p-bosswins">0</span></div>
-          <div class="row"><span class="label" data-i18n="totalGamesLabel">Toplam Oyun / Galibiyet</span><span class="value" id="p-games">0 / 0</span></div>
-          <div style="margin-top:8px; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;" data-i18n="medalsLabel">🏅 Madalyalar</div>
-          <div class="medal-row" id="medal-row"></div>
-          <div style="margin-top:8px; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:1px;" data-i18n="bossCollectionLabel">Boss Koleksiyonu</div>
-          <div class="boss-list" id="boss-list"></div>
-        </div>
+      <div class="panel" id="panel-arenas">
+        <div class="grid" id="arenaGrid"></div>
       </div>
-    </div>
-  </div>
 
-  <!-- MARKET SCREEN -->
-  <div id="market-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="marketTitle">🛒 Market</div>
-        <div class="screen-sub" data-i18n="marketSub">Altınını kalıcı geliştirmelere harca — her seviye biraz daha pahalı olur.</div>
+      <div class="panel" id="panel-skins">
+        <div class="grid" id="skinGrid"></div>
       </div>
-      <div class="gold-badge">💰 <span id="market-gold">0</span></div>
-    </div>
-    <div class="upgrade-grid" id="upgrade-grid"></div>
-    <div class="prestige-box" id="prestige-box"></div>
-    <button class="btn-secondary" id="market-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
 
-  <!-- QUESTS SCREEN -->
-  <div id="quests-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="questsTitle">📅 Günlük Görevler</div>
-        <div class="screen-sub" data-i18n="questsSub">Görevler her gün sıfırlanır. Tamamlayınca ödülünü almayı unutma!</div>
+      <div class="panel" id="panel-ach">
+        <div id="achList"></div>
       </div>
-      <div class="gold-badge">💰 <span id="quests-gold">0</span></div>
-    </div>
-    <div class="quest-list" id="quest-list"></div>
-    <button class="btn-secondary" id="quests-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
 
-  <!-- ACHIEVEMENTS SCREEN -->
-  <div id="achievements-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="achievementsTitle">🏆 Başarımlar</div>
-        <div class="screen-sub" data-i18n="achievementsSub">Kalıcı hedefler — bir kez tamamlanır, bir kez ödül verir.</div>
+      <div class="panel" id="panel-leaderboard">
+        <div id="leaderboardList"></div>
       </div>
-      <div class="gold-badge">💰 <span id="ach-gold">0</span></div>
-    </div>
-    <div class="quest-list" id="achievement-list"></div>
-    <button class="btn-secondary" id="achievements-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
 
-  <!-- STATS SCREEN -->
-  <div id="stats-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="statsTitle">📊 İstatistikler</div>
-        <div class="screen-sub" data-i18n="statsSub">Tüm zamanlar boyunca topladığın veriler.</div>
+      <div class="panel" id="panel-settings">
+        <h3 data-i18n="difficulty">Zorluk</h3>
+        <div class="diffRow" id="diffRow"></div>
+        <h3 style="margin-top:18px;" data-i18n="wallMode">Kenar Modu</h3>
+        <p style="font-size:0.8em;color:var(--muted);" id="wallModeDesc"></p>
+        <h3 style="margin-top:18px;" data-i18n="resetTitle">Sıfırla</h3>
+        <button class="ghostBtn" id="resetBtn" data-i18n="resetBtn" style="border-color:var(--danger);color:#ffb4b4;">İlerlemeyi Sıfırla</button>
       </div>
     </div>
-    <div class="stat-grid" id="stat-grid"></div>
-    <button class="btn-secondary" id="stats-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- DAILY LOGIN SCREEN -->
-  <div id="daily-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="dailyTitle">🎁 Günlük Giriş Ödülü</div>
-        <div class="screen-sub" data-i18n="dailySub">Her gün giriş yap, ödülünü al. 7. gün özel Boss Sandığı! Bir gün kaçırırsan seri sıfırlanır.</div>
-      </div>
-      <div class="gold-badge" id="daily-streak-badge">🔥 0 gün</div>
-    </div>
-    <div class="daily-grid" id="daily-grid"></div>
-    <button class="btn-primary" id="daily-claim-btn" style="margin-top:16px;" data-i18n="claimBtn">Ödülü Al</button>
-    <button class="btn-secondary" id="daily-back-btn" style="margin-top:10px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- BOSS COLLECTION SCREEN -->
-  <div id="bosses-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="bossesTitle">🧩 Boss Koleksiyonu</div>
-        <div class="screen-sub" data-i18n="bossesSub">İlk galibiyet skin açar. Sonraki galibiyetler Boss Parçası verir — 100 parça ile Legendary (sadece görsel) versiyon açılır.</div>
-      </div>
-    </div>
-    <div class="boss-frag-grid" id="boss-frag-grid"></div>
-    <button class="btn-secondary" id="bosses-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- SETTINGS SCREEN -->
-  <div id="settings-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="settingsTitle">⚙ Ayarlar</div>
-        <div class="screen-sub" data-i18n="settingsSub">Değişiklikler anında uygulanır ve kaydedilir.</div>
-      </div>
-    </div>
-    <div class="settings-list" id="settings-list">
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="soundLabel">🔊 Ses Efektleri</div>
-        <label class="switch"><input type="checkbox" id="set-sound"><span class="slider"></span></label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="musicLabel">🎵 Müzik</div>
-        <label class="switch"><input type="checkbox" id="set-music"><span class="slider"></span></label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="musicTrackLabel">🎼 Müzik Türü</div>
-        <select id="set-music-track" class="setting-select">
-          <option value="yumusak" data-i18n="trackSoft">Yumuşak</option>
-          <option value="ambient" data-i18n="trackAmbient">Ambient</option>
-          <option value="enerjik" data-i18n="trackEnergetic">Enerjik</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="graphicsLabel">🎨 Grafik Kalitesi</div>
-        <select id="set-graphics" class="setting-select">
-          <option value="dusuk" data-i18n="graphicsLow">Düşük</option>
-          <option value="orta" data-i18n="graphicsMed">Orta</option>
-          <option value="yuksek" data-i18n="graphicsHigh">Yüksek</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label">🖥 FPS</div>
-        <select id="set-fps" class="setting-select">
-          <option value="30">30</option>
-          <option value="60">60</option>
-          <option value="120">120</option>
-        </select>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="vibrationLabel">📳 Titreşim <span class="setting-note" data-i18n="vibrationNote">(mobil cihazlarda)</span></div>
-        <label class="switch"><input type="checkbox" id="set-vibration"><span class="slider"></span></label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="notificationsLabel">🔔 Bildirimler <span class="setting-note" data-i18n="notificationsNote">(tarayıcı izni gerekir)</span></div>
-        <label class="switch"><input type="checkbox" id="set-notifications"><span class="slider"></span></label>
-      </div>
-      <div class="setting-row">
-        <div class="setting-label" data-i18n="langLabel">🌐 Dil</div>
-        <select id="set-language" class="setting-select">
-          <option value="tr">Türkçe</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn-secondary" id="settings-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- CHESTS SCREEN -->
-  <div id="chests-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="chestsTitle">🎰 Boss Sandıkları</div>
-        <div class="screen-sub" data-i18n="chestsSub">Boss yenince nadire göre sandık düşer: Bronz, Gümüş, Altın, Elmas, Efsanevi. Sandıklardan altın, boss parçası ve nadir kozmetikler çıkabilir.</div>
-      </div>
-      <button class="btn-primary" id="open-all-chests-btn" style="width:auto; padding:10px 18px; white-space:nowrap;" data-i18n="openAllBtn">Tümünü Aç</button>
-    </div>
-    <div class="chest-grid" id="chest-grid"></div>
-    <div class="cosmetics-section">
-      <div class="screen-sub" style="margin-bottom:8px;" data-i18n="cosmeticsLabel">🎨 Kozmetik Koleksiyonu</div>
-      <div class="boss-list" id="cosmetics-list"></div>
-    </div>
-    <button class="btn-secondary" id="chests-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- SKINS SCREEN -->
-  <div id="skins-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="skinsTitle">🎨 Skinler</div>
-        <div class="screen-sub" data-i18n="skinsSub">Oyun parasıyla renk satın al veya boss yenerek açtığın görünümleri seç. Seçili skin oyunda yılanının rengi olur.</div>
-      </div>
-      <div class="gold-badge" id="skins-gold">💰 0</div>
-    </div>
-    <div class="screen-sub" style="margin:12px 0 6px;" data-i18n="purchasableLabel">Satın Alınabilir Renkler</div>
-    <div class="skin-grid" id="skin-catalog-grid"></div>
-    <div class="screen-sub" style="margin:18px 0 6px;" data-i18n="bossSkinsLabel">Boss Skinleri</div>
-    <div class="skin-grid" id="skin-boss-grid"></div>
-    <button class="btn-secondary" id="skins-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- LEADERBOARD SCREEN -->
-  <div id="leaderboard-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="leaderboardTitle">📋 Skor Tablosu</div>
-        <div class="screen-sub" data-i18n="leaderboardSub">Maç sonunda hesaplanan skorunla kaydolabilirsin. Skor = level×10 + yenilen yılan×6 + boss galibiyeti bonusu + yem/altın bonusu.</div>
-      </div>
-      <button class="btn-secondary" id="clear-leaderboard-btn" style="width:auto; padding:10px 16px; white-space:nowrap;" data-i18n="clearAllBtn">🗑 Tümünü Temizle</button>
-    </div>
-    <div class="leaderboard-list" id="leaderboard-list"></div>
-    <button class="btn-secondary" id="leaderboard-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
-  </div>
-
-  <!-- ARENA SCREEN -->
-  <div id="arenas-screen" class="panel hidden">
-    <div class="screen-header">
-      <div>
-        <div class="screen-title" data-i18n="arenasTitle">🗺 Arena Seç</div>
-        <div class="screen-sub" data-i18n="arenasSub">Level yükseldikçe yeni arenaların kilidi açılır. Her arenanın kendine has bir atmosferi var.</div>
-      </div>
-    </div>
-    <div class="arena-grid" id="arena-grid"></div>
-    <button class="btn-secondary" id="arenas-back-btn" style="margin-top:16px;" data-i18n="backBtn">← Ana Menü</button>
+    <div class="footNote" id="saveNote"></div>
   </div>
 
   <!-- GAME SCREEN -->
-  <div id="game-screen" class="hidden">
-    <div id="game-wrap">
-      <canvas id="game-canvas" width="1200" height="750"></canvas>
+  <div class="screen" id="gameScreen">
+    <div id="hud">
+      <div class="hudBox"><span data-i18n="score">Skor</span>: <b id="hudScore">0</b></div>
+      <div class="hudBox">❤ <b id="hudLives">3</b> &nbsp; 🛡 <b id="hudShield">0</b> &nbsp; ✨ <b id="hudEssence">0</b></div>
+    </div>
+    <div id="bossBarWrap">
+      <div id="bossName">-</div>
+      <div id="bossBarBg"><div id="bossBarFg"></div></div>
+    </div>
+    <div id="toastWrap"></div>
+    <div id="canvasWrap">
+      <canvas id="gameCanvas" width="800" height="560"></canvas>
+    </div>
+    <button id="pauseBtn" data-i18n="pause">⏸ Duraklat</button>
+    <button id="quitBtn" data-i18n="quit">✕ Çık</button>
+    <button id="fullscreenBtn">⛶</button>
 
-      <div class="hud-overlay">
-        <div class="hud">
-          <div>
-            <span class="pill level">Lv <span id="hud-level">1</span></span>
-            <span class="pill gold">💰 <span id="hud-gold">0</span></span>
-          </div>
-          <div>
-            <span class="pill timer" id="hud-timer">⏱ --:--</span>
-            <button class="pill fs-btn" id="fullscreen-btn" title="Tam Ekran">⛶</button>
-            <button class="pill fs-btn" id="quit-to-menu-btn" title="Ana Menüye Dön">🏠</button>
-          </div>
-        </div>
-        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xp-fill"></div></div>
-        <div class="buff-row" id="buff-row"></div>
+    <div id="pauseOverlay">
+      <h2 data-i18n="pausedTitle">Duraklatıldı</h2>
+      <button class="bigBtn" id="resumeBtn" data-i18n="resume">Devam Et</button>
+      <button class="ghostBtn" id="pauseQuitBtn" data-i18n="quitToMenu">Menüye Dön</button>
+    </div>
+    <div id="gameOverOverlay">
+      <h2 id="gameOverTitle" data-i18n="gameOverTitle">Oyun Bitti</h2>
+      <p id="gameOverStats"></p>
+      <div class="saveScoreRow">
+        <input type="text" id="saveScoreName" maxlength="24" placeholder="İsim / Name">
+        <button class="bigBtn" id="saveScoreBtn" data-i18n="saveScore">Skoru Kaydet</button>
       </div>
-
-      <div id="event-banner" class="event-banner hidden"></div>
-      <div id="overlay" class="overlay hidden"></div>
+      <button class="ghostBtn" id="backToMenuBtn" data-i18n="backToMenu">Menüye Dön</button>
     </div>
   </div>
 
 </div>
 
-<button type="button" class="fullscreen-btn" id="rob-fullscreen-btn" title="Tam ekran" aria-label="Tam ekran">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-</button>
 <script>
-  (function () {
-    var btn = document.getElementById('rob-fullscreen-btn');
-    if (!btn) return;
-    btn.addEventListener('click', function () {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(function () {});
-      } else {
-        document.exitFullscreen();
-      }
-    });
-  })();
-</script>
+/* =========================================================
+   RISE OF THE BOSSES — single-file build
+   ========================================================= */
 
-<script src="{{ url_for('rise_of_the_bosses.static', filename='game.js') }}"></script>
+/* ---------- i18n ---------- */
+const LANG = {
+  tr: {
+    langBtnLabel:"EN", subtitle:"Evrimleş, savaş, yüksel.",
+    tabPlay:"Oyna", tabMarket:"Market", tabArenas:"Arenalar", tabSkins:"Kostümler",
+    tabAch:"Başarımlar", tabSettings:"Ayarlar",
+    playDesc:"Yılanını büyüt, orbları ye, patronları yen. Seçtiğin arena ve kostümle savaşa gir.",
+    startRun:"▶ Koşuya Başla",
+    controlsNote:"Kontroller: Ok tuşları / WASD. Boss savaşında yılan başını boss'a değdirerek hasar verirsin, projektillerden kaç.",
+    essenceLabel:"Öz", prestigeLabel:"Prestij", bossesLabel:"Yenilen Boss", bestLabel:"En İyi Skor",
+    prestigeTitle:"Prestij", prestigeBtn:"Prestij Yap",
+    difficulty:"Zorluk", wallMode:"Kenar Modu", resetTitle:"Sıfırla", resetBtn:"İlerlemeyi Sıfırla",
+    score:"Skor", pause:"⏸ Duraklat", quit:"✕ Çık",
+    pausedTitle:"Duraklatıldı", resume:"Devam Et", quitToMenu:"Menüye Dön",
+    gameOverTitle:"Oyun Bitti", backToMenu:"Menüye Dön",
+    easy:"Kolay", normal:"Normal", hard:"Zor",
+    locked:"Kilitli", selected:"Seçili", select:"Seç",
+    buy:"Satın Al", max:"Maks", level:"Seviye",
+    bossDefeated:"yenildi!", newBoss:"karşınızda!",
+    achUnlocked:"Başarım açıldı",
+    prestigeConfirm:"Prestij yapmak Öz ve Market seviyelerini sıfırlar ama kalıcı bonus verir. Emin misin?",
+    resetConfirm:"Tüm ilerleme silinecek. Emin misin?",
+    wrapDesc:"Bu arenada kenarlar sarmal (geçiş var).",
+    wallDesc:"Bu arenada kenara çarpmak ölümcül.",
+    needEssence:"Yetersiz Öz",
+    livesLost:"Can kaybedildi!",
+    shieldBlocked:"Kalkan hasarı engelledi!",
+    loadProfile:"Yükle", tabLeaderboard:"Skor Tablosu", saveScore:"Skoru Kaydet",
+    scoreSaved:"Skor kaydedildi!", scoreSaveFailed:"Kaydedilemedi", enterName:"Bir isim gir",
+    profileLoaded:"Kayıt yüklendi", newProfile:"Yeni profil", serverUnreachable:"Sunucuya bağlanılamadı",
+    noScoresYet:"Henüz skor yok.", confirmDeleteScore:"Bu skoru silmek istiyor musun?",
+    loading:"Yükleniyor...",
+  },
+  en: {
+    langBtnLabel:"TR", subtitle:"Evolve, fight, ascend.",
+    tabPlay:"Play", tabMarket:"Market", tabArenas:"Arenas", tabSkins:"Skins",
+    tabAch:"Achievements", tabSettings:"Settings",
+    playDesc:"Grow your snake, eat orbs, defeat bosses. Enter battle with your chosen arena and skin.",
+    startRun:"▶ Start Run",
+    controlsNote:"Controls: Arrow keys / WASD. During boss fights, touch the boss with your head to deal damage, dodge projectiles.",
+    essenceLabel:"Essence", prestigeLabel:"Prestige", bossesLabel:"Bosses Defeated", bestLabel:"Best Score",
+    prestigeTitle:"Prestige", prestigeBtn:"Prestige Now",
+    difficulty:"Difficulty", wallMode:"Wall Mode", resetTitle:"Reset", resetBtn:"Reset Progress",
+    score:"Score", pause:"⏸ Pause", quit:"✕ Quit",
+    pausedTitle:"Paused", resume:"Resume", quitToMenu:"Back to Menu",
+    gameOverTitle:"Game Over", backToMenu:"Back to Menu",
+    easy:"Easy", normal:"Normal", hard:"Hard",
+    locked:"Locked", selected:"Selected", select:"Select",
+    buy:"Buy", max:"Max", level:"Level",
+    bossDefeated:"defeated!", newBoss:"has appeared!",
+    achUnlocked:"Achievement unlocked",
+    prestigeConfirm:"Prestige resets Essence and Market levels but grants a permanent bonus. Are you sure?",
+    resetConfirm:"All progress will be erased. Are you sure?",
+    wrapDesc:"In this arena, edges wrap around (no wall death).",
+    wallDesc:"In this arena, touching the wall is deadly.",
+    needEssence:"Not enough Essence",
+    livesLost:"Life lost!",
+    shieldBlocked:"Shield blocked the hit!",
+    loadProfile:"Load", tabLeaderboard:"Leaderboard", saveScore:"Save Score",
+    scoreSaved:"Score saved!", scoreSaveFailed:"Could not save", enterName:"Enter a name",
+    profileLoaded:"Save loaded", newProfile:"New profile", serverUnreachable:"Could not reach server",
+    noScoresYet:"No scores yet.", confirmDeleteScore:"Delete this score?",
+    loading:"Loading...",
+  }
+};
+let curLang = 'tr';
+function t(key){ return LANG[curLang][key] || key; }
+function updateTexts(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
+  document.getElementById('essenceLabel').textContent = t('essenceLabel');
+  document.getElementById('prestigeLabel').textContent = t('prestigeLabel');
+  document.getElementById('bossesLabel').textContent = t('bossesLabel');
+  document.getElementById('bestLabel').textContent = t('bestLabel');
+  document.getElementById('prestigeDesc').textContent =
+    `${t('prestigeLabel')} x${(1+STATE.prestigeCount*0.05).toFixed(2)} ${t('essenceLabel')} ${t('level')==='Level'?'mult':'çarpanı'}`;
+  renderMarket(); renderArenas(); renderSkins(); renderAchievements(); renderDifficulty(); renderWallDesc();
+  document.getElementById('saveNote').textContent = curLang==='tr'
+    ? 'İlerleme yalnızca bu oturumda tutulur (sayfa yenilenirse sıfırlanır).'
+    : 'Progress is kept only for this session (resets if the page reloads).';
+}
+
+/* ---------- DATA ---------- */
+const BOSS_NAMES = [
+  ["Kertenkele Kral","Lizard King"], ["Örümcek Ana","Spider Matriarch"],
+  ["Taş Dev","Stone Giant"], ["Alev Ejderi","Flame Drake"],
+  ["Buz Kraliçesi","Ice Queen"], ["Gölge Suikastçı","Shadow Assassin"],
+  ["Zehir Kurbağası","Poison Toad"], ["Demir Golem","Iron Golem"],
+  ["Kum Solucanı","Sand Worm"], ["Fırtına Kuşu","Storm Bird"],
+  ["Mercan Canavarı","Coral Beast"], ["Gece Yarasası","Night Bat"],
+  ["Kristal Muhafız","Crystal Guardian"], ["Kaos Şövalyesi","Chaos Knight"],
+  ["Ejderha İmparatoru","Dragon Emperor"]
+];
+const BOSS_PATTERNS = ['spray','homing','laser','spray','laser','homing','spray','laser',
+  'homing','spray','laser','homing','laser','combo','combo'];
+const BOSS_COLORS = ['#7cb342','#8d6e63','#9e9e9e','#ff5722','#4fc3f7','#616161','#66bb6a','#78909c',
+  '#d4a373','#42a5f5','#26a69a','#5c4a72','#ba68c8','#c0392b','#f5b301'];
+const BOSSES = BOSS_NAMES.map((name,i)=>({
+  idx:i, name_tr:name[0], name_en:name[1],
+  hpBase: 60 + i*22,
+  speed: 1.1 + i*0.06,
+  pattern: BOSS_PATTERNS[i],
+  color: BOSS_COLORS[i],
+  threshold: 90 + i*70,
+}));
+
+const ARENAS = [
+  {name_tr:"Çayırlık",name_en:"Grasslands", bg:['#1c3d1f','#0b1a0d'], wrap:true},
+  {name_tr:"Çöl",name_en:"Desert", bg:['#4a3510','#1a1206'], wrap:true},
+  {name_tr:"Mağara",name_en:"Cave", bg:['#2b2b33','#0d0d10'], wrap:true},
+  {name_tr:"Okyanus",name_en:"Ocean", bg:['#0a3d4a','#031418'], wrap:true},
+  {name_tr:"Volkan",name_en:"Volcano", bg:['#4a1408','#180402'], wrap:true},
+  {name_tr:"Orman",name_en:"Forest", bg:['#123321','#040f08'], wrap:false},
+  {name_tr:"Buz Sahası",name_en:"Ice Field", bg:['#1c3a4a','#08161d'], wrap:false},
+  {name_tr:"Neon Şehir",name_en:"Neon City", bg:['#2a0a3d','#0d0316'], wrap:false},
+  {name_tr:"Boşluk",name_en:"Void Space", bg:['#0a0a14','#000000'], wrap:false},
+  {name_tr:"Gökyüzü Alemi",name_en:"Sky Realm", bg:['#1a2a4a','#060a14'], wrap:false},
+];
+const ARENA_UNLOCK_AT = [0,0,1,1,2,3,4,5,7,10]; // bossesDefeated required
+
+const SKINS = [
+  {name_tr:"Yeşil",name_en:"Green", color:"#4ade80", head:"#22c55e", unlock:0},
+  {name_tr:"Kızıl",name_en:"Crimson", color:"#f87171", head:"#dc2626", unlock:1},
+  {name_tr:"Mavi",name_en:"Azure", color:"#60a5fa", head:"#2563eb", unlock:2},
+  {name_tr:"Altın",name_en:"Gold", color:"#fde047", head:"#eab308", unlock:3},
+  {name_tr:"Karanlık",name_en:"Void", color:"#a78bfa", head:"#581c87", unlock:5},
+  {name_tr:"Toksik",name_en:"Toxic", color:"#a3e635", head:"#4d7c0f", unlock:7},
+  {name_tr:"Buz",name_en:"Ice", color:"#a5f3fc", head:"#06b6d4", unlock:9},
+  {name_tr:"Gökkuşağı",name_en:"Rainbow", color:"rainbow", head:"#fff", unlock:12},
+];
+
+const UPGRADE_DEFS = [
+  {id:'speed', name_tr:'Hız Kontrolü', name_en:'Speed Control', base:40, mult:1.5, max:5,
+   desc_tr:'Yılanın hareket hassasiyetini artırır.', desc_en:'Improves snake movement precision.'},
+  {id:'life', name_tr:'Ekstra Can', name_en:'Extra Life', base:80, mult:1.8, max:4,
+   desc_tr:'+1 başlangıç canı.', desc_en:'+1 starting life.'},
+  {id:'shield', name_tr:'Kalkan Şarjı', name_en:'Shield Charge', base:70, mult:1.7, max:4,
+   desc_tr:'+1 hasar engelleyen kalkan.', desc_en:'+1 damage-blocking shield.'},
+  {id:'magnet', name_tr:'Mıknatıs Menzili', name_en:'Magnet Range', base:60, mult:1.6, max:5,
+   desc_tr:'Orbları uzaktan çeker.', desc_en:'Attracts orbs from farther away.'},
+  {id:'essence', name_tr:'Öz Çarpanı', name_en:'Essence Multiplier', base:100, mult:1.9, max:6,
+   desc_tr:'Kazanılan Öz miktarını artırır (+10%/seviye).', desc_en:'Increases Essence earned (+10%/level).'},
+  {id:'damage', name_tr:'Isırık Hasarı', name_en:'Bite Damage', base:90, mult:1.8, max:6,
+   desc_tr:'Boss savaşlarında ısırık hasarını artırır.', desc_en:'Increases bite damage in boss fights.'},
+];
+
+const ACHIEVEMENTS = [
+  {id:'first_orb', name_tr:'İlk Lokma', name_en:'First Bite', icon:'🍎', cond:s=>s.lifetimeOrbs>=1},
+  {id:'first_boss', name_tr:'İlk Zafer', name_en:'First Victory', icon:'⚔️', cond:s=>s.lifetimeBossKills>=1},
+  {id:'five_boss', name_tr:'Boss Avcısı', name_en:'Boss Hunter', icon:'🗡️', cond:s=>s.lifetimeBossKills>=5},
+  {id:'all_boss', name_tr:'İmparator Katili', name_en:'Emperor Slayer', icon:'🐉', cond:s=>s.lifetimeBossKills>=15},
+  {id:'score500', name_tr:'500 Skor', name_en:'Score 500', icon:'⭐', cond:s=>s.bestScore>=500},
+  {id:'score2000', name_tr:'2000 Skor', name_en:'Score 2000', icon:'🌟', cond:s=>s.bestScore>=2000},
+  {id:'first_prestige', name_tr:'Yeniden Doğuş', name_en:'Rebirth', icon:'👑', cond:s=>s.prestigeCount>=1},
+  {id:'five_prestige', name_tr:'Ölümsüz', name_en:'Immortal', icon:'♾️', cond:s=>s.prestigeCount>=5},
+  {id:'all_skins', name_tr:'Moda İkonu', name_en:'Fashion Icon', icon:'🎨', cond:s=>SKINS.every(sk=>s.lifetimeBossKills>=sk.unlock)},
+  {id:'all_arenas', name_tr:'Kaşif', name_en:'Explorer', icon:'🗺️', cond:s=>s.lifetimeBossKills>=10},
+  {id:'close_call', name_tr:'Son Anda', name_en:'Close Call', icon:'💢', cond:s=>s.hadCloseCall},
+  {id:'persistent', name_tr:'Pes Etmeyen', name_en:'Persistent', icon:'🔄', cond:s=>s.lifetimeDeaths>=10},
+];
+
+/* ---------- STATE (in-memory only, no persistence across reload) ---------- */
+const STATE = {
+  essence:0, lifetimeEssence:0, prestigeCount:0, bestScore:0,
+  lifetimeBossKills:0, lifetimeOrbs:0, lifetimeDeaths:0, hadCloseCall:false,
+  upgrades:{speed:0,life:0,shield:0,magnet:0,essence:0,damage:0},
+  unlockedAch:{}, selectedArena:0, selectedSkin:0, difficulty:'normal',
+};
+
+let playerName = '';
+let saveTimer = null;
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+async function loadProgress(name){
+  const statusEl = document.getElementById('profileStatus');
+  try{
+    const res = await fetch('/api/load_progress?name='+encodeURIComponent(name));
+    const data = await res.json();
+    if(data.found){
+      const s = data.state;
+      STATE.essence = s.essence||0; STATE.lifetimeEssence = s.lifetime_essence||0;
+      STATE.prestigeCount = s.prestige_count||0; STATE.bestScore = s.best_score||0;
+      STATE.lifetimeBossKills = s.lifetime_boss_kills||0; STATE.lifetimeOrbs = s.lifetime_orbs||0;
+      STATE.lifetimeDeaths = s.lifetime_deaths||0; STATE.hadCloseCall = !!s.had_close_call;
+      STATE.upgrades = Object.assign({speed:0,life:0,shield:0,magnet:0,essence:0,damage:0}, s.upgrades||{});
+      STATE.unlockedAch = s.unlocked_ach || {};
+      STATE.selectedArena = s.selected_arena||0; STATE.selectedSkin = s.selected_skin||0;
+      STATE.difficulty = s.difficulty||'normal';
+      statusEl.textContent = t('profileLoaded');
+    } else {
+      Object.assign(STATE,{essence:0,lifetimeEssence:0,prestigeCount:0,bestScore:0,lifetimeBossKills:0,
+        lifetimeOrbs:0,lifetimeDeaths:0,hadCloseCall:false,
+        upgrades:{speed:0,life:0,shield:0,magnet:0,essence:0,damage:0},
+        unlockedAch:{},selectedArena:0,selectedSkin:0,difficulty:'normal'});
+      statusEl.textContent = t('newProfile');
+    }
+  }catch(e){
+    statusEl.textContent = t('serverUnreachable');
+  }
+  updateTexts(); renderMenuStats();
+}
+function saveProgress(){
+  if(!playerName) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{
+    fetch('/api/save_progress',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:playerName, state:STATE})}).catch(()=>{});
+  }, 350);
+}
+document.getElementById('loadProfileBtn').onclick = ()=>{
+  const v = document.getElementById('playerNameInput').value.trim();
+  if(!v){ toast(t('enterName')); return; }
+  playerName = v;
+  document.getElementById('saveScoreName').value = v;
+  loadProgress(playerName);
+};
+
+async function renderLeaderboard(){
+  const wrap = document.getElementById('leaderboardList');
+  wrap.innerHTML = t('loading');
+  try{
+    const res = await fetch('/api/leaderboard');
+    const rows = await res.json();
+    wrap.innerHTML='';
+    if(rows.length===0){ wrap.textContent = t('noScoresYet'); return; }
+    rows.forEach((r,i)=>{
+      const row=document.createElement('div'); row.className='lbRow';
+      const rank=document.createElement('span'); rank.className='lbRank'; rank.textContent='#'+(i+1);
+      const name=document.createElement('span'); name.className='lbName'; name.textContent=r.name;
+      const score=document.createElement('span'); score.className='lbScore'; score.textContent=r.score;
+      const sub=document.createElement('span'); sub.className='lbSub';
+      sub.textContent = `💀${r.bosses_defeated} ✨${r.essence_earned}`;
+      const delBtn=document.createElement('button'); delBtn.className='lbDel'; delBtn.textContent='🗑';
+      delBtn.onclick=async()=>{
+        if(!confirm(t('confirmDeleteScore'))) return;
+        await fetch('/api/leaderboard/'+r.id,{method:'DELETE'});
+        renderLeaderboard();
+      };
+      row.appendChild(rank); row.appendChild(name); row.appendChild(score); row.appendChild(sub); row.appendChild(delBtn);
+      wrap.appendChild(row);
+    });
+  }catch(e){
+    wrap.textContent = t('serverUnreachable');
+  }
+}
+document.getElementById('saveScoreBtn').onclick = async ()=>{
+  const nameVal = document.getElementById('saveScoreName').value.trim() || (curLang==='tr'?'Anonim':'Anonymous');
+  const btn = document.getElementById('saveScoreBtn'); btn.disabled=true;
+  try{
+    await fetch('/api/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name:nameVal, score:game.score, essence_earned:game.essenceRun, bosses_defeated:game.bossesThisRun})});
+    toast(t('scoreSaved'));
+  }catch(e){
+    toast(t('scoreSaveFailed')); btn.disabled=false;
+  }
+};
+
+function essenceMult(){ return 1 + STATE.prestigeCount*0.05 + STATE.upgrades.essence*0.10; }
+function damageMult(){ return 1 + STATE.prestigeCount*0.02 + STATE.upgrades.damage*0.18; }
+function upgradeCost(def){
+  const lvl = STATE.upgrades[def.id];
+  if(lvl>=def.max) return null;
+  return Math.round(def.base*Math.pow(def.mult, lvl));
+}
+
+/* ---------- Sound (WebAudio, no assets) ---------- */
+let audioCtx=null, masterGain=null, ambientOn=true, ambientNodes=[];
+function initAudio(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  masterGain = audioCtx.createGain(); masterGain.gain.value = 0.25;
+  masterGain.connect(audioCtx.destination);
+  startAmbient();
+}
+function startAmbient(){
+  [55,55*1.5].forEach((f,i)=>{
+    const osc = audioCtx.createOscillator();
+    osc.type='sine'; osc.frequency.value=f;
+    const g = audioCtx.createGain(); g.gain.value= i===0?0.05:0.03;
+    osc.connect(g); g.connect(masterGain); osc.start();
+    ambientNodes.push(osc);
+  });
+}
+function beep(freq=440,dur=0.08,type='sine',vol=0.18){
+  if(!audioCtx) return;
+  const osc=audioCtx.createOscillator(); const g=audioCtx.createGain();
+  osc.type=type; osc.frequency.value=freq; g.gain.value=vol;
+  osc.connect(g); g.connect(masterGain);
+  osc.start(); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+dur);
+  osc.stop(audioCtx.currentTime+dur+0.02);
+}
+document.getElementById('soundBtn').onclick=()=>{
+  if(!audioCtx){ initAudio(); document.getElementById('soundBtn').textContent='🔊'; return; }
+  ambientOn=!ambientOn; masterGain.gain.value = ambientOn?0.25:0;
+  document.getElementById('soundBtn').textContent = ambientOn?'🔊':'🔇';
+};
+
+/* ---------- Toasts ---------- */
+function toast(msg){
+  const wrap=document.getElementById('toastWrap');
+  const el=document.createElement('div'); el.className='toast'; el.textContent=msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(),2600);
+}
+
+/* ---------- UI: tabs ---------- */
+document.querySelectorAll('.tabbtn').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab==='leaderboard') renderLeaderboard();
+  };
+});
+document.getElementById('langBtn').onclick=()=>{ curLang = curLang==='tr'?'en':'tr'; updateTexts(); };
+
+/* ---------- Render: menu stats ---------- */
+function renderMenuStats(){
+  document.getElementById('essenceVal').textContent = STATE.essence;
+  document.getElementById('prestigeVal').textContent = STATE.prestigeCount;
+  document.getElementById('bossesVal').textContent = STATE.lifetimeBossKills+'/15';
+  document.getElementById('bestVal').textContent = STATE.bestScore;
+}
+
+/* ---------- Render: market ---------- */
+function renderMarket(){
+  const wrap = document.getElementById('marketList'); wrap.innerHTML='';
+  UPGRADE_DEFS.forEach(def=>{
+    const lvl = STATE.upgrades[def.id];
+    const cost = upgradeCost(def);
+    const row = document.createElement('div'); row.className='upgradeRow';
+    const name = curLang==='tr'?def.name_tr:def.name_en;
+    const desc = curLang==='tr'?def.desc_tr:def.desc_en;
+    row.innerHTML = `<div class="upgradeInfo"><b>${name}</b> — ${t('level')} ${lvl}/${def.max}<br><span style="color:var(--muted)">${desc}</span></div>`;
+    const btn = document.createElement('button'); btn.className='buyBtn';
+    if(cost===null){ btn.textContent = t('max'); btn.disabled=true; }
+    else { btn.textContent = `${t('buy')} (${cost} ✨)`; btn.disabled = STATE.essence<cost; }
+    btn.onclick=()=>{
+      const c = upgradeCost(def);
+      if(c!==null && STATE.essence>=c){
+        STATE.essence-=c; STATE.upgrades[def.id]++;
+        renderMarket(); renderMenuStats(); saveProgress();
+      } else toast(t('needEssence'));
+    };
+    row.appendChild(btn); wrap.appendChild(row);
+  });
+}
+document.getElementById('prestigeBtn').onclick=()=>{
+  if(STATE.lifetimeEssence < 500){ toast(curLang==='tr'?'Prestij için en az 500 toplam Öz gerekir.':'Need at least 500 lifetime Essence to prestige.'); return; }
+  if(confirm(t('prestigeConfirm'))){
+    STATE.prestigeCount += Math.max(1,Math.floor(STATE.lifetimeEssence/500));
+    STATE.essence=0;
+    Object.keys(STATE.upgrades).forEach(k=>STATE.upgrades[k]=0);
+    renderMarket(); renderMenuStats(); updateTexts();
+    toast((curLang==='tr'?'Prestij tamamlandı!':'Prestige complete!'));
+    checkAchievements(); saveProgress();
+  }
+};
+
+/* ---------- Render: arenas ---------- */
+function renderArenas(){
+  const grid = document.getElementById('arenaGrid'); grid.innerHTML='';
+  ARENAS.forEach((a,i)=>{
+    const unlocked = STATE.lifetimeBossKills >= ARENA_UNLOCK_AT[i];
+    const card = document.createElement('div'); card.className='card'+(unlocked?'':' locked')+(STATE.selectedArena===i?' selected':'');
+    const thumb = document.createElement('div'); thumb.className='arenaThumb';
+    thumb.style.background = `linear-gradient(135deg, ${a.bg[0]}, ${a.bg[1]})`;
+    card.appendChild(thumb);
+    const title = document.createElement('div'); title.className='cardTitle';
+    title.textContent = curLang==='tr'?a.name_tr:a.name_en;
+    card.appendChild(title);
+    const sub = document.createElement('div'); sub.className='cardSub';
+    sub.textContent = unlocked ? (a.wrap ? '↻' : '☠') : `${t('locked')} (${ARENA_UNLOCK_AT[i]} 💀)`;
+    card.appendChild(sub);
+    if(unlocked) card.onclick=()=>{ STATE.selectedArena=i; renderArenas(); renderWallDesc(); saveProgress(); };
+    grid.appendChild(card);
+  });
+}
+function renderWallDesc(){
+  const a = ARENAS[STATE.selectedArena];
+  document.getElementById('wallModeDesc').textContent = a.wrap ? t('wrapDesc') : t('wallDesc');
+}
+
+/* ---------- Render: skins ---------- */
+function renderSkins(){
+  const grid = document.getElementById('skinGrid'); grid.innerHTML='';
+  SKINS.forEach((sk,i)=>{
+    const unlocked = STATE.lifetimeBossKills >= sk.unlock;
+    const card = document.createElement('div'); card.className='card'+(unlocked?'':' locked')+(STATE.selectedSkin===i?' selected':'');
+    const sw = document.createElement('div'); sw.className='swatch';
+    sw.style.background = sk.color==='rainbow' ? 'conic-gradient(red,orange,yellow,green,blue,violet,red)' : sk.color;
+    card.appendChild(sw);
+    const title = document.createElement('div'); title.className='cardTitle';
+    title.textContent = curLang==='tr'?sk.name_tr:sk.name_en;
+    card.appendChild(title);
+    const sub = document.createElement('div'); sub.className='cardSub';
+    sub.textContent = unlocked ? '' : `${t('locked')} (${sk.unlock} 💀)`;
+    card.appendChild(sub);
+    if(unlocked) card.onclick=()=>{ STATE.selectedSkin=i; renderSkins(); saveProgress(); };
+    grid.appendChild(card);
+  });
+}
+
+/* ---------- Render: achievements ---------- */
+function renderAchievements(){
+  const wrap = document.getElementById('achList'); wrap.innerHTML='';
+  ACHIEVEMENTS.forEach(a=>{
+    const unlocked = !!STATE.unlockedAch[a.id];
+    const row = document.createElement('div'); row.className='achRow'+(unlocked?'':' locked');
+    row.innerHTML = `<span class="achIcon">${a.icon}</span><span>${curLang==='tr'?a.name_tr:a.name_en}</span>`;
+    wrap.appendChild(row);
+  });
+}
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(!STATE.unlockedAch[a.id] && a.cond(STATE)){
+      STATE.unlockedAch[a.id]=true;
+      toast(`🏆 ${t('achUnlocked')}: ${curLang==='tr'?a.name_tr:a.name_en}`);
+    }
+  });
+  renderAchievements(); renderArenas(); renderSkins(); saveProgress();
+}
+
+/* ---------- Render: difficulty ---------- */
+const DIFF_SETTINGS = {
+  easy:{hp:0.7, projSpeed:0.8, lives:1},
+  normal:{hp:1.0, projSpeed:1.0, lives:0},
+  hard:{hp:1.4, projSpeed:1.3, lives:-1},
+};
+function renderDifficulty(){
+  const row = document.getElementById('diffRow'); row.innerHTML='';
+  ['easy','normal','hard'].forEach(d=>{
+    const btn=document.createElement('button'); btn.className='diffBtn'+(STATE.difficulty===d?' active':'');
+    btn.textContent=t(d);
+    btn.onclick=()=>{ STATE.difficulty=d; renderDifficulty(); saveProgress(); };
+    row.appendChild(btn);
+  });
+}
+document.getElementById('resetBtn').onclick=()=>{
+  if(confirm(t('resetConfirm'))){
+    Object.assign(STATE,{essence:0,lifetimeEssence:0,prestigeCount:0,bestScore:0,lifetimeBossKills:0,
+      lifetimeOrbs:0,lifetimeDeaths:0,hadCloseCall:false,upgrades:{speed:0,life:0,shield:0,magnet:0,essence:0,damage:0},
+      unlockedAch:{},selectedArena:0,selectedSkin:0,difficulty:'normal'});
+    if(playerName){ fetch('/api/player/'+encodeURIComponent(playerName),{method:'DELETE'}).catch(()=>{}); }
+    updateTexts(); renderMenuStats();
+  }
+};
+
+/* =========================================================
+   GAME ENGINE
+   ========================================================= */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const GRID = 20, COLS = canvas.width/GRID, ROWS = canvas.height/GRID;
+
+let game = null; // active run state
+let rafId = null;
+
+function newGame(){
+  const diff = DIFF_SETTINGS[STATE.difficulty];
+  const startLives = Math.max(1, 3 + STATE.upgrades.life + diff.lives);
+  return {
+    snake:[{x:10,y:14},{x:9,y:14},{x:8,y:14}],
+    dir:{x:1,y:0}, nextDir:{x:1,y:0},
+    orb:spawnOrb([{x:10,y:14}]),
+    specialOrb:null, specialTimer:0,
+    score:0, essenceRun:0, lives:startLives, shields:STATE.upgrades.shield,
+    speedBase: 8 + STATE.upgrades.speed*0.6,
+    tickAcc:0,
+    stage:1, // evolution stage
+    boss:null, bossIndexNext:0, bossesThisRun:0,
+    projectiles:[], particles:[],
+    invuln:0, over:false, paused:false,
+    arena: ARENAS[STATE.selectedArena], skin: SKINS[STATE.selectedSkin],
+    time:0,
+  };
+}
+function spawnOrb(exclude){
+  let p;
+  do{ p={x:Math.floor(Math.random()*COLS), y:Math.floor(Math.random()*ROWS)}; }
+  while(exclude.some(s=>s.x===p.x&&s.y===p.y));
+  return p;
+}
+
+function startRun(){
+  game = newGame();
+  document.getElementById('menuScreen').classList.remove('active');
+  document.getElementById('gameScreen').classList.add('active');
+  document.getElementById('pauseOverlay').classList.remove('active');
+  document.getElementById('gameOverOverlay').classList.remove('active');
+  document.getElementById('bossBarWrap').style.display='none';
+  if(!audioCtx) initAudio();
+  resizeCanvas();
+  last = performance.now();
+  if(rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(loop);
+}
+document.getElementById('startRunBtn').onclick = startRun;
+
+/* --- input --- */
+window.addEventListener('keydown', e=>{
+  if(e.key==='Escape' && game && !game.over){
+    if(game.paused){
+      game.paused=false; document.getElementById('pauseOverlay').classList.remove('active'); last=performance.now();
+    } else {
+      game.paused=true; document.getElementById('pauseOverlay').classList.add('active');
+    }
+    return;
+  }
+  if(!game || game.over || game.paused) return;
+  const k = e.key.toLowerCase();
+  const d = game.dir;
+  if((k==='arrowup'||k==='w') && d.y===0) game.nextDir={x:0,y:-1};
+  else if((k==='arrowdown'||k==='s') && d.y===0) game.nextDir={x:0,y:1};
+  else if((k==='arrowleft'||k==='a') && d.x===0) game.nextDir={x:-1,y:0};
+  else if((k==='arrowright'||k==='d') && d.x===0) game.nextDir={x:1,y:0};
+});
+
+/* touch swipe controls (mobile) */
+let touchStartX=0, touchStartY=0;
+canvas.addEventListener('touchstart', e=>{
+  const tt = e.changedTouches[0]; touchStartX=tt.clientX; touchStartY=tt.clientY;
+}, {passive:true});
+canvas.addEventListener('touchend', e=>{
+  if(!game || game.over || game.paused) return;
+  const tt = e.changedTouches[0];
+  const dx = tt.clientX-touchStartX, dy = tt.clientY-touchStartY;
+  const d = game.dir;
+  if(Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+  if(Math.abs(dx) > Math.abs(dy)){
+    if(dx>0 && d.x===0) game.nextDir={x:1,y:0};
+    else if(dx<0 && d.x===0) game.nextDir={x:-1,y:0};
+  } else {
+    if(dy>0 && d.y===0) game.nextDir={x:0,y:1};
+    else if(dy<0 && d.y===0) game.nextDir={x:0,y:-1};
+  }
+}, {passive:true});
+
+/* fullscreen toggle */
+document.getElementById('fullscreenBtn').onclick=()=>{
+  if(!document.fullscreenElement){
+    document.getElementById('app').requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen().catch(()=>{});
+  }
+};
+function resizeCanvas(){
+  const wrap = document.getElementById('canvasWrap');
+  const availW = wrap.clientWidth, availH = wrap.clientHeight;
+  const ratio = 800/560;
+  let w = availW, h = w/ratio;
+  if(h > availH){ h = availH; w = h*ratio; }
+  canvas.style.width = w+'px'; canvas.style.height = h+'px';
+}
+window.addEventListener('resize', resizeCanvas);
+document.addEventListener('fullscreenchange', ()=>setTimeout(resizeCanvas,50));
+
+document.getElementById('pauseBtn').onclick=()=>{
+  if(!game||game.over) return;
+  game.paused=true; document.getElementById('pauseOverlay').classList.add('active');
+};
+document.getElementById('resumeBtn').onclick=()=>{
+  game.paused=false; document.getElementById('pauseOverlay').classList.remove('active');
+  last = performance.now();
+};
+document.getElementById('pauseQuitBtn').onclick=()=>endRunToMenu();
+document.getElementById('quitBtn').onclick=()=>{
+  if(!game||game.over) return;
+  game.paused=true; document.getElementById('pauseOverlay').classList.add('active');
+};
+document.getElementById('backToMenuBtn').onclick=()=>endRunToMenu();
+
+function endRunToMenu(){
+  if(rafId) cancelAnimationFrame(rafId);
+  document.getElementById('gameScreen').classList.remove('active');
+  document.getElementById('menuScreen').classList.add('active');
+  renderMenuStats(); renderMarket(); renderArenas(); renderSkins(); renderAchievements();
+}
+
+/* --- boss pattern generators --- */
+function fireBossPattern(boss, headPos){
+  const diff = DIFF_SETTINGS[STATE.difficulty];
+  const speed = 2.4*diff.projSpeed;
+  const bx=boss.x, by=boss.y;
+  function addProj(vx,vy,color){ game.projectiles.push({x:bx,y:by,vx,vy,r:6,color:color||boss.color,life:400}); }
+  if(boss.pattern==='spray' || boss.pattern==='combo'){
+    const n=8;
+    for(let i=0;i<n;i++){
+      const ang = (i/n)*Math.PI*2 + game.time*0.3;
+      addProj(Math.cos(ang)*speed, Math.sin(ang)*speed);
+    }
+  }
+  if(boss.pattern==='homing' || boss.pattern==='combo'){
+    for(let i=0;i<3;i++){
+      const ang = Math.atan2(headPos.y-by, headPos.x-bx) + (i-1)*0.35;
+      addProj(Math.cos(ang)*speed*1.15, Math.sin(ang)*speed*1.15, '#fff');
+    }
+  }
+  if(boss.pattern==='laser'){
+    const ang = Math.atan2(headPos.y-by, headPos.x-bx);
+    for(let d=1;d<16;d++){
+      game.particles.push({x:bx+Math.cos(ang)*d*GRID*0.8,y:by+Math.sin(ang)*d*GRID*0.8,
+        life:22,color:boss.color,laser:true});
+    }
+    game.laserActive = {ang, ticks:14};
+  }
+}
+
+/* --- boss spawn / update --- */
+function trySpawnBoss(){
+  if(game.boss) return;
+  if(game.bossIndexNext>=BOSSES.length) return;
+  const def = BOSSES[game.bossIndexNext];
+  if(game.score < def.threshold) return;
+  const diff = DIFF_SETTINGS[STATE.difficulty];
+  game.boss = {
+    def, x:canvas.width/2, y:80, vx:1.4*def.speed, vy:0.6*def.speed,
+    hp: def.hpBase*diff.hp, maxHp: def.hpBase*diff.hp, fireTimer:0, phase:0,
+  };
+  document.getElementById('bossBarWrap').style.display='block';
+  document.getElementById('bossName').textContent = (curLang==='tr'?def.name_tr:def.name_en) + ' ' + t('newBoss');
+  toast((curLang==='tr'?def.name_tr:def.name_en)+' '+t('newBoss'));
+  beep(140,0.3,'sawtooth',0.2);
+}
+function updateBoss(dtSec, headPos){
+  const b = game.boss; if(!b) return;
+  b.x += b.vx; b.y += b.vy;
+  if(b.x<60||b.x>canvas.width-60) b.vx*=-1;
+  if(b.y<40||b.y>canvas.height*0.4) b.vy*=-1;
+  b.fireTimer += dtSec;
+  const interval = b.def.pattern==='laser'?2.2:1.5;
+  if(b.fireTimer > interval){
+    b.fireTimer=0;
+    fireBossPattern({x:b.x,y:b.y,color:b.def.color,pattern:b.def.pattern}, headPos);
+  }
+  // contact damage: snake head near boss
+  const dx = headPos.x*GRID+GRID/2-b.x, dy = headPos.y*GRID+GRID/2-b.y;
+  if(Math.sqrt(dx*dx+dy*dy) < 26){
+    b.hp -= 14*damageMult();
+    game.score += 2;
+    spawnParticles(b.x,b.y,b.def.color,6);
+    beep(300,0.05,'square',0.1);
+    // knockback boss slightly
+    b.vx = (dx<0?-1:1)*Math.abs(b.vx); b.vy = (dy<0?-1:1)*Math.abs(b.vy);
+  }
+  document.getElementById('bossBarFg').style.width = Math.max(0,(b.hp/b.maxHp*100))+'%';
+  if(b.hp<=0){
+    defeatBoss(b);
+  }
+}
+function defeatBoss(b){
+  const earned = Math.round(50 + b.def.idx*10);
+  game.essenceRun += earned;
+  game.bossesThisRun++;
+  STATE.lifetimeBossKills = Math.max(STATE.lifetimeBossKills, game.bossIndexNext+1);
+  toast((curLang==='tr'?b.def.name_tr:b.def.name_en)+' '+t('bossDefeated')+` +${earned}✨`);
+  beep(660,0.2,'triangle',0.2);
+  spawnParticles(b.x,b.y,b.def.color,30);
+  game.bossIndexNext++;
+  game.boss=null; game.projectiles=[]; game.laserActive=null;
+  document.getElementById('bossBarWrap').style.display='none';
+  checkAchievements();
+}
+function spawnParticles(x,y,color,n){
+  for(let i=0;i<n;i++){
+    const ang=Math.random()*Math.PI*2, sp=Math.random()*3+1;
+    game.particles.push({x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,life:26,color});
+  }
+}
+
+/* --- main update --- */
+let last=0;
+function loop(now){
+  rafId = requestAnimationFrame(loop);
+  if(!game || game.paused || game.over) return;
+  const dt = Math.min(0.05, (now-last)/1000); last = now;
+  game.time += dt;
+
+  const speed = game.speedBase + Math.min(6, game.stage*0.4);
+  game.tickAcc += dt*speed;
+  if(game.tickAcc >= 1){
+    game.tickAcc -= 1;
+    stepSnake();
+  }
+
+  updateProjectiles(dt);
+  if(game.boss) updateBoss(dt, game.snake[0]);
+  else trySpawnBoss();
+  updateParticles(dt);
+  draw();
+  updateHud();
+}
+
+function stepSnake(){
+  game.dir = game.nextDir;
+  const head = game.snake[0];
+  let nx = head.x+game.dir.x, ny = head.y+game.dir.y;
+  const wrap = game.arena.wrap;
+  if(wrap){
+    nx = (nx+COLS)%COLS; ny=(ny+ROWS)%ROWS;
+  } else {
+    if(nx<0||nx>=COLS||ny<0||ny>=ROWS){ return hitHazard(); }
+  }
+  // self collision
+  if(game.snake.some(s=>s.x===nx&&s.y===ny)) return hitHazard();
+
+  const newHead={x:nx,y:ny};
+  game.snake.unshift(newHead);
+
+  let grew=false;
+  if(newHead.x===game.orb.x && newHead.y===game.orb.y){
+    game.score+=10; STATE.lifetimeOrbs++;
+    game.essenceRun += Math.round(1*essenceMult());
+    grew=true; game.orb = spawnOrb(game.snake);
+    beep(520,0.05,'sine',0.12);
+    if(game.score/60 > game.stage){ game.stage++; toast((curLang==='tr'?'Evrim!':'Evolved!')+' Lv.'+game.stage); beep(760,0.15,'triangle',0.15);}
+  }
+  if(game.specialOrb && newHead.x===game.specialOrb.x && newHead.y===game.specialOrb.y){
+    game.score+=25; game.essenceRun += Math.round(5*essenceMult());
+    if(game.lives < 9) {} // no-op placeholder for balance
+    game.specialOrb=null; grew=true;
+    beep(900,0.1,'sine',0.15);
+  }
+  if(!grew) game.snake.pop();
+
+  // magnet: check nearby orb auto-collect
+  const magnetRange = STATE.upgrades.magnet;
+  if(magnetRange>0){
+    const d = Math.abs(game.orb.x-newHead.x)+Math.abs(game.orb.y-newHead.y);
+    if(d<=magnetRange && d>0){
+      // slowly pull orb closer conceptually by relocating if very close - simplified: instant collect within range 1
+    }
+  }
+
+  // occasionally spawn special orb
+  if(!game.specialOrb && Math.random()<0.01){
+    game.specialOrb = spawnOrb(game.snake);
+  }
+}
+
+function hitHazard(){
+  if(game.shields>0){
+    game.shields--; toast(t('shieldBlocked')); beep(200,0.1,'square',0.15);
+    return;
+  }
+  game.lives--;
+  toast(t('livesLost'));
+  beep(160,0.2,'sawtooth',0.2);
+  if(game.lives<=1) STATE.hadCloseCall=true;
+  if(game.lives<=0){ gameOver(); }
+  else {
+    // shrink a bit and continue
+    game.snake = game.snake.slice(0, Math.max(3, Math.floor(game.snake.length*0.7)));
+  }
+}
+
+function updateProjectiles(dt){
+  const head = game.snake[0];
+  const hx = head.x*GRID+GRID/2, hy = head.y*GRID+GRID/2;
+  game.projectiles = game.projectiles.filter(p=>{
+    p.x+=p.vx; p.y+=p.vy; p.life--;
+    const dx=p.x-hx, dy=p.y-hy;
+    if(Math.sqrt(dx*dx+dy*dy) < 12){
+      hitHazard(); return false;
+    }
+    return p.life>0 && p.x>-20&&p.x<canvas.width+20&&p.y>-20&&p.y<canvas.height+20;
+  });
+  if(game.laserActive){
+    game.laserActive.ticks--;
+    // laser damages if head roughly aligned
+    const b=game.boss;
+    if(b){
+      const ang=game.laserActive.ang;
+      const dx=hx-b.x, dy=hy-b.y;
+      const angToHead=Math.atan2(dy,dx);
+      let diffAng = Math.atan2(Math.sin(angToHead-ang),Math.cos(angToHead-ang));
+      if(Math.abs(diffAng)<0.15 && game.laserActive.ticks>0 && game.laserActive.ticks%6===0){
+        hitHazard();
+      }
+    }
+    if(game.laserActive.ticks<=0) game.laserActive=null;
+  }
+}
+function updateParticles(dt){
+  game.particles = game.particles.filter(p=>{
+    p.x+=(p.vx||0); p.y+=(p.vy||0); p.life--;
+    return p.life>0;
+  });
+}
+
+function gameOver(){
+  game.over=true;
+  STATE.essence += game.essenceRun;
+  STATE.lifetimeEssence += game.essenceRun;
+  STATE.bestScore = Math.max(STATE.bestScore, game.score);
+  STATE.lifetimeDeaths++;
+  checkAchievements();
+  saveProgress();
+  document.getElementById('gameOverOverlay').classList.add('active');
+  document.getElementById('gameOverStats').textContent =
+    `${t('score')}: ${game.score}  |  ✨ +${game.essenceRun}  |  💀 ${game.bossesThisRun}`;
+  const saveNameInput = document.getElementById('saveScoreName');
+  if(!saveNameInput.value) saveNameInput.value = playerName;
+  document.getElementById('saveScoreBtn').disabled = false;
+  beep(120,0.4,'sawtooth',0.2);
+}
+
+/* --- rendering --- */
+function draw(){
+  const arena = game.arena;
+  const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0, arena.bg[0]); grad.addColorStop(1, arena.bg[1]);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // subtle grid
+  ctx.strokeStyle='rgba(255,255,255,0.03)';
+  for(let x=0;x<=COLS;x++){ ctx.beginPath();ctx.moveTo(x*GRID,0);ctx.lineTo(x*GRID,canvas.height);ctx.stroke(); }
+
+  // orb
+  ctx.fillStyle='#f5b301';
+  ctx.beginPath(); ctx.arc(game.orb.x*GRID+GRID/2, game.orb.y*GRID+GRID/2, GRID/2.6, 0, 7); ctx.fill();
+  if(game.specialOrb){
+    ctx.fillStyle='#22d3ee';
+    ctx.beginPath(); ctx.arc(game.specialOrb.x*GRID+GRID/2, game.specialOrb.y*GRID+GRID/2, GRID/2.4,0,7); ctx.fill();
+  }
+
+  // snake
+  const skin = game.skin;
+  game.snake.forEach((s,i)=>{
+    let color;
+    if(skin.color==='rainbow'){ color = `hsl(${(i*20+game.time*60)%360},80%,60%)`; }
+    else color = i===0? skin.head : skin.color;
+    ctx.fillStyle = color;
+    const pad = i===0?1:2;
+    ctx.fillRect(s.x*GRID+pad, s.y*GRID+pad, GRID-pad*2, GRID-pad*2);
+  });
+
+  // boss
+  if(game.boss){
+    const b=game.boss;
+    ctx.fillStyle=b.def.color;
+    ctx.beginPath(); ctx.arc(b.x,b.y,26,0,7); ctx.fill();
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(b.x-8,b.y-6,4,0,7); ctx.arc(b.x+8,b.y-6,4,0,7); ctx.fill();
+  }
+  // projectiles
+  game.projectiles.forEach(p=>{
+    ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r||5,0,7); ctx.fill();
+  });
+  // laser telegraph particles
+  game.particles.forEach(p=>{
+    ctx.fillStyle=p.color; ctx.globalAlpha=Math.max(0,p.life/26);
+    ctx.beginPath(); ctx.arc(p.x,p.y,p.laser?4:3,0,7); ctx.fill();
+    ctx.globalAlpha=1;
+  });
+}
+function updateHud(){
+  document.getElementById('hudScore').textContent = game.score;
+  document.getElementById('hudLives').textContent = game.lives;
+  document.getElementById('hudShield').textContent = game.shields;
+  document.getElementById('hudEssence').textContent = game.essenceRun;
+}
+
+/* ---------- init ---------- */
+updateTexts();
+renderMenuStats();
+</script>
 </body>
 </html>
