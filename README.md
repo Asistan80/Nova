@@ -177,3 +177,38 @@ paylaş, yapısına göre (Blueprint veya iframe) aynı yöntemle entegre ederiz
 `data/projects.json` dosyasını doğrudan düzenleyip yeni bir obje ekleyebilirsin,
 format admin panelin ürettiğiyle aynıdır.
 
+
+## Yorum Bildirimleri (E-posta / Discord / Telefon)
+
+Yeni bir yorum geldiğinde admin'e (sana) haber vermesi için 3 bağımsız
+kanal var — istediğini/istediklerini aç, kalanını boş bırak.
+
+### E-posta (Gmail)
+1. Gmail hesabında 2 Adımlı Doğrulama'yı aç (Google Hesabı → Güvenlik).
+2. "Uygulama Şifreleri" oluştur (App Passwords) → 16 haneli bir şifre alırsın.
+3. Render → Environment:
+```
+GMAIL_ADDRESS = murnovadunyasi@gmail.com
+GMAIL_APP_PASSWORD = (16 haneli uygulama şifresi)
+NOTIFY_EMAIL_TO = murnovadunyasi@gmail.com   (opsiyonel, boşsa GMAIL_ADDRESS'e gider)
+```
+
+### Discord
+1. Discord'da bir kanala sağ tık → Kanalı Düzenle → Entegrasyonlar → Webhooks → Yeni Webhook.
+2. Webhook URL'ini kopyala.
+3. Render → Environment:
+```
+DISCORD_WEBHOOK_URL = (kopyaladığın webhook URL'i)
+```
+
+### Telefon (anlık push, uygulama gerektirmez)
+1. Telefonuna [ntfy](https://ntfy.sh) uygulamasını kur (App Store / Play Store, ücretsiz).
+2. Uygulamada kendine özel, tahmin edilmesi zor bir "topic" adı belirle
+   (ör. `murnova-bildirim-8x4k2`) ve o konuya abone ol.
+3. Render → Environment:
+```
+NTFY_TOPIC = murnova-bildirim-8x4k2
+```
+
+Hepsi ayarlandıktan sonra admin panelin üstünde hangilerinin aktif
+olduğunu gösteren küçük noktalar göreceksin.

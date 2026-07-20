@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 
 import store
 import github_sync
+import notifications
 import categories as cat
 from games_blueprints.rise_of_the_bosses import bp as rise_of_the_bosses_bp
 
@@ -113,12 +114,39 @@ def login_required(f):
     return wrapper
 
 
+_login_attempts = {}  # {ip: [basarisiz deneme zaman damgalari]}
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 600  # 10 dakika
+
+
+def _client_ip():
+    return request.headers.get("X-Forwarded-For", request.remote_addr or "unknown").split(",")[0].strip()
+
+
+def _login_locked(ip):
+    now_ts = datetime.now(timezone.utc).timestamp()
+    attempts = [t for t in _login_attempts.get(ip, []) if now_ts - t < LOGIN_WINDOW_SECONDS]
+    _login_attempts[ip] = attempts
+    return len(attempts) >= LOGIN_MAX_ATTEMPTS
+
+
+def _register_failed_login(ip):
+    now_ts = datetime.now(timezone.utc).timestamp()
+    _login_attempts.setdefault(ip, []).append(now_ts)
+
+
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
+    ip = _client_ip()
     if request.method == "POST":
+        if _login_locked(ip):
+            flash(f"Çok fazla yanlış deneme yapıldı. {LOGIN_WINDOW_SECONDS // 60} dakika sonra tekrar dene.")
+            return render_template("admin/login.html")
         if request.form.get("password") == ADMIN_PASSWORD:
+            _login_attempts.pop(ip, None)
             session["is_admin"] = True
             return redirect(request.args.get("next") or url_for("admin_dashboard"))
+        _register_failed_login(ip)
         flash("Şifre yanlış.")
     return render_template("admin/login.html")
 
@@ -299,6 +327,11 @@ def submit_comment(slug):
     name = request.form.get("name", "").strip()
     store.add_comment(slug, name, text)
     _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yeni yorum: {slug}")
+    try:
+        admin_url = request.url_root.rstrip("/") + url_for("admin_comments")
+        notifications.notify_new_comment(project["name"], name or "Misafir", text, admin_url)
+    except Exception:
+        pass
     flash("Yorumun gönderildi — onaylandıktan sonra görünecek.")
     return redirect(redirect_url)
 
@@ -495,6 +528,7 @@ def admin_dashboard():
         pending_count=len(store.pending_comments()),
         sync_enabled=github_sync.is_enabled(),
         deploy_hook_enabled=github_sync.deploy_hook_enabled(),
+        notify_status=notifications.status(),
     )
 
 
