@@ -94,29 +94,48 @@ durur). Ama bu commit'ler **otomatik olarak siteye geri yansımaz** — çünkü
 başlatır.
 
 **Bu yüzden ücretsiz planda kalmaya karar verildiyse şu iş akışını
-izlemek gerekiyor:**
+izlemek gerekiyordu:**
 1. Admin panelden istediğin değişikliği yap (kapak yükle, yorum onayla, vb.)
 2. **Render Dashboard → Nova servisi → Manual Deploy → Deploy latest
    commit** ile elle bir deploy tetikle.
 3. Bu deploy bitene kadar bekle (birkaç dakika) — bundan sonra o
    değişiklik kalıcı hale gelir, sonraki uyuma/uyanma döngülerinde kaybolmaz.
 
-Admin panelin üstünde bu hatırlatma sürekli görünür durumda.
+### 🤖 Artık otomatik: Deploy Hook
+Bu adımı elle yapmak unutulmaya çok müsait olduğu için, artık **otomatik**
+hale getirildi. Render'da her servisin kendine özel, gizli bir "Deploy Hook"
+URL'i vardır (Settings → Deploy → Deploy Hook). Bunu bir ortam değişkeni
+olarak eklersen, admin panelden yapılan **her** değişiklik (kapak yükleme,
+yorum onaylama, Hakkımda güncelleme, proje ekleme/silme, vb.) otomatik
+olarak bu URL'i tetikler ve Render birkaç dakika içinde kendini yeniden
+deploy edip değişikliği kalıcı hale getirir. **Elle Manual Deploy yapmana
+artık gerek yok.**
+
+Kurulum:
+```
+RENDER_DEPLOY_HOOK_URL = (Render → Settings → Deploy → Deploy Hook'tan kopyala)
+```
+Admin panelin üstünde bu özelliğin açık/kapalı olduğu her zaman görünür.
+
+**Not:** Bu, arka arkaya çok sayıda değişiklik yaparsan (ör. 10 kapak
+görseli art arda yüklemek) birden fazla deploy'un sıraya girmesine sebep
+olabilir — zararı yok, Render bunları sırayla işler, sadece son hâl
+oturana kadar birkaç dakika geçebilir.
 
 **Kalıcı ve sorunsuz bir çözüm isteniyorsa:** Render'da ücretli bir plana
 geçip (~7$/ay) **Persistent Disk** eklemek, bu sorunu tamamen ortadan
-kaldırır — manuel deploy'a hiç gerek kalmaz.
+kaldırır — deploy hook'a bile gerek kalmaz.
 
 ### Kurulumu (Render → Environment sekmesi)
 ```
 GITHUB_TOKEN  = (repo izinli bir Personal Access Token)
 GITHUB_REPO   = Asistan80/Nova
 GITHUB_BRANCH = main
+RENDER_DEPLOY_HOOK_URL = (yukarıda açıklanan Deploy Hook URL'i)
 ```
-Bu üç değişken tanımlı değilse, senkronizasyon sessizce devre dışı kalır —
-site normal çalışmaya devam eder, sadece yedekleme yapılmaz. Admin
-panelindeki **"Bağlantıyı Test Et"** butonuyla bu bağlantıyı istediğin an
-doğrulayabilirsin.
+Bu değişkenler tanımlı değilse, ilgili özellik sessizce devre dışı kalır —
+site normal çalışmaya devam eder. Admin panelindeki **"Bağlantıyı Test
+Et"** butonuyla GitHub bağlantısını istediğin an doğrulayabilirsin.
 
 ## Şifreyi değiştirmek
 Render'da: Dashboard → servisin → **Environment** sekmesi → şu değişkenleri ekle:

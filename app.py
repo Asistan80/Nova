@@ -83,11 +83,13 @@ def _make_gif_poster(gif_path, poster_path):
 def _sync_projects_json(message):
     if github_sync.is_enabled():
         github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
+        github_sync.trigger_deploy()
 
 
 def _sync_data_file(local_path, repo_filename, message):
     if github_sync.is_enabled():
         github_sync.push_file(local_path, f"data/{repo_filename}", message)
+        github_sync.trigger_deploy()
 
 
 # ---------- Ziyaretçi sayacı ----------
@@ -492,6 +494,7 @@ def admin_dashboard():
         visit_chart=store.last_n_days(14),
         pending_count=len(store.pending_comments()),
         sync_enabled=github_sync.is_enabled(),
+        deploy_hook_enabled=github_sync.deploy_hook_enabled(),
     )
 
 

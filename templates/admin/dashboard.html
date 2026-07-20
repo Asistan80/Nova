@@ -31,11 +31,27 @@
       </form>
     </div>
 
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
+      {% if deploy_hook_enabled %}
+        <span style="color:var(--teal);">●</span> Otomatik deploy: AÇIK — her değişiklik kendini otomatik kalıcı hale getirir
+      {% else %}
+        <span style="color:var(--boss-red);">●</span> Otomatik deploy: KAPALI (RENDER_DEPLOY_HOOK_URL eksik)
+      {% endif %}
+    </div>
+
+    {% if not deploy_hook_enabled %}
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:rgba(76,141,255,0.08); border:1px solid rgba(76,141,255,0.3); border-radius:10px; font-size:0.88rem; color:var(--text-dim);">
       ⚠️ <strong style="color:var(--text);">Unutma:</strong> Render ücretsiz planda olduğu için, buradan yaptığın değişikliklerin
       kalıcı olması için <strong style="color:var(--text);">Render → Manual Deploy → Deploy latest commit</strong>
       yapman gerekiyor — yoksa site "uyuyup uyandığında" bu oturumdaki değişiklikler kaybolabilir.
+      (Bunu otomatikleştirmek için RENDER_DEPLOY_HOOK_URL ekleyebilirsin.)
     </div>
+    {% else %}
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:rgba(165,107,255,0.08); border:1px solid rgba(165,107,255,0.3); border-radius:10px; font-size:0.88rem; color:var(--text-dim);">
+      ✅ Her değişiklikten sonra site birkaç dakika içinde kendini otomatik yeniden başlatıp
+      değişikliği kalıcı hale getirir — elle bir şey yapmana gerek yok.
+    </div>
+    {% endif %}
 
     <div class="visit-chart">
       {% for label, count in visit_chart %}

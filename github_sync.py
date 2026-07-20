@@ -152,3 +152,24 @@ def delete_file(repo_path, message):
         return r.status_code == 200
     except requests.RequestException:
         return False
+
+
+# ---------- Otomatik deploy tetikleme ----------
+# Render'ın "Deploy Hook" URL'si tanımlıysa, admin panelden yapılan her
+# değişiklikten sonra bu URL'e istek atılır ve Render otomatik olarak
+# en son commit'i (yeni yüklenen dosyalar dahil) deploy eder. Böylece
+# kullanıcının elle "Manual Deploy" yapmasına gerek kalmaz.
+
+def deploy_hook_enabled():
+    return bool(os.environ.get("RENDER_DEPLOY_HOOK_URL"))
+
+
+def trigger_deploy():
+    hook_url = os.environ.get("RENDER_DEPLOY_HOOK_URL")
+    if not hook_url:
+        return False
+    try:
+        r = requests.post(hook_url, timeout=15)
+        return r.status_code in (200, 201, 202)
+    except requests.RequestException:
+        return False
