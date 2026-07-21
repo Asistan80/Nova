@@ -212,3 +212,16 @@ NTFY_TOPIC = murnova-bildirim-8x4k2
 
 Hepsi ayarlandıktan sonra admin panelin üstünde hangilerinin aktif
 olduğunu gösteren küçük noktalar göreceksin.
+
+### Telegram (muhtemelen en kolayı)
+1. Telegram'da **@BotFather**'a yaz, `/newbot` komutuyla yeni bir bot oluştur
+   (bir isim ve kullanıcı adı soracak) — sana bir **bot token** verecek.
+2. Oluşturduğun bota Telegram'dan `/start` yaz (ya da herhangi bir mesaj at).
+3. Şu adrese tarayıcından git (TOKEN yerine kendi token'ını yaz):
+   `https://api.telegram.org/botTOKEN/getUpdates`
+   Dönen JSON içinde `"chat":{"id": ...}` kısmındaki sayı senin chat id'in.
+4. Render → Environment:
+```
+TELEGRAM_BOT_TOKEN = (BotFather'dan aldığın token)
+TELEGRAM_CHAT_ID = (getUpdates'ten bulduğun sayı)
+```

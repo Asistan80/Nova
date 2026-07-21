@@ -75,6 +75,24 @@ def notify_ntfy(title, message):
         return False
 
 
+# ---------- Telegram (bot üzerinden mesaj) ----------
+
+def notify_telegram(text):
+    token = os.environ.get("TELEGRAM_BOT_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+    if not token or not chat_id:
+        return False
+    try:
+        r = requests.post(
+            f"https://api.telegram.org/bot{token}/sendMessage",
+            json={"chat_id": chat_id, "text": text},
+            timeout=15,
+        )
+        return r.status_code == 200
+    except requests.RequestException:
+        return False
+
+
 # ---------- Ortak: yeni yorum bildirimi ----------
 
 def notify_new_comment(project_name, comment_name, comment_text, admin_url):
@@ -88,10 +106,16 @@ def notify_new_comment(project_name, comment_name, comment_text, admin_url):
     notify_email(subject, body)
     notify_discord(f"💬 **Yeni yorum** — *{project_name}*\n**{comment_name}:** {comment_text}\n{admin_url}")
     notify_ntfy(subject, f"{comment_name}: {comment_text}")
+    notify_telegram(f"💬 Yeni yorum — {project_name}\n{comment_name}: {comment_text}\n{admin_url}")
 
 
 def any_enabled():
-    return bool(_email_config() or os.environ.get("DISCORD_WEBHOOK_URL") or os.environ.get("NTFY_TOPIC"))
+    return bool(
+        _email_config()
+        or os.environ.get("DISCORD_WEBHOOK_URL")
+        or os.environ.get("NTFY_TOPIC")
+        or (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
+    )
 
 
 def status():
@@ -99,4 +123,5 @@ def status():
         "email": bool(_email_config()),
         "discord": bool(os.environ.get("DISCORD_WEBHOOK_URL")),
         "ntfy": bool(os.environ.get("NTFY_TOPIC")),
+        "telegram": bool(os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID")),
     }

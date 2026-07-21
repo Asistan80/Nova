@@ -877,3 +877,12 @@ img.skeleton{
 @media (prefers-reduced-motion: reduce){
   .marquee-track{ animation:none; }
 }
+
+/* ================================================================
+   KATEGORİ SAYFASI HERO (Oyunlar / Uygulamalar / Medya başlığı)
+   ================================================================ */
+.category-hero{ padding:70px 0 50px; }
+.category-hero-top{ display:flex; align-items:center; gap:22px; flex-wrap:wrap; }
+.category-hero-icon.group-tile-icon{
+  width:64px; height:64px; font-size:1.8rem; flex-shrink:0; margin-bottom:0;
+}

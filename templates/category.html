@@ -7,12 +7,23 @@
 
 {% block content %}
 
-<header class="detail-hero">
+<header class="hero category-hero">
+  <div class="hero-orbs" aria-hidden="true">
+    <span class="orb orb-amber"></span>
+    <span class="orb orb-teal"></span>
+    <span class="orb orb-red"></span>
+  </div>
   <div class="wrap">
-    <h1 class="detail-title">{{ group.label }}</h1>
-    <p class="detail-tagline">{{ group.desc }}</p>
-    <div class="hero-cta">
+    <div class="category-hero-top reveal in">
+      <div class="group-tile-icon icon-{{ group.slug }} category-hero-icon"></div>
+      <div>
+        <h1 class="detail-title" style="margin-bottom:6px;">{{ group.label }}</h1>
+        <p class="detail-tagline" style="margin-bottom:0;">{{ group.desc }}</p>
+      </div>
+    </div>
+    <div class="hero-cta" style="margin-top:28px;">
       <a href="{{ url_for('index') }}" class="btn btn-ghost">← Anasayfaya dön</a>
+      <span class="stat-badge" style="align-self:center;">{{ items|length }} içerik</span>
     </div>
   </div>
 </header>

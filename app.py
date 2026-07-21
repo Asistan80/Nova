@@ -3,7 +3,7 @@ from functools import wraps
 from datetime import timedelta, datetime, timezone
 
 from flask import (
-    Flask, render_template, send_from_directory, abort, request,
+    Flask, render_template, send_from_directory, send_file, abort, request,
     redirect, url_for, session, flash
 )
 from werkzeug.utils import secure_filename
@@ -538,6 +538,45 @@ def admin_sync_test():
     ok, message = github_sync.test_connection()
     flash(("✅ " if ok else "❌ ") + message)
     return redirect(url_for("admin_dashboard"))
+
+
+@app.route("/admin/yedek-indir")
+@login_required
+def admin_backup_download():
+    import io
+    import zipfile
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        # data/ klasöründeki tüm JSON dosyaları
+        if os.path.exists(store.DATA_DIR):
+            for fname in os.listdir(store.DATA_DIR):
+                fpath = os.path.join(store.DATA_DIR, fname)
+                if os.path.isfile(fpath):
+                    zf.write(fpath, f"data/{fname}")
+        # yüklenen kapak/galeri görselleri
+        for root, _dirs, files in os.walk(os.path.join(BASE_DIR, "static", "uploads")):
+            for fname in files:
+                fpath = os.path.join(root, fname)
+                arcname = os.path.relpath(fpath, BASE_DIR)
+                zf.write(fpath, arcname)
+        # indirilebilir paketler
+        for root, _dirs, files in os.walk(DOWNLOADS_DIR):
+            for fname in files:
+                fpath = os.path.join(root, fname)
+                arcname = os.path.relpath(fpath, BASE_DIR)
+                zf.write(fpath, arcname)
+        # Rise of the Bosses veritabanı (varsa)
+        rotb_db = os.path.join(BASE_DIR, "games_blueprints", "rise_of_the_bosses", "data", "rotb.db")
+        if os.path.exists(rotb_db):
+            zf.write(rotb_db, "games_blueprints/rise_of_the_bosses/data/rotb.db")
+
+    buf.seek(0)
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H%M")
+    return send_file(
+        buf, mimetype="application/zip", as_attachment=True,
+        download_name=f"murnova-yedek-{stamp}.zip",
+    )
 
 
 @app.route("/admin/sirala/<kind>", methods=["POST"])
