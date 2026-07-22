@@ -886,3 +886,28 @@ img.skeleton{
 .category-hero-icon.group-tile-icon{
   width:64px; height:64px; font-size:1.8rem; flex-shrink:0; margin-bottom:0;
 }
+
+/* ================================================================
+   ADMİN: YORUM YANITLAMA FORMU
+   ================================================================ */
+.reply-form{ display:flex; gap:10px; margin:12px 0; align-items:flex-start; }
+.reply-form textarea{
+  flex:1; min-height:50px; padding:10px 12px; border-radius:8px;
+  border:1px solid var(--line); background:var(--bg-deep); color:var(--text);
+  font-family:'Manrope',sans-serif; font-size:0.86rem; resize:vertical;
+}
+.admin-reply-preview{
+  margin-top:10px; padding:10px 14px; border-radius:8px;
+  background: rgba(76,141,255,0.08); border-left:3px solid var(--amber);
+  font-size:0.85rem; color:var(--text-dim);
+}
+
+/* ================================================================
+   HERKESE AÇIK: YORUM ALTINDA ADMİN YANITI
+   ================================================================ */
+.comment-reply{
+  margin-top:10px; margin-left:18px; padding:12px 16px;
+  background: rgba(76,141,255,0.06); border-left:3px solid var(--amber);
+  border-radius:0 8px 8px 0; font-size:0.87rem;
+}
+.comment-reply strong{ color:var(--amber); }

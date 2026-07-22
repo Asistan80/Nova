@@ -48,6 +48,18 @@
           <span>{{ projects_by_slug.get(c.slug, {}).get('name', c.slug) }}</span>
         </div>
         <p>{{ c.text }}</p>
+
+        {% if c.admin_reply %}
+        <div class="admin-reply-preview">
+          <strong>Senin yanıtın:</strong> {{ c.admin_reply }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('admin_reply_comment', comment_id=c.id) }}" class="reply-form">
+          <textarea name="reply" placeholder="Yanıt yaz (boş bırakıp gönderirsen yanıt kaldırılır)...">{{ c.admin_reply or '' }}</textarea>
+          <button type="submit" class="mini-btn primary">{{ 'Yanıtı Güncelle' if c.admin_reply else 'Yanıtla' }}</button>
+        </form>
+
         <div class="admin-actions">
           <form method="POST" action="{{ url_for('admin_delete_comment', comment_id=c.id) }}" onsubmit="return confirm('Bu yorum silinsin mi?');">
             <button type="submit" class="danger">Sil</button>

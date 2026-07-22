@@ -319,6 +319,19 @@ def delete_comment(comment_id):
     _save_comments(comments)
 
 
+def reply_to_comment(comment_id, reply_text):
+    comments = all_comments()
+    for c in comments:
+        if c["id"] == comment_id:
+            if reply_text.strip():
+                c["admin_reply"] = reply_text.strip()[:600]
+                c["admin_reply_at"] = _now_iso()
+            else:
+                c.pop("admin_reply", None)
+                c.pop("admin_reply_at", None)
+    _save_comments(comments)
+
+
 # ---------- Toplu admin işlemleri ----------
 
 def bulk_set_published(slugs, published):

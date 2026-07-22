@@ -617,6 +617,15 @@ def admin_delete_comment(comment_id):
     return redirect(url_for("admin_comments"))
 
 
+@app.route("/admin/yorum-yanitla/<comment_id>", methods=["POST"])
+@login_required
+def admin_reply_comment(comment_id):
+    reply_text = request.form.get("reply", "")
+    store.reply_to_comment(comment_id, reply_text)
+    _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yorum yanıtlandı: {comment_id}")
+    return redirect(url_for("admin_comments"))
+
+
 @app.route("/admin/toplu/<action>", methods=["POST"])
 @login_required
 def admin_bulk(action):

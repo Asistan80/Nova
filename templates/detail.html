@@ -127,6 +127,9 @@
       <div class="comment-item">
         <div class="comment-head"><strong>{{ c.name }}</strong></div>
         <p>{{ c.text }}</p>
+        {% if c.admin_reply %}
+        <div class="comment-reply"><strong>MuBiKu yanıtladı:</strong> {{ c.admin_reply }}</div>
+        {% endif %}
       </div>
       {% endfor %}
     </div>

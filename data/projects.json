@@ -21,7 +21,7 @@
       "Zorluk ön ayarları ve AI-vs-AI çarpışma modu",
       "Tam Türkçe / İngilizce dil desteği"
     ],
-    "cover": null,
+    "cover": "rise-of-the-bosses.png",
     "gallery": [],
     "version": "2.0",
     "play_url": "/oyna/rise-of-the-bosses",
@@ -32,7 +32,9 @@
     ],
     "has_game_files": true,
     "created_at": "2026-07-13T00:00:00+00:00",
-    "published": true
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "bench",
@@ -107,7 +109,7 @@
       "Skor tablosu",
       "PWA - telefona kurulabilir"
     ],
-    "cover": null,
+    "cover": "cyber-dash.png",
     "gallery": [],
     "version": "1.0",
     "play_url": "/oyna/cyber-dash",
@@ -115,7 +117,9 @@
     "download_file": null,
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-16T07:04:38.793073+00:00"
+    "created_at": "2026-07-16T07:04:38.793073+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "kahve-dukkanim",
@@ -134,7 +138,7 @@
       "LocalStorage skor tablosu",
       "6 pazar alanı geliştirmesi"
     ],
-    "cover": null,
+    "cover": "kahve-dukkanim.png",
     "gallery": [],
     "version": "1.0",
     "play_url": "/oyna/kahve-dukkanim",
@@ -142,7 +146,9 @@
     "download_file": null,
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-16T07:04:38.793182+00:00"
+    "created_at": "2026-07-16T07:04:38.793182+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "neon-racer",
@@ -163,7 +169,7 @@
       "15 başarım",
       "Tam prosedürel ses/müzik"
     ],
-    "cover": null,
+    "cover": "neon-racer.png",
     "gallery": [],
     "version": "1.0",
     "play_url": null,
@@ -171,7 +177,9 @@
     "download_file": "neon-racer.zip",
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-16T07:04:38.793186+00:00"
+    "created_at": "2026-07-16T07:04:38.793186+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "endless-runner",
@@ -190,7 +198,7 @@
       "Çömelme",
       "Dokunmatik kontrol desteği"
     ],
-    "cover": null,
+    "cover": "endless-runner.png",
     "gallery": [],
     "version": "1.0",
     "play_url": "/oyna/endless-runner",
@@ -198,7 +206,9 @@
     "download_file": null,
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-16T07:04:38.793189+00:00"
+    "created_at": "2026-07-16T07:04:38.793189+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "cyber-stick",
@@ -219,7 +229,7 @@
       "Seviye atlama sistemi",
       "Mobil dokunmatik kontrol"
     ],
-    "cover": null,
+    "cover": "cyber-stick.png",
     "gallery": [],
     "version": "1.0",
     "play_url": "/oyna/cyber-stick",
@@ -227,7 +237,9 @@
     "download_file": null,
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-16T07:04:38.793191+00:00"
+    "created_at": "2026-07-16T07:04:38.793191+00:00",
+    "youtube_url": "",
+    "publish_at": null
   },
   {
     "slug": "focuspet",
@@ -250,14 +262,104 @@
       "Otomatik kayıt (pet_data.json)",
       "Duruma göre değişen dinamik konuşma balonu"
     ],
-    "cover": null,
+    "cover": "focuspet.png",
     "gallery": [],
     "version": "1.0",
     "play_url": null,
     "download_url": null,
-    "download_file": "focuspet.zip",
+    "download_file": "FocusPet.zip",
     "changelog": [],
     "published": true,
-    "created_at": "2026-07-19T16:13:37.139649+00:00"
+    "created_at": "2026-07-19T16:13:37.139649+00:00",
+    "youtube_url": "",
+    "publish_at": null
+  },
+  {
+    "name": "KÜTÜPHANEM",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Kitaplar ve oyunlar",
+    "desc": "Kitaplarınızı ve oyunlarınızı hepsini düzenli bir şekilde koyabileceğiniz kütüphane programı.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "kutuphanem.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "KUTUPHANEM.zip",
+    "updated_at": "",
+    "slug": "kutuphanem",
+    "created_at": "2026-07-21T22:38:00.006702+00:00"
+  },
+  {
+    "name": "KütüphaneApp",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Kitaplar ve oyunlar",
+    "desc": "Kitaplarınızı ve oyunlarınızı ayrı ayrı depolayacağınız liste halinde kayıt edebileceğiniz kütüphane programı.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "kutuphaneapp.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "KutuphaneApp.zip",
+    "updated_at": "",
+    "slug": "kutuphaneapp",
+    "created_at": "2026-07-21T22:40:01.564186+00:00"
+  },
+  {
+    "name": "NEXUS HUB KÜTÜPHANE",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Kitaplar ve oyunlar",
+    "desc": "Eğer kitaplarınızı liste halinde toplu olarak kayıt etmek istiyorsanız güzel bir hem kitap hem de oyunlarınızı kayıt edebilirsiniz. Gelişmiş özellikleri ile size hizmet edecektir.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "nexus-hub-kutuphane.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "NEXUS_HUB.zip",
+    "updated_at": "",
+    "slug": "nexus-hub-kutuphane",
+    "created_at": "2026-07-21T22:41:56.136343+00:00"
+  },
+  {
+    "name": "Korsan Kedi",
+    "kind": "resim",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Şirin güzel bir korsan kedi resmi.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "659de29bd9387c4b2e40c114099591c5d800932a_original.jpeg",
+    "updated_at": "",
+    "slug": "korsan-kedi",
+    "created_at": "2026-07-21T23:02:39.343326+00:00"
   }
 ]
