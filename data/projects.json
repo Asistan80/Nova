@@ -361,5 +361,27 @@
     "updated_at": "",
     "slug": "korsan-kedi",
     "created_at": "2026-07-21T23:02:39.343326+00:00"
+  },
+  {
+    "name": "Manzara",
+    "kind": "resim",
+    "status": "playable",
+    "tagline": "Güzel bir manzara resmi isteyenlere",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "Gemini_Generated_Image_dwtayadwtayadwta.png",
+    "updated_at": "",
+    "slug": "manzara",
+    "created_at": "2026-07-24T09:26:55.390089+00:00"
   }
 ]
