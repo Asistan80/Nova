@@ -405,5 +405,27 @@
     "updated_at": "",
     "slug": "proje",
     "created_at": "2026-07-24T09:29:04.614393+00:00"
+  },
+  {
+    "name": "AmbientStudio",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Sesler",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "ambientstudio.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "AmbientStudio.zip",
+    "updated_at": "",
+    "slug": "ambientstudio",
+    "created_at": "2026-07-24T09:31:05.491443+00:00"
   }
 ]
