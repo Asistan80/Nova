@@ -28,5 +28,13 @@
     "text": "<3",
     "approved": true,
     "created_at": "2026-07-27T17:03:42.535077+00:00"
+  },
+  {
+    "id": "9b0f951bf1",
+    "slug": "manzara",
+    "name": "MuBiKu",
+    "text": "Çok güzel manzara <3",
+    "approved": false,
+    "created_at": "2026-07-27T17:06:40.228133+00:00"
   }
 ]
