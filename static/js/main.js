@@ -25,7 +25,7 @@
   if (saved) root.setAttribute("data-theme", saved);
 
   document.addEventListener("click", function (e) {
-    const btn = e.target.closest(".theme-toggle");
+    const btn = e.target.closest(".theme-toggle:not(.sound-toggle)");
     if (!btn) return;
     const current = root.getAttribute("data-theme") === "light" ? "light" : "dark";
     const next = current === "light" ? "dark" : "light";
@@ -284,3 +284,75 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/static/sw.js").catch(function () {});
   });
 }
+
+// ---------- Favoriler (localStorage, hesap gerektirmez) ----------
+(function () {
+  function getFavorites() {
+    try { return JSON.parse(localStorage.getItem("murnova-favorites") || "[]"); }
+    catch (e) { return []; }
+  }
+  function setFavorites(list) {
+    localStorage.setItem("murnova-favorites", JSON.stringify(list));
+  }
+  function isFavorited(slug) {
+    return getFavorites().includes(slug);
+  }
+  function paintStar(el, slug) {
+    el.classList.toggle("favorited", isFavorited(slug));
+  }
+
+  // Sayfadaki tüm favori butonlarını başlangıç durumuna göre boya
+  document.querySelectorAll(".favorite-star, .favorite-btn").forEach((el) => {
+    paintStar(el, el.dataset.slug);
+  });
+
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".favorite-star, .favorite-btn");
+    if (!btn) return;
+    e.preventDefault();
+    const slug = btn.dataset.slug;
+    let favs = getFavorites();
+    if (favs.includes(slug)) {
+      favs = favs.filter((s) => s !== slug);
+    } else {
+      favs.push(slug);
+    }
+    setFavorites(favs);
+    document.querySelectorAll('[data-slug="' + slug + '"].favorite-star, [data-slug="' + slug + '"].favorite-btn').forEach((el) => {
+      paintStar(el, slug);
+      el.classList.add("pop");
+      setTimeout(() => el.classList.remove("pop"), 250);
+    });
+  });
+
+  // Favoriler sayfasındaysa: sadece favorilenmiş kartları göster
+  const favPage = document.getElementById("favorites-page");
+  if (favPage) {
+    const favs = getFavorites();
+    const cards = favPage.querySelectorAll(".cart[data-slug]");
+    let visibleCount = 0;
+    cards.forEach((card) => {
+      const match = favs.includes(card.dataset.slug);
+      card.style.display = match ? "" : "none";
+      if (match) visibleCount++;
+    });
+    const emptyMsg = document.getElementById("favorites-empty");
+    if (emptyMsg) emptyMsg.style.display = visibleCount ? "none" : "block";
+  }
+})();
+
+// ---------- Yorum beğenisi ----------
+(function () {
+  document.addEventListener("click", function (e) {
+    const btn = e.target.closest(".comment-like-btn");
+    if (!btn) return;
+    const id = btn.dataset.commentId;
+    fetch("/begen-yorum/" + id, { method: "POST" })
+      .then((r) => r.json())
+      .then((data) => {
+        btn.classList.toggle("liked", data.liked);
+        btn.querySelector(".like-num").textContent = data.count;
+      })
+      .catch(() => {});
+  });
+})();

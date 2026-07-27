@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Geri Bildirimler — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Geri Bildirimler ({{ items|length }})</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    {% if items %}
+    <div class="comment-mod-list">
+      {% for f in items %}
+      <div class="comment-mod-card">
+        <div class="comment-mod-meta">
+          <strong>{{ f.category }}</strong>
+          {% if f.contact %}<span>{{ f.contact }}</span>{% endif %}
+          <span>{{ f.created_at[:10] }}</span>
+        </div>
+        <p>{{ f.message }}</p>
+        <div class="admin-actions">
+          <form method="POST" action="{{ url_for('admin_feedback_delete', feedback_id=f.id) }}" onsubmit="return confirm('Silinsin mi?');">
+            <button type="submit" class="danger">Sil</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Henüz geri bildirim yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

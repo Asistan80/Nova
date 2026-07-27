@@ -96,17 +96,24 @@ def notify_telegram(text):
 # ---------- Ortak: yeni yorum bildirimi ----------
 
 def notify_new_comment(project_name, comment_name, comment_text, admin_url):
-    subject = f"Yeni yorum: {project_name}"
-    body = (
-        f'"{project_name}" için yeni bir yorum geldi.\n\n'
-        f"Yazan: {comment_name}\n"
-        f"Yorum: {comment_text}\n\n"
-        f"Onaylamak/silmek için: {admin_url}"
-    )
-    notify_email(subject, body)
-    notify_discord(f"💬 **Yeni yorum** — *{project_name}*\n**{comment_name}:** {comment_text}\n{admin_url}")
-    notify_ntfy(subject, f"{comment_name}: {comment_text}")
-    notify_telegram(f"💬 Yeni yorum — {project_name}\n{comment_name}: {comment_text}\n{admin_url}")
+    """Tüm bildirim kanallarını arka planda tetikler -- yorum gönderen
+    ziyaretçiyi e-posta/Discord/Telegram isteklerinin süresi kadar bekletmez."""
+    import threading
+
+    def _fire():
+        subject = f"Yeni yorum: {project_name}"
+        body = (
+            f'"{project_name}" için yeni bir yorum geldi.\n\n'
+            f"Yazan: {comment_name}\n"
+            f"Yorum: {comment_text}\n\n"
+            f"Onaylamak/silmek için: {admin_url}"
+        )
+        notify_email(subject, body)
+        notify_discord(f"💬 **Yeni yorum** — *{project_name}*\n**{comment_name}:** {comment_text}\n{admin_url}")
+        notify_ntfy(subject, f"{comment_name}: {comment_text}")
+        notify_telegram(f"💬 Yeni yorum — {project_name}\n{comment_name}: {comment_text}\n{admin_url}")
+
+    threading.Thread(target=_fire, daemon=True).start()
 
 
 def any_enabled():

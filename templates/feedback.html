@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Geri Bildirim — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Geri Bildirim</h1>
+    <p class="detail-tagline">Bir hata mı buldun, bir öneri mi var, yoksa sadece merhaba mı demek istedin? Buyur.</p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    <form method="POST" class="form-grid" style="max-width:560px;">
+      <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <div class="form-field">
+        <label for="category">Konu</label>
+        <select id="category" name="category">
+          <option value="oneri">Öneri</option>
+          <option value="hata">Hata bildirimi</option>
+          <option value="sikayet">Şikayet</option>
+          <option value="genel">Genel / merhaba</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="message">Mesajın</label>
+        <textarea id="message" name="message" required maxlength="1000" style="min-height:140px;" placeholder="Ne düşünüyorsun?"></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="contact">İletişim (opsiyonel — cevap almak istersen)</label>
+        <input type="text" id="contact" name="contact" placeholder="E-posta, Discord kullanıcı adı vb.">
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="justify-self:start;">Gönder</button>
+    </form>
+  </div>
+</section>
+
+{% endblock %}

@@ -99,7 +99,7 @@ def _sync_data_file(local_path, repo_filename, message):
 def _count_visit():
     ep = request.endpoint or ""
     if ep in ("index", "category_list", "category_detail", "tag_page", "search_page",
-              "devlog_page", "about_page", "roadmap_page", "stats_page"):
+              "devlog_page", "about_page", "roadmap_page", "stats_page", "favorites_page"):
         store.bump_visit()
 
 
@@ -299,6 +299,14 @@ def like_project(slug):
     return {"count": count, "liked": liked}
 
 
+@app.route("/begen-yorum/<comment_id>", methods=["POST"])
+def like_comment(comment_id):
+    visitor_id = _get_visitor_id()
+    count, liked = store.toggle_comment_like(comment_id, visitor_id)
+    _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yorum beğenisi: {comment_id}")
+    return {"count": count, "liked": liked}
+
+
 @app.route("/yorum/<slug>", methods=["POST"])
 def submit_comment(slug):
     project = store.get_project(slug)
@@ -388,6 +396,55 @@ def about_page():
 @app.route("/yol-haritasi")
 def roadmap_page():
     return render_template("roadmap.html", items=store.all_roadmap_items())
+
+
+@app.route("/favorilerim")
+def favorites_page():
+    return render_template(
+        "favorites.html",
+        items=store.all_visible_projects(),
+        categories=cat.CATEGORIES,
+        stats=store.get_stats(),
+    )
+
+
+@app.route("/geri-bildirim", methods=["GET", "POST"])
+def feedback_page():
+    if request.method == "POST":
+        category = request.form.get("category", "genel")
+        message = request.form.get("message", "").strip()
+        contact = request.form.get("contact", "").strip()
+        if request.form.get("website"):  # honeypot
+            return redirect(url_for("feedback_page"))
+        if not message:
+            flash("Mesaj boş olamaz.")
+            return redirect(url_for("feedback_page"))
+        store.add_feedback(category, message, contact)
+        _sync_data_file(store.FEEDBACK_FILE, "feedback.json", "yeni geri bildirim")
+        try:
+            admin_url = request.url_root.rstrip("/") + url_for("admin_feedback")
+            notifications.notify_new_comment(
+                f"Genel Geri Bildirim ({category})", contact or "Anonim", message, admin_url
+            )
+        except Exception:
+            pass
+        flash("Geri bildirimin için teşekkürler! 🙏")
+        return redirect(url_for("feedback_page"))
+    return render_template("feedback.html")
+
+
+@app.route("/admin/geri-bildirim")
+@login_required
+def admin_feedback():
+    return render_template("admin/feedback.html", items=store.all_feedback())
+
+
+@app.route("/admin/geri-bildirim/sil/<feedback_id>", methods=["POST"])
+@login_required
+def admin_feedback_delete(feedback_id):
+    store.delete_feedback(feedback_id)
+    _sync_data_file(store.FEEDBACK_FILE, "feedback.json", "geri bildirim silindi")
+    return redirect(url_for("admin_feedback"))
 
 
 @app.route("/rastgele")

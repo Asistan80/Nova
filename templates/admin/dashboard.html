@@ -11,6 +11,7 @@
           Yorumlar{% if pending_count %} <span class="tag" style="color:var(--boss-red); border-color:var(--boss-red); margin-left:4px;">{{ pending_count }} bekliyor</span>{% endif %}
         </a>
         <a href="{{ url_for('admin_devlog') }}" class="btn btn-ghost">Devlog</a>
+        <a href="{{ url_for('admin_feedback') }}" class="btn btn-ghost">Geri Bildirim</a>
         <a href="{{ url_for('admin_about') }}" class="btn btn-ghost">Hakkımda</a>
         <a href="{{ url_for('admin_roadmap') }}" class="btn btn-ghost">Yol Haritası</a>
         <a href="{{ url_for('admin_new') }}" class="btn btn-primary">+ Yeni Proje</a>

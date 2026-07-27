@@ -280,7 +280,7 @@ def comments_for(slug, approved_only=True):
     items = [c for c in all_comments() if c["slug"] == slug]
     if approved_only:
         items = [c for c in items if c.get("approved")]
-    return sorted(items, key=lambda c: c["created_at"], reverse=True)
+    return sorted(items, key=lambda c: (c.get("likes", 0), c["created_at"]), reverse=True)
 
 
 def pending_comments():
@@ -410,4 +410,60 @@ def add_roadmap_item(title, desc, eta):
 def delete_roadmap_item(item_id):
     items = [i for i in _read_json(ROADMAP_FILE, []) if i["id"] != item_id]
     _write_json(ROADMAP_FILE, items)
+
+
+# ---------- Yorum beğenisi ----------
+
+def toggle_comment_like(comment_id, visitor_id):
+    comments = all_comments()
+    result = (0, False)
+    for c in comments:
+        if c["id"] == comment_id:
+            liked_by = c.setdefault("liked_by", [])
+            if visitor_id in liked_by:
+                liked_by.remove(visitor_id)
+                liked = False
+            else:
+                liked_by.append(visitor_id)
+                liked = True
+            c["likes"] = len(liked_by)
+            result = (c["likes"], liked)
+    _save_comments(comments)
+    return result
+
+
+# ---------- Favoriler (tüm görünür projeler -- istemci tarafında filtrelenir) ----------
+
+def all_visible_projects():
+    return [p for p in all_projects() if is_visible(p)]
+
+
+# ---------- Genel geri bildirim ----------
+
+FEEDBACK_FILE = os.path.join(DATA_DIR, "feedback.json")
+
+
+def all_feedback():
+    items = _read_json(FEEDBACK_FILE, [])
+    return sorted(items, key=lambda f: f["created_at"], reverse=True)
+
+
+def add_feedback(category, message, contact):
+    import uuid as _uuid
+    items = _read_json(FEEDBACK_FILE, [])
+    entry = {
+        "id": _uuid.uuid4().hex[:10],
+        "category": category.strip()[:30] or "genel",
+        "message": message.strip()[:1000],
+        "contact": contact.strip()[:120],
+        "created_at": _now_iso(),
+    }
+    items.append(entry)
+    _write_json(FEEDBACK_FILE, items)
+    return entry
+
+
+def delete_feedback(feedback_id):
+    items = [f for f in _read_json(FEEDBACK_FILE, []) if f["id"] != feedback_id]
+    _write_json(FEEDBACK_FILE, items)
 

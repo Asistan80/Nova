@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "_card.html" import render_card %}
+{% block title %}Favorilerim — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Favorilerim</h1>
+    <p class="detail-tagline">Yıldızladığın oyun ve uygulamalar burada — tarayıcında saklanır, hesap gerekmez.</p>
+  </div>
+</header>
+
+<section class="shelf" id="favorites-page">
+  <div class="wrap">
+    <div class="empty-favorites" id="favorites-empty" style="display:none;">
+      <p>Henüz favori eklemedin. Bir kartın sağ üstündeki ⭐ ikonuna tıklayarak buraya ekleyebilirsin.</p>
+      <a href="{{ url_for('index') }}" class="btn btn-primary" style="margin-top:16px; display:inline-block;">Keşfetmeye başla</a>
+    </div>
+    <div class="rack">
+      {% for p in items %}
+        {{ render_card(p, categories, stats) }}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% endblock %}

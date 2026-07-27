@@ -165,11 +165,19 @@ def deploy_hook_enabled():
 
 
 def trigger_deploy():
+    """Deploy hook'u arka planda tetikler -- kullanıcının isteğini
+    (kapak yükleme, yorum onaylama vb.) bu ağ isteği için bekletmez."""
     hook_url = os.environ.get("RENDER_DEPLOY_HOOK_URL")
     if not hook_url:
         return False
-    try:
-        r = requests.post(hook_url, timeout=15)
-        return r.status_code in (200, 201, 202)
-    except requests.RequestException:
-        return False
+
+    import threading
+
+    def _fire():
+        try:
+            requests.post(hook_url, timeout=15)
+        except requests.RequestException:
+            pass
+
+    threading.Thread(target=_fire, daemon=True).start()
+    return True

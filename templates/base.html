@@ -73,10 +73,12 @@
       <p>{% block footer_extra %}Yeni kartuşlar geliştirildikçe rafa eklenir.{% endblock %}</p>
     </div>
     <div class="footer-links">
+      <a href="{{ url_for('favorites_page') }}">Favorilerim</a>
       <a href="{{ url_for('about_page') }}">Hakkımda</a>
       <a href="{{ url_for('devlog_page') }}">Devlog</a>
       <a href="{{ url_for('roadmap_page') }}">Yol Haritası</a>
       <a href="{{ url_for('stats_page') }}">İstatistikler</a>
+      <a href="{{ url_for('feedback_page') }}">Geri Bildirim</a>
       <a href="{{ url_for('feed_xml') }}">RSS</a>
       <a href="mailto:murnovadunyasi@gmail.com">İletişim</a>
     </div>

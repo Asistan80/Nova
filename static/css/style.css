@@ -911,3 +911,41 @@ img.skeleton{
   border-radius:0 8px 8px 0; font-size:0.87rem;
 }
 .comment-reply strong{ color:var(--amber); }
+
+/* ================================================================
+   FAVORİ YILDIZI (kart üzerinde)
+   ================================================================ */
+.favorite-star{
+  position:absolute; top:14px; right:14px; z-index:5;
+  width:34px; height:34px; border-radius:9px;
+  background: rgba(8,8,15,0.55); border:1px solid rgba(255,255,255,0.12);
+  color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+  backdrop-filter: blur(4px); transition: all .2s ease;
+}
+.favorite-star svg{ width:16px; height:16px; }
+.favorite-star:hover{ border-color:var(--amber); color:var(--amber); }
+.favorite-star.favorited{ color:var(--amber); border-color:var(--amber); }
+.favorite-star.favorited svg{ fill:var(--amber); }
+.favorite-star.pop svg{ transform:scale(1.25); }
+.favorite-star svg{ transition:transform .2s ease; }
+
+/* Detay sayfası büyük favori butonu için nötr durum */
+.btn.favorite-btn.favorited{ color:var(--amber); border-color:var(--amber); }
+.btn.favorite-btn.favorited svg{ fill:var(--amber); }
+
+/* ================================================================
+   YORUM BEĞENİSİ
+   ================================================================ */
+.comment-like-btn{
+  display:inline-flex; align-items:center; gap:5px; margin-top:8px;
+  font-size:0.78rem; color:var(--text-dim); background:none; border:1px solid var(--line);
+  border-radius:7px; padding:5px 10px; cursor:pointer; transition: all .15s ease;
+}
+.comment-like-btn:hover{ border-color:var(--amber); color:var(--amber); }
+.comment-like-btn.liked{ color:var(--amber); border-color:var(--amber); }
+.comment-like-btn svg{ width:12px; height:12px; }
+
+/* ================================================================
+   BOŞ FAVORİLER DURUMU
+   ================================================================ */
+.empty-favorites{ text-align:center; padding:60px 20px; color:var(--text-dim); }
