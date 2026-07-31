@@ -427,5 +427,29 @@
     "updated_at": "",
     "slug": "ambientstudio",
     "created_at": "2026-07-24T09:31:05.491443+00:00"
+  },
+  {
+    "name": "ENERJİ ÇEKİRDEĞİ",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "",
+    "tags": [
+      "HTML/JS"
+    ],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": "/oyna/enerji-ceki-rdegi",
+    "download_url": null,
+    "download_file": "core.zip",
+    "updated_at": "",
+    "slug": "enerji-ceki-rdegi",
+    "created_at": "2026-07-31T13:28:23.267081+00:00"
   }
 ]
