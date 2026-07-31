@@ -475,5 +475,29 @@
     "updated_at": "",
     "slug": "enerji-ceki-rdegi-2",
     "created_at": "2026-07-31T13:28:25.720895+00:00"
+  },
+  {
+    "name": "ENERJİ ÇEKİRDEĞİ",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "",
+    "tags": [
+      "HTML/JS"
+    ],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": "/oyna/enerji-ceki-rdegi-3",
+    "download_url": null,
+    "download_file": "core.zip",
+    "updated_at": "",
+    "slug": "enerji-ceki-rdegi-3",
+    "created_at": "2026-07-31T13:28:27.804480+00:00"
   }
 ]
