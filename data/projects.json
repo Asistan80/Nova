@@ -521,5 +521,27 @@
     "updated_at": "",
     "slug": "kartal-savunma-tank",
     "created_at": "2026-07-31T13:30:05.646474+00:00"
+  },
+  {
+    "name": "NEON KALE",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": "/oyna/neon-kale",
+    "download_url": null,
+    "download_file": "tower_.zip",
+    "updated_at": "",
+    "slug": "neon-kale",
+    "created_at": "2026-07-31T13:31:18.106649+00:00"
   }
 ]
