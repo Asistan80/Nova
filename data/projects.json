@@ -543,5 +543,27 @@
     "updated_at": "",
     "slug": "neon-kale",
     "created_at": "2026-07-31T13:31:18.106649+00:00"
+  },
+  {
+    "name": "ALIŞKANLIK TAKİBİ",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "habits_.zip",
+    "updated_at": "",
+    "slug": "aliskanlik-taki-bi",
+    "created_at": "2026-07-31T13:32:28.762748+00:00"
   }
 ]
