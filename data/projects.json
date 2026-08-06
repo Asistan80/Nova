@@ -539,5 +539,27 @@
     "updated_at": "",
     "slug": "neon-tetris",
     "created_at": "2026-07-31T13:33:32.343874+00:00"
+  },
+  {
+    "name": "Kilo Takip Programı",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Uygulama",
+    "desc": "Kilolarınızı buraya yazarak takip edebilirsiniz.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "Kilo_Takip_Program.zip",
+    "updated_at": "",
+    "slug": "kilo-takip-programi",
+    "created_at": "2026-08-06T17:08:16.386945+00:00"
   }
 ]
