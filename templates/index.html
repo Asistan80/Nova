@@ -105,6 +105,22 @@
   </div>
 </section>
 
+{% if monthly_featured %}
+<section class="shelf">
+  <div class="wrap">
+    <div class="shelf-head">
+      <div>
+        <h2>🏆 Bu ayın öne çıkanı</h2>
+        <p>Oynanma, indirme ve beğenilere göre otomatik seçilir.</p>
+      </div>
+    </div>
+    <div class="rack">
+      {{ render_card(monthly_featured, categories, stats) }}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if recent %}
 <section class="shelf">
   <div class="wrap">

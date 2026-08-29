@@ -341,6 +341,80 @@ if ("serviceWorker" in navigator) {
   }
 })();
 
+// ---------- Takma ad ile cihazlar arası favori senkronu (hesapsız) ----------
+(function () {
+  const btn = document.getElementById("nickname-sync-btn");
+  if (!btn) return;
+  const label = document.getElementById("nickname-btn-label");
+
+  function getNickname() {
+    return localStorage.getItem("murnova-nickname") || "";
+  }
+  function getFavorites() {
+    try { return JSON.parse(localStorage.getItem("murnova-favorites") || "[]"); }
+    catch (e) { return []; }
+  }
+  function setFavorites(list) {
+    localStorage.setItem("murnova-favorites", JSON.stringify(list));
+  }
+  function refreshStars() {
+    const favs = getFavorites();
+    document.querySelectorAll(".favorite-star, .favorite-btn").forEach((el) => {
+      el.classList.toggle("favorited", favs.includes(el.dataset.slug));
+    });
+  }
+  function updateLabel() {
+    const name = getNickname();
+    label.textContent = name ? ("Senkron: " + name + " (değiştir)") : "Takma Ad ile Senkronla";
+  }
+  updateLabel();
+
+  btn.addEventListener("click", function () {
+    const current = getNickname();
+    const name = window.prompt(
+      "Bir takma ad gir — favorilerin/beğenilerin bu adı kullandığın her cihazda senkron olsun (hesap gerekmez):",
+      current
+    );
+    if (name === null) return; // vazgeçildi
+    const trimmed = name.trim();
+    if (!trimmed) {
+      localStorage.removeItem("murnova-nickname");
+      updateLabel();
+      return;
+    }
+    localStorage.setItem("murnova-nickname", trimmed);
+    updateLabel();
+
+    fetch("/takma-ad/senkron", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: trimmed, favorites: getFavorites() }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.ok) {
+          setFavorites(data.favorites);
+          refreshStars();
+        }
+      })
+      .catch(() => {});
+  });
+
+  // Favori butonlarına her basıldığında, takma ad ayarlıysa sunucuya da yaz.
+  document.addEventListener("click", function (e) {
+    const fbtn = e.target.closest(".favorite-star, .favorite-btn");
+    if (!fbtn) return;
+    const name = getNickname();
+    if (!name) return;
+    const slug = fbtn.dataset.slug;
+    fetch("/takma-ad/favori/" + slug, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name }),
+    }).catch(() => {});
+  });
+})();
+
 // ---------- Yorum beğenisi ----------
 (function () {
   document.addEventListener("click", function (e) {

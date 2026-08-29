@@ -116,6 +116,86 @@ def notify_new_comment(project_name, comment_name, comment_text, admin_url):
     threading.Thread(target=_fire, daemon=True).start()
 
 
+# ---------- Bülten: yeni içerik/devlog e-postası ----------
+
+def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
+    """Her aboneye ayrı ayrı, kendi çıkış linkiyle e-posta gönderir (arka planda)."""
+    cfg = _email_config()
+    if not cfg or not subscribers:
+        return
+
+    import threading
+
+    def _fire():
+        for sub in subscribers:
+            try:
+                unsub_url = unsubscribe_url_fn(sub.get("token", ""))
+                body = "\n".join(body_lines) + f"\n\n---\nBu e-postaları almak istemiyorsan: {unsub_url}"
+                msg = MIMEText(body, "plain", "utf-8")
+                msg["Subject"] = subject
+                msg["From"] = cfg["address"]
+                msg["To"] = sub["email"]
+                with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+                    server.login(cfg["address"], cfg["app_password"])
+                    server.sendmail(cfg["address"], [sub["email"]], msg.as_string())
+            except Exception:
+                continue
+
+    threading.Thread(target=_fire, daemon=True).start()
+
+
+def notify_new_project(project_name, project_url, tagline, subscribers, unsubscribe_url_fn):
+    subject = f"🆕 Yeni: {project_name} — Derin Murnova Dünyası"
+    body_lines = [
+        f'"{project_name}" rafa eklendi!',
+        tagline or "",
+        "",
+        f"Hemen bak: {project_url}",
+    ]
+    notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn)
+
+
+def notify_new_devlog(title, devlog_url, subscribers, unsubscribe_url_fn):
+    subject = f"📝 Yeni devlog: {title} — Derin Murnova Dünyası"
+    body_lines = [
+        f'Yeni bir devlog kaydı yayınlandı: "{title}"',
+        "",
+        f"Oku: {devlog_url}",
+    ]
+    notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn)
+
+
+# ---------- Yorum yanıtı: ziyaretçiye bildirim (iletişim bilgisi bıraktıysa) ----------
+
+def notify_comment_reply(to_email, project_name, reply_text, project_url):
+    if not to_email or "@" not in to_email:
+        return
+    import threading
+
+    def _fire():
+        subject = f"MuBiKu yorumuna cevap verdi — {project_name}"
+        body = (
+            f'"{project_name}" için yaptığın yoruma bir cevap geldi:\n\n'
+            f"\"{reply_text}\"\n\n"
+            f"Sayfayı gör: {project_url}"
+        )
+        cfg = _email_config()
+        if not cfg:
+            return
+        try:
+            msg = MIMEText(body, "plain", "utf-8")
+            msg["Subject"] = subject
+            msg["From"] = cfg["address"]
+            msg["To"] = to_email
+            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+                server.login(cfg["address"], cfg["app_password"])
+                server.sendmail(cfg["address"], [to_email], msg.as_string())
+        except Exception:
+            pass
+
+    threading.Thread(target=_fire, daemon=True).start()
+
+
 def any_enabled():
     return bool(
         _email_config()

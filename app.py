@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 import store
 import github_sync
 import notifications
+import moderation
 import categories as cat
 from games_blueprints.rise_of_the_bosses import bp as rise_of_the_bosses_bp
 
@@ -200,6 +201,7 @@ def index():
         featured = with_cover[0]
     elif playable:
         featured = playable[0]
+    monthly_featured = store.monthly_featured()
     return render_template(
         "index.html",
         stats=stats,
@@ -208,6 +210,7 @@ def index():
         recent=store.recent_projects(6),
         categories=cat.CATEGORIES,
         featured=featured,
+        monthly_featured=monthly_featured,
     )
 
 
@@ -333,15 +336,41 @@ def submit_comment(slug):
     session["last_comment_at"] = now_ts
 
     name = request.form.get("name", "").strip()
-    store.add_comment(slug, name, text)
+    contact = request.form.get("contact", "").strip()
+    flagged, flag_reason = moderation.check_text(text)
+    store.add_comment(slug, name, text, contact=contact, flagged=flagged, flag_reason=flag_reason)
     _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yeni yorum: {slug}")
     try:
         admin_url = request.url_root.rstrip("/") + url_for("admin_comments")
-        notifications.notify_new_comment(project["name"], name or "Misafir", text, admin_url)
+        note = " ⚠️ (şüpheli içerik işaretlendi)" if flagged else ""
+        notifications.notify_new_comment(project["name"], name or "Misafir", text + note, admin_url)
     except Exception:
         pass
     flash("Yorumun gönderildi — onaylandıktan sonra görünecek.")
     return redirect(redirect_url)
+
+
+@app.route("/takma-ad/senkron", methods=["POST"])
+def nickname_sync():
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get("name") or "").strip()[:40]
+    local_favorites = data.get("favorites") or []
+    if not name:
+        return {"ok": False, "error": "takma ad boş"}, 400
+    merged = store.sync_nickname_favorites(name, local_favorites)
+    _sync_data_file(store.NICKNAMES_FILE, "nicknames.json", f"takma ad senkronu: {name}")
+    return {"ok": True, "favorites": merged}
+
+
+@app.route("/takma-ad/favori/<slug>", methods=["POST"])
+def nickname_toggle_favorite(slug):
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get("name") or "").strip()[:40]
+    if not name:
+        return {"ok": False, "error": "takma ad boş"}, 400
+    favs, is_fav = store.toggle_nickname_favorite(name, slug)
+    _sync_data_file(store.NICKNAMES_FILE, "nicknames.json", f"favori senkronu: {name}")
+    return {"ok": True, "favorites": favs, "favorited": is_fav}
 
 
 @app.route("/etiket/<tag>")
@@ -445,6 +474,37 @@ def admin_feedback_delete(feedback_id):
     store.delete_feedback(feedback_id)
     _sync_data_file(store.FEEDBACK_FILE, "feedback.json", "geri bildirim silindi")
     return redirect(url_for("admin_feedback"))
+
+
+@app.route("/bulten/abone-ol", methods=["POST"])
+def newsletter_subscribe():
+    if request.form.get("website"):  # honeypot
+        return redirect(request.referrer or url_for("index"))
+    email = request.form.get("email", "").strip()
+    sub, status_ = store.add_subscriber(email)
+    if status_ == "invalid":
+        flash("Geçerli bir e-posta adresi gir.")
+    elif status_ == "exists":
+        flash("Zaten abonesin — teşekkürler! 🙌")
+    else:
+        _sync_data_file(store.NEWSLETTER_FILE, "newsletter.json", "yeni bülten abonesi")
+        flash("Abone oldun — yeni oyun/uygulama ve devlog eklendiğinde haber vereceğiz 📬")
+    return redirect(request.referrer or url_for("index"))
+
+
+@app.route("/bulten/cikis/<token>")
+def newsletter_unsubscribe(token):
+    ok = store.remove_subscriber_by_token(token)
+    if ok:
+        _sync_data_file(store.NEWSLETTER_FILE, "newsletter.json", "bülten aboneliği iptal edildi")
+        flash("Bülten aboneliğin iptal edildi. İstediğin zaman tekrar abone olabilirsin.")
+    else:
+        flash("Abonelik bulunamadı ya da zaten iptal edilmiş.")
+    return redirect(url_for("index"))
+
+
+def _newsletter_unsubscribe_url(token):
+    return request.url_root.rstrip("/") + url_for("newsletter_unsubscribe", token=token)
 
 
 @app.route("/rastgele")
@@ -586,6 +646,7 @@ def admin_dashboard():
         sync_enabled=github_sync.is_enabled(),
         deploy_hook_enabled=github_sync.deploy_hook_enabled(),
         notify_status=notifications.status(),
+        subscriber_count=store.subscriber_count(),
     )
 
 
@@ -678,8 +739,17 @@ def admin_delete_comment(comment_id):
 @login_required
 def admin_reply_comment(comment_id):
     reply_text = request.form.get("reply", "")
-    store.reply_to_comment(comment_id, reply_text)
+    replied = store.reply_to_comment(comment_id, reply_text)
     _sync_data_file(store.COMMENTS_FILE, "comments.json", f"yorum yanıtlandı: {comment_id}")
+    if replied and reply_text.strip() and replied.get("contact"):
+        project = store.get_project(replied["slug"])
+        if project:
+            try:
+                group = cat.group_for_kind(project["kind"])
+                project_url = request.url_root.rstrip("/") + url_for("category_detail", group_slug=group, slug=project["slug"])
+                notifications.notify_comment_reply(replied["contact"], project["name"], reply_text.strip(), project_url)
+            except Exception:
+                pass
     return redirect(url_for("admin_comments"))
 
 
@@ -713,6 +783,11 @@ def admin_devlog():
         if title and body:
             store.add_devlog_entry(title, body)
             _sync_data_file(store.DEVLOG_FILE, "devlog.json", f"devlog eklendi: {title}")
+            try:
+                devlog_url = request.url_root.rstrip("/") + url_for("devlog_page")
+                notifications.notify_new_devlog(title, devlog_url, store.all_subscribers(), _newsletter_unsubscribe_url)
+            except Exception:
+                pass
             flash("Devlog kaydı eklendi.")
         return redirect(url_for("admin_devlog"))
     return render_template("admin/devlog.html", entries=store.all_devlog_entries())
@@ -842,6 +917,16 @@ def admin_new():
         _handle_uploads(project, request.files)
         store.add_project(project)
         _sync_projects_json(f"proje eklendi: {project['name']}")
+        if project.get("published", True):
+            try:
+                group = cat.group_for_kind(project["kind"])
+                project_url = request.url_root.rstrip("/") + url_for("category_detail", group_slug=group, slug=project["slug"])
+                notifications.notify_new_project(
+                    project["name"], project_url, project.get("tagline", ""),
+                    store.all_subscribers(), _newsletter_unsubscribe_url,
+                )
+            except Exception:
+                pass
         flash(f"\"{project['name']}\" rafa eklendi.")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form.html", p=None, categories=cat.CATEGORIES)

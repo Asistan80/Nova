@@ -57,6 +57,17 @@ CATEGORIES = {
         "media_kind": True,
         "preview": "audio",
     },
+    "video": {
+        "label": "Videolar",
+        "singular": "Video",
+        "slug": "videolar",
+        "group": "medya",
+        "icon": "video",
+        "file_exts": {"mp4", "webm"},
+        "file_label": "Video Dosyası (.mp4/.webm)",
+        "media_kind": True,
+        "preview": "video",
+    },
 }
 
 # Üst gruplar (nav ve anasayfa kategori kutuları için)

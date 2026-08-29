@@ -69,6 +69,10 @@
       <div class="media-preview media-preview-audio">
         <audio controls src="{{ url_for('media_inline', slug=p.slug) }}"></audio>
       </div>
+      {% elif category.preview == 'video' %}
+      <div class="media-preview media-preview-video">
+        <video controls src="{{ url_for('media_inline', slug=p.slug) }}"></video>
+      </div>
       {% endif %}
     {% endif %}
 
@@ -155,8 +159,12 @@
         <label for="c-text">Yorumun</label>
         <textarea id="c-text" name="text" required maxlength="600" placeholder="Ne düşünüyorsun?"></textarea>
       </div>
+      <div class="form-field">
+        <label for="c-contact">E-posta (opsiyonel)</label>
+        <input type="email" id="c-contact" name="contact" placeholder="Yanıt gelince haberim olsun" maxlength="120">
+      </div>
       <button type="submit" class="btn btn-primary">Yorumu Gönder</button>
-      <p class="form-hint">Yorumun, onaylandıktan sonra herkese görünür olacak.</p>
+      <p class="form-hint">Yorumun, onaylandıktan sonra herkese görünür olacak. E-posta bırakırsan, sadece yanıt geldiğinde haber vermek için kullanılır.</p>
     </form>
 
     {% if similar %}

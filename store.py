@@ -290,7 +290,7 @@ def pending_comments():
     )
 
 
-def add_comment(slug, name, text):
+def add_comment(slug, name, text, contact="", flagged=False, flag_reason=""):
     import uuid as _uuid
     comments = all_comments()
     comment = {
@@ -298,7 +298,10 @@ def add_comment(slug, name, text):
         "slug": slug,
         "name": (name or "Misafir").strip()[:40] or "Misafir",
         "text": text.strip()[:600],
+        "contact": (contact or "").strip()[:120],
         "approved": False,
+        "flagged": bool(flagged),
+        "flag_reason": (flag_reason or "").strip()[:120],
         "created_at": _now_iso(),
     }
     comments.append(comment)
@@ -321,6 +324,7 @@ def delete_comment(comment_id):
 
 def reply_to_comment(comment_id, reply_text):
     comments = all_comments()
+    replied = None
     for c in comments:
         if c["id"] == comment_id:
             if reply_text.strip():
@@ -329,7 +333,9 @@ def reply_to_comment(comment_id, reply_text):
             else:
                 c.pop("admin_reply", None)
                 c.pop("admin_reply_at", None)
+            replied = c
     _save_comments(comments)
+    return replied
 
 
 # ---------- Toplu admin işlemleri ----------
@@ -466,4 +472,139 @@ def add_feedback(category, message, contact):
 def delete_feedback(feedback_id):
     items = [f for f in _read_json(FEEDBACK_FILE, []) if f["id"] != feedback_id]
     _write_json(FEEDBACK_FILE, items)
+
+
+# ---------- E-posta bülteni ----------
+
+NEWSLETTER_FILE = os.path.join(DATA_DIR, "newsletter.json")
+
+
+def _newsletter_token(email):
+    import hashlib
+    secret = os.environ.get("SECRET_KEY", "dev-secret-degistir-bunu")
+    return hashlib.sha256(f"{email.lower()}:{secret}".encode("utf-8")).hexdigest()[:24]
+
+
+def all_subscribers(active_only=True):
+    items = _read_json(NEWSLETTER_FILE, [])
+    if active_only:
+        items = [s for s in items if s.get("active", True)]
+    return items
+
+
+def add_subscriber(email):
+    email = email.strip().lower()
+    if not email or "@" not in email:
+        return None, "invalid"
+    items = _read_json(NEWSLETTER_FILE, [])
+    for s in items:
+        if s["email"] == email:
+            if s.get("active", True):
+                return s, "exists"
+            s["active"] = True
+            _write_json(NEWSLETTER_FILE, items)
+            return s, "reactivated"
+    sub = {
+        "email": email,
+        "token": _newsletter_token(email),
+        "active": True,
+        "created_at": _now_iso(),
+    }
+    items.append(sub)
+    _write_json(NEWSLETTER_FILE, items)
+    return sub, "added"
+
+
+def remove_subscriber_by_token(token):
+    items = _read_json(NEWSLETTER_FILE, [])
+    found = False
+    for s in items:
+        if s.get("token") == token:
+            s["active"] = False
+            found = True
+    if found:
+        _write_json(NEWSLETTER_FILE, items)
+    return found
+
+
+def subscriber_count(active_only=True):
+    return len(all_subscribers(active_only))
+
+
+# ---------- Takma ad ile cihazlar arası senkron (hesapsız) ----------
+
+NICKNAMES_FILE = os.path.join(DATA_DIR, "nicknames.json")
+
+
+def _normalize_nickname(name):
+    return (name or "").strip().lower()[:40]
+
+
+def _all_nicknames():
+    return _read_json(NICKNAMES_FILE, {})
+
+
+def sync_nickname_favorites(name, local_favorites):
+    """Ziyaretçinin cihazındaki favorileri, aynı takma adı kullanan diğer
+    cihazlardaki kayıtla birleştirir (küme birleşimi) ve sonucu saklar."""
+    key = _normalize_nickname(name)
+    if not key:
+        return list(dict.fromkeys(local_favorites or []))
+    data = _all_nicknames()
+    record = data.get(key, {"favorites": [], "display_name": name.strip()[:40]})
+    merged = list(dict.fromkeys((record.get("favorites") or []) + (local_favorites or [])))
+    record["favorites"] = merged
+    record["display_name"] = name.strip()[:40]
+    record["updated_at"] = _now_iso()
+    data[key] = record
+    _write_json(NICKNAMES_FILE, data)
+    return merged
+
+
+def toggle_nickname_favorite(name, slug):
+    key = _normalize_nickname(name)
+    if not key:
+        return [], False
+    data = _all_nicknames()
+    record = data.setdefault(key, {"favorites": [], "display_name": name.strip()[:40]})
+    favs = record.setdefault("favorites", [])
+    if slug in favs:
+        favs.remove(slug)
+        is_fav = False
+    else:
+        favs.append(slug)
+        is_fav = True
+    record["updated_at"] = _now_iso()
+    _write_json(NICKNAMES_FILE, data)
+    return favs, is_fav
+
+
+def get_nickname_favorites(name):
+    key = _normalize_nickname(name)
+    if not key:
+        return []
+    record = _all_nicknames().get(key)
+    return record.get("favorites", []) if record else []
+
+
+# ---------- Aylık öne çıkan (istatistiklere göre) ----------
+
+def monthly_featured():
+    """Bu ayki en çok oynanan/indirilen + en çok beğenilen projeyi puanlayıp döner."""
+    stats = get_stats()
+    items = all_visible_projects()
+    if not items:
+        return None
+    plays = stats.get("plays", {})
+    downloads = stats.get("downloads", {})
+    likes = stats.get("likes", {})
+    scored = []
+    for p in items:
+        score = plays.get(p["slug"], 0) * 2 + downloads.get(p["slug"], 0) * 2 + likes.get(p["slug"], 0) * 3
+        if score > 0:
+            scored.append((score, p))
+    if not scored:
+        return None
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return scored[0][1]
 

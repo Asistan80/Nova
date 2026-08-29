@@ -57,6 +57,11 @@
       </span>
     </div>
 
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:0.88rem;">
+      <span>📬 Bülten aboneleri: <strong style="color:var(--text);">{{ subscriber_count }}</strong></span>
+      <span style="color:var(--text-dim); margin-left:auto;">{{ 'E-posta gönderimi açık' if notify_status.email else 'Gmail bilgileri eksik — bülten e-postaları gönderilemiyor' }}</span>
+    </div>
+
     {% if not deploy_hook_enabled %}
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:rgba(76,141,255,0.08); border:1px solid rgba(76,141,255,0.3); border-radius:10px; font-size:0.88rem; color:var(--text-dim);">
       ⚠️ <strong style="color:var(--text);">Unutma:</strong> Render ücretsiz planda olduğu için, buradan yaptığın değişikliklerin

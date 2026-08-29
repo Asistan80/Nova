@@ -67,6 +67,19 @@
 </div>
 
 <footer>
+  <div class="wrap footer-top">
+    <form class="newsletter-form" method="POST" action="{{ url_for('newsletter_subscribe') }}">
+      <input type="text" name="website" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label for="nl-email">📬 Yeni kartuş/devlog bildirimleri al</label>
+      <div class="newsletter-row">
+        <input type="email" id="nl-email" name="email" placeholder="e-posta adresin" required maxlength="120">
+        <button type="submit" class="mini-btn primary">Abone Ol</button>
+      </div>
+    </form>
+    <button type="button" class="mini-btn nickname-btn" id="nickname-sync-btn" title="Favorilerini takma adınla diğer cihazlarınla senkronla">
+      👤 <span id="nickname-btn-label">Takma Ad ile Senkronla</span>
+    </button>
+  </div>
   <div class="wrap">
     <div>
       <p>© 2026 Derin Murnova Dünyası — MuBiKu</p>

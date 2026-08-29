@@ -19,8 +19,10 @@
         <div class="comment-mod-meta">
           <strong>{{ c.name }}</strong>
           <span>{{ projects_by_slug.get(c.slug, {}).get('name', c.slug) }}</span>
+          {% if c.flagged %}<span class="tag" style="color:var(--boss-red); border-color:var(--boss-red);">⚠️ {{ c.flag_reason }}</span>{% endif %}
         </div>
         <p>{{ c.text }}</p>
+        {% if c.contact %}<p style="font-size:0.78rem; color:var(--text-dim);">İletişim: {{ c.contact }}</p>{% endif %}
         <div class="admin-actions">
           <form method="POST" action="{{ url_for('admin_approve_comment', comment_id=c.id) }}">
             <button type="submit" style="color:var(--teal); border-color:var(--teal);">Onayla</button>
@@ -48,6 +50,7 @@
           <span>{{ projects_by_slug.get(c.slug, {}).get('name', c.slug) }}</span>
         </div>
         <p>{{ c.text }}</p>
+        {% if c.contact %}<p style="font-size:0.78rem; color:var(--text-dim);">İletişim: {{ c.contact }} — yanıt yazarsan otomatik e-posta gider.</p>{% endif %}
 
         {% if c.admin_reply %}
         <div class="admin-reply-preview">
