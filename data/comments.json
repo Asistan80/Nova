@@ -92,7 +92,7 @@
     "name": "Misafir",
     "text": "Güzel manzara",
     "contact": "mukel8082@hotmail.com",
-    "approved": false,
+    "approved": true,
     "flagged": false,
     "flag_reason": "",
     "created_at": "2026-08-30T07:23:20.601792+00:00"
