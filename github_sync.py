@@ -14,9 +14,21 @@
 
 import os
 import base64
+import time
+import threading
 import requests
 
 API_ROOT = "https://api.github.com"
+
+# Art arda gelen çok sayıda yazma işlemi (yorum, favori, senkron vb.) her
+# birinde ayrı bir Render deploy'u tetiklemesin diye: bu pencere içinde en
+# fazla bir kez gerçek deploy isteği atılır, geri kalanlar bu pencerenin
+# sonunda tek bir deploy'da toplanır. Veri her durumda her yazımda GitHub'a
+# gönderiliyor (push_file senkron) -- burada sadece "sunucuyu yeniden
+# başlatma" isteğinin sıklığı sınırlanıyor.
+_DEPLOY_COOLDOWN_SECONDS = 120
+_deploy_lock = threading.Lock()
+_deploy_state = {"last_fired_at": 0.0, "pending_timer": None}
 
 
 def _config():
@@ -180,20 +192,38 @@ def deploy_hook_enabled():
     return bool(os.environ.get("RENDER_DEPLOY_HOOK_URL"))
 
 
+def _fire_deploy_hook(hook_url):
+    try:
+        requests.post(hook_url, timeout=15)
+    except requests.RequestException:
+        pass
+    with _deploy_lock:
+        _deploy_state["last_fired_at"] = time.time()
+        _deploy_state["pending_timer"] = None
+
+
 def trigger_deploy():
-    """Deploy hook'u arka planda tetikler -- kullanıcının isteğini
-    (kapak yükleme, yorum onaylama vb.) bu ağ isteği için bekletmez."""
+    """Deploy hook'u tetikler -- ama art arda çağrılırsa her seferinde değil,
+    en fazla _DEPLOY_COOLDOWN_SECONDS'ta bir gerçek istek atar. Aradaki
+    çağrılar, pencere sonunda otomatik ateşlenecek TEK bir zamanlayıcıya
+    toplanır, böylece son yapılan değişiklik de garantili şekilde deploy
+    edilir -- sadece hemen değil, en geç pencere bitiminde."""
     hook_url = os.environ.get("RENDER_DEPLOY_HOOK_URL")
     if not hook_url:
         return False
 
-    import threading
+    with _deploy_lock:
+        now = time.time()
+        elapsed = now - _deploy_state["last_fired_at"]
 
-    def _fire():
-        try:
-            requests.post(hook_url, timeout=15)
-        except requests.RequestException:
-            pass
+        if elapsed >= _DEPLOY_COOLDOWN_SECONDS and _deploy_state["pending_timer"] is None:
+            threading.Thread(target=_fire_deploy_hook, args=(hook_url,), daemon=True).start()
+        elif _deploy_state["pending_timer"] is None:
+            delay = max(_DEPLOY_COOLDOWN_SECONDS - elapsed, 1)
+            timer = threading.Timer(delay, _fire_deploy_hook, args=(hook_url,))
+            timer.daemon = True
+            timer.start()
+            _deploy_state["pending_timer"] = timer
+        # else: zaten bekleyen bir zamanlayıcı var, bu çağrı ona dahil olur
 
-    threading.Thread(target=_fire, daemon=True).start()
     return True
