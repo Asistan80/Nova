@@ -84,33 +84,35 @@ def _make_gif_poster(gif_path, poster_path):
 
 def _sync_projects_json(message):
     if github_sync.is_enabled():
-        ok = github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
+        ok, reason = github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
         if ok:
             github_sync.trigger_deploy()
         else:
-            _record_sync_failure("data/projects.json", message)
+            _record_sync_failure("data/projects.json", message, reason)
 
 
 def _sync_data_file(local_path, repo_filename, message):
     if github_sync.is_enabled():
-        ok = github_sync.push_file(local_path, f"data/{repo_filename}", message)
+        ok, reason = github_sync.push_file(local_path, f"data/{repo_filename}", message)
         if ok:
             github_sync.trigger_deploy()
         else:
-            _record_sync_failure(repo_filename, message)
+            _record_sync_failure(repo_filename, message, reason)
 
 
 _last_sync_failures = []
 
 
-def _record_sync_failure(repo_filename, message):
+def _record_sync_failure(repo_filename, message, reason=""):
     """GitHub'a yazma başarısız olduğunda deploy'u TETİKLEMEYİZ -- aksi halde
     Render, henüz senkron olmamış eski veriyi çekip yerel değişikliği ezer.
-    Bunun yerine admin panelde görünecek şekilde kaydederiz."""
+    Bunun yerine admin panelde görünecek şekilde, nedeniyle birlikte kaydederiz."""
     from datetime import datetime, timezone
+    print(f"[github_sync] BAŞARISIZ: {repo_filename} — {message} — {reason}")
     _last_sync_failures.append({
         "file": repo_filename,
         "message": message,
+        "reason": reason,
         "at": datetime.now(timezone.utc).isoformat(),
     })
     del _last_sync_failures[:-10]  # sadece son 10 kaydı tut

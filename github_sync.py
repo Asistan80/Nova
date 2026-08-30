@@ -104,10 +104,13 @@ def push_file_content(repo_path, text_content, message):
 def push_file(local_path, repo_path, message):
     """local_path'teki dosyayı repo_path konumuna commit'ler (varsa günceller).
     Aynı dosyaya çok kısa sürede art arda yazılırsa GitHub sha çakışması (409)
-    verebilir -- bu durumda güncel sha'yı tekrar çekip bir kez daha dener."""
+    verebilir -- bu durumda güncel sha'yı tekrar çekip bir kez daha dener.
+    (ok: bool, reason: str) döner -- reason sadece ok=False iken doludur."""
     cfg = _config()
-    if not cfg or not os.path.exists(local_path):
-        return False
+    if not cfg:
+        return False, "GITHUB_TOKEN veya GITHUB_REPO tanımlı değil"
+    if not os.path.exists(local_path):
+        return False, f"yerel dosya bulunamadı: {local_path}"
 
     url = f"{API_ROOT}/repos/{cfg['repo']}/contents/{repo_path}"
     headers = _headers(cfg["token"])
@@ -115,14 +118,17 @@ def push_file(local_path, repo_path, message):
     with open(local_path, "rb") as f:
         content_b64 = base64.b64encode(f.read()).decode("utf-8")
 
+    last_reason = ""
     for attempt in (1, 2):
         sha = None
         try:
             r = requests.get(url, headers=headers, params={"ref": cfg["branch"]}, timeout=15)
             if r.status_code == 200:
                 sha = r.json().get("sha")
-        except requests.RequestException:
-            return False
+            elif r.status_code != 404:
+                return False, f"sha okunamadı: HTTP {r.status_code} {r.text[:150]}"
+        except requests.RequestException as e:
+            return False, f"bağlantı hatası (GET): {e}"
 
         payload = {"message": message, "content": content_b64, "branch": cfg["branch"]}
         if sha:
@@ -130,16 +136,17 @@ def push_file(local_path, repo_path, message):
 
         try:
             r = requests.put(url, headers=headers, json=payload, timeout=30)
-        except requests.RequestException:
-            return False
+        except requests.RequestException as e:
+            return False, f"bağlantı hatası (PUT): {e}"
 
         if r.status_code in (200, 201):
-            return True
+            return True, ""
+        last_reason = f"HTTP {r.status_code} {r.text[:150]}"
         if r.status_code == 409 and attempt == 1:
             continue  # sha bayatlamış olabilir -- tekrar çekip bir kez daha dene
-        return False
+        return False, last_reason
 
-    return False
+    return False, last_reason
 
 
 def delete_file(repo_path, message):

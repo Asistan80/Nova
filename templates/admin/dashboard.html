@@ -67,10 +67,10 @@
       <strong style="color:var(--boss-red);">⚠️ GitHub senkronu başarısız oldu (deploy tetiklenmedi, veri kaybını önlemek için):</strong>
       <ul style="margin:8px 0 0 18px; color:var(--text-dim);">
         {% for f in sync_failures %}
-        <li>{{ f.file }} — {{ f.message }} ({{ f.at[:19] }})</li>
+        <li>{{ f.file }} — {{ f.message }} ({{ f.at[:19] }}){% if f.reason %}<br><span style="opacity:0.8;">↳ {{ f.reason }}</span>{% endif %}</li>
         {% endfor %}
       </ul>
-      <p style="margin-top:8px; color:var(--text-dim);">Yeniden dene: sayfayı yenileyip aynı işlemi tekrar yap, ya da birkaç dakika bekle.</p>
+      <p style="margin-top:8px; color:var(--text-dim);">Yeniden dene: sayfayı yenileyip aynı işlemi tekrar yap, ya da birkaç dakika bekle. Kesin nedeni görmek için yukarıdaki "GitHub Bağlantısını Test Et" butonunu kullanabilirsin.</p>
     </div>
     {% endif %}
 
