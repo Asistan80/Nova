@@ -102,7 +102,9 @@ def push_file_content(repo_path, text_content, message):
 
 
 def push_file(local_path, repo_path, message):
-    """local_path'teki dosyayı repo_path konumuna commit'ler (varsa günceller)."""
+    """local_path'teki dosyayı repo_path konumuna commit'ler (varsa günceller).
+    Aynı dosyaya çok kısa sürede art arda yazılırsa GitHub sha çakışması (409)
+    verebilir -- bu durumda güncel sha'yı tekrar çekip bir kez daha dener."""
     cfg = _config()
     if not cfg or not os.path.exists(local_path):
         return False
@@ -110,27 +112,34 @@ def push_file(local_path, repo_path, message):
     url = f"{API_ROOT}/repos/{cfg['repo']}/contents/{repo_path}"
     headers = _headers(cfg["token"])
 
-    # Dosya zaten repoda var mı, varsa sha'sını al (güncelleme için gerekli)
-    sha = None
-    try:
-        r = requests.get(url, headers=headers, params={"ref": cfg["branch"]}, timeout=15)
-        if r.status_code == 200:
-            sha = r.json().get("sha")
-    except requests.RequestException:
-        return False
-
     with open(local_path, "rb") as f:
         content_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-    payload = {"message": message, "content": content_b64, "branch": cfg["branch"]}
-    if sha:
-        payload["sha"] = sha
+    for attempt in (1, 2):
+        sha = None
+        try:
+            r = requests.get(url, headers=headers, params={"ref": cfg["branch"]}, timeout=15)
+            if r.status_code == 200:
+                sha = r.json().get("sha")
+        except requests.RequestException:
+            return False
 
-    try:
-        r = requests.put(url, headers=headers, json=payload, timeout=30)
-        return r.status_code in (200, 201)
-    except requests.RequestException:
+        payload = {"message": message, "content": content_b64, "branch": cfg["branch"]}
+        if sha:
+            payload["sha"] = sha
+
+        try:
+            r = requests.put(url, headers=headers, json=payload, timeout=30)
+        except requests.RequestException:
+            return False
+
+        if r.status_code in (200, 201):
+            return True
+        if r.status_code == 409 and attempt == 1:
+            continue  # sha bayatlamış olabilir -- tekrar çekip bir kez daha dene
         return False
+
+    return False
 
 
 def delete_file(repo_path, message):

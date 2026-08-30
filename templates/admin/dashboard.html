@@ -62,6 +62,18 @@
       <span style="color:var(--text-dim); margin-left:auto;">{{ 'E-posta gönderimi açık' if notify_status.email else 'Gmail bilgileri eksik — bülten e-postaları gönderilemiyor' }}</span>
     </div>
 
+    {% if sync_failures %}
+    <div style="margin-bottom:24px; padding:14px 18px; background:rgba(255,80,80,0.08); border:1px solid var(--boss-red); border-radius:10px; font-size:0.85rem;">
+      <strong style="color:var(--boss-red);">⚠️ GitHub senkronu başarısız oldu (deploy tetiklenmedi, veri kaybını önlemek için):</strong>
+      <ul style="margin:8px 0 0 18px; color:var(--text-dim);">
+        {% for f in sync_failures %}
+        <li>{{ f.file }} — {{ f.message }} ({{ f.at[:19] }})</li>
+        {% endfor %}
+      </ul>
+      <p style="margin-top:8px; color:var(--text-dim);">Yeniden dene: sayfayı yenileyip aynı işlemi tekrar yap, ya da birkaç dakika bekle.</p>
+    </div>
+    {% endif %}
+
     {% if not deploy_hook_enabled %}
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:rgba(76,141,255,0.08); border:1px solid rgba(76,141,255,0.3); border-radius:10px; font-size:0.88rem; color:var(--text-dim);">
       ⚠️ <strong style="color:var(--text);">Unutma:</strong> Render ücretsiz planda olduğu için, buradan yaptığın değişikliklerin

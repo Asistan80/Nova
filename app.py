@@ -84,14 +84,36 @@ def _make_gif_poster(gif_path, poster_path):
 
 def _sync_projects_json(message):
     if github_sync.is_enabled():
-        github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
-        github_sync.trigger_deploy()
+        ok = github_sync.push_file(store.PROJECTS_FILE, "data/projects.json", message)
+        if ok:
+            github_sync.trigger_deploy()
+        else:
+            _record_sync_failure("data/projects.json", message)
 
 
 def _sync_data_file(local_path, repo_filename, message):
     if github_sync.is_enabled():
-        github_sync.push_file(local_path, f"data/{repo_filename}", message)
-        github_sync.trigger_deploy()
+        ok = github_sync.push_file(local_path, f"data/{repo_filename}", message)
+        if ok:
+            github_sync.trigger_deploy()
+        else:
+            _record_sync_failure(repo_filename, message)
+
+
+_last_sync_failures = []
+
+
+def _record_sync_failure(repo_filename, message):
+    """GitHub'a yazma başarısız olduğunda deploy'u TETİKLEMEYİZ -- aksi halde
+    Render, henüz senkron olmamış eski veriyi çekip yerel değişikliği ezer.
+    Bunun yerine admin panelde görünecek şekilde kaydederiz."""
+    from datetime import datetime, timezone
+    _last_sync_failures.append({
+        "file": repo_filename,
+        "message": message,
+        "at": datetime.now(timezone.utc).isoformat(),
+    })
+    del _last_sync_failures[:-10]  # sadece son 10 kaydı tut
 
 
 # ---------- Ziyaretçi sayacı ----------
@@ -647,6 +669,7 @@ def admin_dashboard():
         deploy_hook_enabled=github_sync.deploy_hook_enabled(),
         notify_status=notifications.status(),
         subscriber_count=store.subscriber_count(),
+        sync_failures=_last_sync_failures[-5:],
     )
 
 
