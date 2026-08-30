@@ -583,5 +583,27 @@
     "updated_at": "",
     "slug": "manzara-2",
     "created_at": "2026-08-30T22:23:58.060379+00:00"
+  },
+  {
+    "name": "Kedicik",
+    "kind": "resim",
+    "status": "playable",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "Leonardo_Phoenix_A_majestic_attentiongrabbing_cat_dressed_in_a_0.jpg",
+    "updated_at": "",
+    "slug": "kedicik",
+    "created_at": "2026-08-30T23:39:14.883130+00:00"
   }
 ]
