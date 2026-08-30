@@ -67,10 +67,11 @@
         <p class="form-hint">En son eklediğin satır listenin en üstünde gösterilir.</p>
       </div>
 
-      <div class="form-field" data-field-for="oyun,uygulama">
+      <div class="form-field" data-field-for="oyun,uygulama,video">
         <label for="cover">Kapak Görseli (png/jpg/webp)</label>
         <input type="file" id="cover" name="cover" accept="image/*">
         {% if p and p.cover %}<p class="form-hint">Mevcut: {{ p.cover }} — yeni yüklersen üzerine yazılır.</p>{% endif %}
+        <p class="form-hint" id="auto-cover-hint" style="display:none; color:var(--teal);">Video dosyasından otomatik bir kapak karesi oluşturuldu ✓ (istersen üstteki alandan kendi görselini seçip değiştirebilirsin)</p>
       </div>
 
       <div class="form-field" data-field-for="oyun,uygulama">
@@ -138,6 +139,45 @@
 
   document.getElementById('kind').addEventListener('change', applyKindVisibility);
   applyKindVisibility();
+
+  // ---- Video yüklerken tarayıcıda otomatik bir kapak karesi (PNG) üret ----
+  // Video elementiyle sayfa yüklendikten sonra kareye "seek" etmek, meta verisi
+  // dosyanın sonunda olan (faststart'sız) mp4'lerde güvenilir çalışmıyor.
+  // Ama admin burada dosyanın TAMAMINA (yerel File nesnesi) sahip olduğu için
+  // bir kare çıkarıp normal, güvenilir resim-kapak sistemine ekleyebiliyoruz.
+  document.getElementById('package').addEventListener('change', function (e) {
+    const kind = document.getElementById('kind').value;
+    const file = e.target.files[0];
+    const hint = document.getElementById('auto-cover-hint');
+    if (kind !== 'video' || !file) { if (hint) hint.style.display = 'none'; return; }
+
+    const video = document.createElement('video');
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto';
+    video.src = URL.createObjectURL(file);
+
+    video.addEventListener('loadeddata', function () {
+      video.currentTime = Math.min(0.5, (video.duration || 1) / 4);
+    });
+
+    video.addEventListener('seeked', function () {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 360;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(function (blob) {
+        if (!blob) return;
+        const thumbFile = new File([blob], 'video-kapagi.png', { type: 'image/png' });
+        const dt = new DataTransfer();
+        dt.items.add(thumbFile);
+        document.getElementById('cover').files = dt.files;
+        if (hint) hint.style.display = '';
+        URL.revokeObjectURL(video.src);
+      }, 'image/png');
+    });
+  });
 </script>
 
 {% endblock %}

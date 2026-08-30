@@ -11,7 +11,11 @@
       {% elif c.preview == 'image' %}
         <img src="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}">
       {% elif c.preview == 'video' %}
-        <video class="cart-video-thumb" muted playsinline preload="metadata" src="{{ url_for('media_inline', slug=p.slug) }}#t=0.5"></video>
+        {% if p.cover %}
+          <img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="{{ p.name }}">
+        {% else %}
+          <video class="cart-video-thumb" muted playsinline preload="metadata" src="{{ url_for('media_inline', slug=p.slug) }}#t=0.5"></video>
+        {% endif %}
       {% else %}
         <span class="cover-fallback icon-audio">♪</span>
       {% endif %}
