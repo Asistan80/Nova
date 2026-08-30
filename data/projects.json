@@ -583,5 +583,27 @@
     "updated_at": "",
     "slug": "manzara-2",
     "created_at": "2026-08-30T07:20:38.645251+00:00"
+  },
+  {
+    "name": "Manzara",
+    "kind": "video",
+    "status": "playable",
+    "tagline": "Manzara /Doğa",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "manzara-3.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "manzara_esliginde_guzel_bir_do.mp4",
+    "updated_at": "",
+    "slug": "manzara-3",
+    "created_at": "2026-08-30T22:02:18.743885+00:00"
   }
 ]
