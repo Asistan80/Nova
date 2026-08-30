@@ -11,7 +11,7 @@
       {% elif c.preview == 'image' %}
         <img src="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}">
       {% elif c.preview == 'video' %}
-        <video muted preload="metadata" src="{{ url_for('media_inline', slug=p.slug) }}#t=0.5"></video>
+        <video class="cart-video-thumb" muted playsinline preload="metadata" src="{{ url_for('media_inline', slug=p.slug) }}#t=0.5"></video>
       {% else %}
         <span class="cover-fallback icon-audio">♪</span>
       {% endif %}

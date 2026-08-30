@@ -121,12 +121,17 @@ def notify_new_comment(project_name, comment_name, comment_text, admin_url):
 def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
     """Her aboneye ayrı ayrı, kendi çıkış linkiyle e-posta gönderir (arka planda)."""
     cfg = _email_config()
-    if not cfg or not subscribers:
+    if not cfg:
+        print("[newsletter] Gmail bilgileri (GMAIL_ADDRESS/GMAIL_APP_PASSWORD) tanımlı değil, bülten gönderilemedi.")
+        return
+    if not subscribers:
+        print("[newsletter] Aktif abone yok, bülten gönderilmedi.")
         return
 
     import threading
 
     def _fire():
+        sent, failed = 0, 0
         for sub in subscribers:
             try:
                 unsub_url = unsubscribe_url_fn(sub.get("token", ""))
@@ -138,8 +143,11 @@ def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
                 with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
                     server.login(cfg["address"], cfg["app_password"])
                     server.sendmail(cfg["address"], [sub["email"]], msg.as_string())
-            except Exception:
-                continue
+                sent += 1
+            except Exception as e:
+                failed += 1
+                print(f"[newsletter] {sub.get('email')} adresine gönderilemedi: {e}")
+        print(f"[newsletter] '{subject}' -> {sent} gönderildi, {failed} başarısız.")
 
     threading.Thread(target=_fire, daemon=True).start()
 

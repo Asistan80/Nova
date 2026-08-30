@@ -341,6 +341,19 @@ if ("serviceWorker" in navigator) {
   }
 })();
 
+// ---------- Video kartuş kartlarında gerçek bir önizleme karesi göster ----------
+// preload="metadata" + #t=0.5 bazı tarayıcılarda (özellikle mobil) siyah/boş
+// kare bırakabiliyor -- metadata yüklenince kareyi bilinçli olarak "seek" edip
+// gerçekten bir kareyi decode ettiriyoruz.
+(function () {
+  document.querySelectorAll(".cart-video-thumb").forEach((video) => {
+    video.addEventListener("loadedmetadata", function () {
+      const target = Math.min(0.5, (video.duration || 1) / 4);
+      try { video.currentTime = target; } catch (e) {}
+    });
+  });
+})();
+
 // ---------- Takma ad ile cihazlar arası favori senkronu (hesapsız) ----------
 (function () {
   const btn = document.getElementById("nickname-sync-btn");

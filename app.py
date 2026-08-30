@@ -811,8 +811,8 @@ def admin_devlog():
             try:
                 devlog_url = request.url_root.rstrip("/") + url_for("devlog_page")
                 notifications.notify_new_devlog(title, devlog_url, store.all_subscribers(), _newsletter_unsubscribe_url)
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[newsletter] devlog bildirimi tetiklenemedi: {e}")
             flash("Devlog kaydı eklendi.")
         return redirect(url_for("admin_devlog"))
     return render_template("admin/devlog.html", entries=store.all_devlog_entries())
@@ -950,8 +950,8 @@ def admin_new():
                     project["name"], project_url, project.get("tagline", ""),
                     store.all_subscribers(), _newsletter_unsubscribe_url,
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[newsletter] proje bildirimi tetiklenemedi: {e}")
         flash(f"\"{project['name']}\" rafa eklendi.")
         return redirect(url_for("admin_dashboard"))
     return render_template("admin/form.html", p=None, categories=cat.CATEGORIES)
