@@ -605,5 +605,27 @@
     "updated_at": "",
     "slug": "kedicik",
     "created_at": "2026-08-30T23:39:14.883130+00:00"
+  },
+  {
+    "name": "Korsan",
+    "kind": "resim",
+    "status": "playable",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "Leonardo_Phoenix_A_stunning_attentiongrabbing_2D_illustration_1.jpg",
+    "updated_at": "",
+    "slug": "korsan",
+    "created_at": "2026-08-30T23:41:30.332460+00:00"
   }
 ]
