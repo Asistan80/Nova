@@ -5,6 +5,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
   </button>
   <div class="cart-cover kind-{{ p.kind }}-cover">
+    <span class="cover-like-badge">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-6.7-4.35-9.3-8.1C1 10.1 1.6 6.6 4.6 5.1c2.3-1.15 4.7-.2 6 1.4a5 5 0 0 1 1.4 1.9 5 5 0 0 1 1.4-1.9c1.3-1.6 3.7-2.55 6-1.4 3 1.5 3.6 5 1.9 7.8C18.7 16.65 12 21 12 21z"/></svg>
+      {{ stats.likes.get(p.slug, 0) }}
+    </span>
     {% if c.media_kind and p.download_file %}
       {% if p.kind == 'gif' %}
         <img class="gif-hover-preview" src="{{ url_for('media_poster', slug=p.slug) }}" data-gif="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}">

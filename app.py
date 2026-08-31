@@ -1047,6 +1047,73 @@ def _cleanup_project_files(project):
         shutil.rmtree(gamedir, ignore_errors=True)
 
 
+def _lerp_color(c1, c2, t):
+    return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
+
+
+def generate_placeholder_cover(project, save_path):
+    """Kapak görseli olmayan projeler için marka renkleriyle (mavi->mor->pembe
+    çapraz gradyan) ve proje baş harfleriyle otomatik bir kapak üretir."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    W, H = 960, 540
+    BLUE, PURPLE, PINK = (76, 141, 255), (165, 107, 255), (255, 92, 122)
+
+    seed_size = 48
+    seed = Image.new("RGB", (seed_size, seed_size))
+    px = seed.load()
+    for y in range(seed_size):
+        for x in range(seed_size):
+            t = (x + y) / (2 * (seed_size - 1))
+            color = _lerp_color(BLUE, PURPLE, t * 2) if t < 0.5 else _lerp_color(PURPLE, PINK, (t - 0.5) * 2)
+            px[x, y] = color
+    img = seed.resize((W, H), Image.BICUBIC).convert("RGBA")
+
+    # metnin okunabilirliği için hafif karartma
+    overlay = Image.new("RGBA", (W, H), (8, 8, 18, 70))
+    img = Image.alpha_composite(img, overlay)
+
+    draw = ImageDraw.Draw(img)
+    font_path = os.path.join(BASE_DIR, "static", "fonts", "Poppins-Bold.ttf")
+    initials = (project.get("name") or "??")[:2].upper() or "??"
+
+    try:
+        font_big = ImageFont.truetype(font_path, 220)
+        font_small = ImageFont.truetype(font_path, 30)
+    except Exception:
+        font_big = font_small = ImageFont.load_default()
+
+    bbox = draw.textbbox((0, 0), initials, font=font_big)
+    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+    draw.text(((W - tw) / 2 - bbox[0], (H - th) / 2 - bbox[1]), initials, font=font_big, fill=(255, 255, 255, 235))
+
+    label = cat.CATEGORIES.get(project.get("kind"), {}).get("singular", "")
+    if label:
+        draw.text((30, H - 60), label.upper(), font=font_small, fill=(255, 255, 255, 200))
+
+    img.convert("RGB").save(save_path, format="PNG")
+
+
+# Bu türler için gerçek bir kapak yoksa otomatik plasholder üretilir
+# (resim/gif zaten kendi görselini kapak olarak kullanıyor, ihtiyaçları yok)
+AUTO_COVER_KINDS = {"oyun", "uygulama", "ses", "video"}
+
+
+def _ensure_auto_cover(project):
+    if project.get("cover") or project.get("kind") not in AUTO_COVER_KINDS:
+        return
+    try:
+        slug = project["slug"]
+        fname = f"{slug}-auto.png"
+        local_path = os.path.join(COVERS_DIR, fname)
+        generate_placeholder_cover(project, local_path)
+        project["cover"] = fname
+        if github_sync.is_enabled():
+            github_sync.push_file(local_path, f"static/uploads/covers/{fname}", f"otomatik kapak: {slug}")
+    except Exception as e:
+        print(f"[auto_cover] {project.get('slug')} için üretilemedi: {e}")
+
+
 def _handle_uploads(project, files):
     slug = project["slug"]
 
@@ -1113,6 +1180,9 @@ def _handle_uploads(project, files):
         project["has_game_files"] = True
         if github_sync.is_enabled():
             github_sync.push_file(source_path, f"games/{slug}/source.zip", f"oyun kaynağı: {slug}")
+
+    # Hâlâ kapak yoksa (admin elle yüklemediyse) marka renkli bir tane üret
+    _ensure_auto_cover(project)
 
 
 if __name__ == "__main__":
