@@ -49,9 +49,24 @@ def _site_url():
     return os.environ.get("SITE_URL", "").rstrip("/")
 
 
-# ---------- E-posta (Gmail SMTP) ----------
+# ---------- E-posta: SendGrid (HTTP API, önerilen) + Gmail SMTP (yedek) ----------
+#
+# Render'ın (ve birçok ücretsiz barındırmanın) giden SMTP portlarını (25/465/587)
+# engellediği doğrulandı -- bu yüzden asıl yol artık SendGrid'in HTTP API'si
+# (port 443, hiçbir zaman engellenmiyor). SENDGRID_API_KEY tanımlıysa o
+# kullanılır. Tanımlı değilse (ör. yerel geliştirmede, ya da SMTP'nin açık
+# olduğu başka bir barındırmada), eski Gmail SMTP yöntemine düşülür.
+
+def _sendgrid_config():
+    api_key = os.environ.get("SENDGRID_API_KEY")
+    from_email = os.environ.get("SENDGRID_FROM_EMAIL") or os.environ.get("GMAIL_ADDRESS")
+    if not api_key or not from_email:
+        return None
+    return {"api_key": api_key, "from_email": from_email}
+
 
 def _email_config():
+    """Sadece yedek plan olan Gmail SMTP için (SendGrid tanımlı değilse)."""
     address = os.environ.get("GMAIL_ADDRESS")
     app_password = os.environ.get("GMAIL_APP_PASSWORD")
     to_addr = os.environ.get("NOTIFY_EMAIL_TO", address)
@@ -60,21 +75,65 @@ def _email_config():
     return {"address": address, "app_password": app_password, "to": to_addr}
 
 
-def notify_email(subject, body):
+def _email_enabled():
+    return bool(_sendgrid_config() or _email_config())
+
+
+def _send_via_sendgrid(to_email, subject, body):
+    cfg = _sendgrid_config()
+    try:
+        r = requests.post(
+            "https://api.sendgrid.com/v3/mail/send",
+            headers={"Authorization": f"Bearer {cfg['api_key']}", "Content-Type": "application/json"},
+            json={
+                "personalizations": [{"to": [{"email": to_email}]}],
+                "from": {"email": cfg["from_email"], "name": "Derin Murnova Dünyası"},
+                "subject": subject,
+                "content": [{"type": "text/plain", "value": body}],
+            },
+            timeout=15,
+        )
+        if r.status_code in (200, 202):
+            return True, "gönderildi (SendGrid)"
+        return False, f"SendGrid HTTP {r.status_code}: {r.text[:200]}"
+    except requests.RequestException as e:
+        return False, f"SendGrid bağlantı hatası: {e}"
+
+
+def _send_via_smtp(to_email, subject, body):
     cfg = _email_config()
-    if not cfg:
-        return False
     try:
         msg = MIMEText(body, "plain", "utf-8")
         msg["Subject"] = subject
         msg["From"] = cfg["address"]
-        msg["To"] = cfg["to"]
+        msg["To"] = to_email
         with _smtp_ssl_connect() as server:
             server.login(cfg["address"], cfg["app_password"])
-            server.sendmail(cfg["address"], [cfg["to"]], msg.as_string())
-        return True
-    except Exception:
+            server.sendmail(cfg["address"], [to_email], msg.as_string())
+        return True, "gönderildi (SMTP)"
+    except Exception as e:
+        return False, f"SMTP hatası: {e}"
+
+
+def send_email(to_email, subject, body):
+    """Tüm gönderimlerin geçtiği tek nokta: önce SendGrid, yoksa Gmail SMTP.
+    (ok: bool, detay: str) döner."""
+    if _sendgrid_config():
+        return _send_via_sendgrid(to_email, subject, body)
+    if _email_config():
+        return _send_via_smtp(to_email, subject, body)
+    return False, "Ne SENDGRID_API_KEY ne GMAIL_ADDRESS/GMAIL_APP_PASSWORD tanımlı."
+
+
+def notify_email(subject, body):
+    cfg = _sendgrid_config()
+    to_addr = os.environ.get("NOTIFY_EMAIL_TO") or (cfg["from_email"] if cfg else None) or os.environ.get("GMAIL_ADDRESS")
+    if not to_addr:
         return False
+    ok, detail = send_email(to_addr, subject, body)
+    if not ok:
+        print(f"[notify_email] gönderilemedi: {detail}")
+    return ok
 
 
 # ---------- Discord (webhook) ----------
@@ -153,9 +212,8 @@ def notify_new_comment(project_name, comment_name, comment_text, admin_url):
 
 def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
     """Her aboneye ayrı ayrı, kendi çıkış linkiyle e-posta gönderir (arka planda)."""
-    cfg = _email_config()
-    if not cfg:
-        print("[newsletter] Gmail bilgileri (GMAIL_ADDRESS/GMAIL_APP_PASSWORD) tanımlı değil, bülten gönderilemedi.")
+    if not _email_enabled():
+        print("[newsletter] Ne SendGrid ne Gmail SMTP tanımlı, bülten gönderilemedi.")
         return
     if not subscribers:
         print("[newsletter] Aktif abone yok, bülten gönderilmedi.")
@@ -166,20 +224,14 @@ def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
     def _fire():
         sent, failed = 0, 0
         for sub in subscribers:
-            try:
-                unsub_url = unsubscribe_url_fn(sub.get("token", ""))
-                body = "\n".join(body_lines) + f"\n\n---\nBu e-postaları almak istemiyorsan: {unsub_url}"
-                msg = MIMEText(body, "plain", "utf-8")
-                msg["Subject"] = subject
-                msg["From"] = cfg["address"]
-                msg["To"] = sub["email"]
-                with _smtp_ssl_connect() as server:
-                    server.login(cfg["address"], cfg["app_password"])
-                    server.sendmail(cfg["address"], [sub["email"]], msg.as_string())
+            unsub_url = unsubscribe_url_fn(sub.get("token", ""))
+            body = "\n".join(body_lines) + f"\n\n---\nBu e-postaları almak istemiyorsan: {unsub_url}"
+            ok, detail = send_email(sub["email"], subject, body)
+            if ok:
                 sent += 1
-            except Exception as e:
+            else:
                 failed += 1
-                print(f"[newsletter] {sub.get('email')} adresine gönderilemedi: {e}")
+                print(f"[newsletter] {sub.get('email')} adresine gönderilemedi: {detail}")
         print(f"[newsletter] '{subject}' -> {sent} gönderildi, {failed} başarısız.")
 
     threading.Thread(target=_fire, daemon=True).start()
@@ -220,43 +272,21 @@ def notify_comment_reply(to_email, project_name, reply_text, project_url):
             f"\"{reply_text}\"\n\n"
             f"Sayfayı gör: {project_url}"
         )
-        cfg = _email_config()
-        if not cfg:
-            return
-        try:
-            msg = MIMEText(body, "plain", "utf-8")
-            msg["Subject"] = subject
-            msg["From"] = cfg["address"]
-            msg["To"] = to_email
-            with _smtp_ssl_connect() as server:
-                server.login(cfg["address"], cfg["app_password"])
-                server.sendmail(cfg["address"], [to_email], msg.as_string())
-        except Exception:
-            pass
+        ok, detail = send_email(to_email, subject, body)
+        if not ok:
+            print(f"[comment_reply] {to_email} adresine gönderilemedi: {detail}")
 
     threading.Thread(target=_fire, daemon=True).start()
 
 
 def send_test_email(to_email):
-    """Bülten SMTP ayarlarını hemen (arka plana atmadan) test eder,
+    """Bülten e-posta ayarlarını hemen (arka plana atmadan) test eder,
     gerçek sonucu (ok, detay) olarak döner -- admin panelde anında görünsün diye."""
-    cfg = _email_config()
-    if not cfg:
-        return False, "GMAIL_ADDRESS / GMAIL_APP_PASSWORD tanımlı değil, e-posta gönderilemiyor."
-    try:
-        msg = MIMEText(
-            "Bu bir test mesajıdır -- Derin Murnova Dünyası bülten sistemi çalışıyor.",
-            "plain", "utf-8",
-        )
-        msg["Subject"] = "🧪 Test e-postası — Derin Murnova Dünyası"
-        msg["From"] = cfg["address"]
-        msg["To"] = to_email
-        with _smtp_ssl_connect() as server:
-            server.login(cfg["address"], cfg["app_password"])
-            server.sendmail(cfg["address"], [to_email], msg.as_string())
-        return True, f"{to_email} adresine test maili gönderildi."
-    except Exception as e:
-        return False, f"Gönderilemedi: {e}"
+    return send_email(
+        to_email,
+        "🧪 Test e-postası — Derin Murnova Dünyası",
+        "Bu bir test mesajıdır -- Derin Murnova Dünyası bülten sistemi çalışıyor.",
+    )
 
 
 def test_smtp_ports():
@@ -289,7 +319,7 @@ def test_smtp_ports():
 
 def any_enabled():
     return bool(
-        _email_config()
+        _email_enabled()
         or os.environ.get("DISCORD_WEBHOOK_URL")
         or os.environ.get("NTFY_TOPIC")
         or (os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID"))
@@ -298,7 +328,8 @@ def any_enabled():
 
 def status():
     return {
-        "email": bool(_email_config()),
+        "email": _email_enabled(),
+        "email_via": "SendGrid" if _sendgrid_config() else ("Gmail SMTP" if _email_config() else None),
         "discord": bool(os.environ.get("DISCORD_WEBHOOK_URL")),
         "ntfy": bool(os.environ.get("NTFY_TOPIC")),
         "telegram": bool(os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID")),

@@ -12,7 +12,7 @@
     <div style="margin-bottom:24px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:0.88rem;">
       <span>{{ '●' if notify_status.email else '○' }} E-posta gönderimi:
         <strong style="color:{{ 'var(--teal)' if notify_status.email else 'var(--boss-red)' }};">
-          {{ 'yapılandırılmış' if notify_status.email else 'GMAIL_ADDRESS / GMAIL_APP_PASSWORD eksik' }}
+          {{ notify_status.email_via if notify_status.email else 'yapılandırılmamış (SENDGRID_API_KEY ya da GMAIL_ADDRESS/GMAIL_APP_PASSWORD eksik)' }}
         </strong>
       </span>
     </div>
