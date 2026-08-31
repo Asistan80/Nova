@@ -538,7 +538,15 @@ def admin_newsletter():
         "admin/newsletter.html",
         subscribers=sorted(store.all_subscribers(active_only=False), key=lambda s: s.get("created_at", ""), reverse=True),
         notify_status=notifications.status(),
+        port_results=session.pop("smtp_port_results", None),
     )
+
+
+@app.route("/admin/bulten/port-testi", methods=["POST"])
+@login_required
+def admin_newsletter_port_test():
+    session["smtp_port_results"] = notifications.test_smtp_ports()
+    return redirect(url_for("admin_newsletter"))
 
 
 @app.route("/admin/bulten/test-maili", methods=["POST"])

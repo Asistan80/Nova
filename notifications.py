@@ -259,6 +259,34 @@ def send_test_email(to_email):
         return False, f"Gönderilemedi: {e}"
 
 
+def test_smtp_ports():
+    """Render'ın giden SMTP portlarını gerçekten engelleyip engellemediğini
+    kanıtlamak için birkaç hedefe kısa süreli ham soket bağlantısı dener.
+    google.com:443 bir referans noktasıdır (bu her zaman açık olmalı --
+    kapalıysa sorun SMTP'ye özgü değil, genel giden bağlantıdadır)."""
+    import time as _time
+
+    targets = [
+        ("google.com", 443, "referans (HTTPS -- her zaman açık olmalı)"),
+        ("smtp.gmail.com", 465, "SMTPS (SSL)"),
+        ("smtp.gmail.com", 587, "SMTP (STARTTLS)"),
+        ("smtp.gmail.com", 25, "SMTP (düz)"),
+    ]
+    results = []
+    for host, port, label in targets:
+        start = _time.time()
+        try:
+            with _force_ipv4_dns():
+                s = socket.create_connection((host, port), timeout=6)
+            s.close()
+            results.append({"host": host, "port": port, "label": label, "ok": True,
+                             "detail": "bağlandı", "ms": int((_time.time() - start) * 1000)})
+        except Exception as e:
+            results.append({"host": host, "port": port, "label": label, "ok": False,
+                             "detail": str(e), "ms": int((_time.time() - start) * 1000)})
+    return results
+
+
 def any_enabled():
     return bool(
         _email_config()

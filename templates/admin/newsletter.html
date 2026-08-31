@@ -18,6 +18,36 @@
     </div>
 
     <div style="margin-bottom:28px; padding:16px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:10px;">🔌 Ağ / port testi</h2>
+      <p class="form-hint" style="margin-bottom:10px;">Render'ın giden SMTP portlarını (465/587/25) gerçekten engelleyip engellemediğini kanıtlar. "referans" satırı her zaman ✅ olmalı -- o da başarısızsa sorun SMTP'ye özgü değil, genel giden bağlantıdadır.</p>
+      <form method="POST" action="{{ url_for('admin_newsletter_port_test') }}">
+        <button type="submit" class="btn btn-ghost">Port Testi Yap</button>
+      </form>
+      {% if port_results %}
+      <table style="width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:14px;">
+        <thead>
+          <tr style="text-align:left; border-bottom:1px solid var(--line); color:var(--text-dim);">
+            <th style="padding:6px;">Hedef</th>
+            <th style="padding:6px;">Sonuç</th>
+            <th style="padding:6px;">Süre</th>
+            <th style="padding:6px;">Detay</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in port_results %}
+          <tr style="border-bottom:1px solid var(--line);">
+            <td style="padding:6px;">{{ r.host }}:{{ r.port }}<br><span style="color:var(--text-dim); font-size:0.78rem;">{{ r.label }}</span></td>
+            <td style="padding:6px; color:{{ 'var(--teal)' if r.ok else 'var(--boss-red)' }};">{{ '✅ açık' if r.ok else '❌ kapalı' }}</td>
+            <td style="padding:6px; color:var(--text-dim);">{{ r.ms }}ms</td>
+            <td style="padding:6px; color:var(--text-dim);">{{ r.detail }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+
+    <div style="margin-bottom:28px; padding:16px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
       <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:10px;">🧪 Anlık test maili gönder</h2>
       <p class="form-hint" style="margin-bottom:10px;">Devlog/proje eklemeyi beklemeden, SMTP ayarlarının gerçekten çalışıp çalışmadığını hemen görmek için.</p>
       <form method="POST" action="{{ url_for('admin_newsletter_test') }}" style="display:flex; gap:8px; flex-wrap:wrap;">
