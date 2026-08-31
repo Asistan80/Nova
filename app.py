@@ -531,6 +531,28 @@ def _newsletter_unsubscribe_url(token):
     return request.url_root.rstrip("/") + url_for("newsletter_unsubscribe", token=token)
 
 
+@app.route("/admin/bulten")
+@login_required
+def admin_newsletter():
+    return render_template(
+        "admin/newsletter.html",
+        subscribers=sorted(store.all_subscribers(active_only=False), key=lambda s: s.get("created_at", ""), reverse=True),
+        notify_status=notifications.status(),
+    )
+
+
+@app.route("/admin/bulten/test-maili", methods=["POST"])
+@login_required
+def admin_newsletter_test():
+    email = request.form.get("email", "").strip()
+    if not email or "@" not in email:
+        flash("❌ Geçerli bir e-posta adresi gir.")
+        return redirect(url_for("admin_newsletter"))
+    ok, detail = notifications.send_test_email(email)
+    flash(("✅ " if ok else "❌ ") + detail)
+    return redirect(url_for("admin_newsletter"))
+
+
 @app.route("/rastgele")
 def random_project():
     project = store.random_project()

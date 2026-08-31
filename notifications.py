@@ -204,6 +204,28 @@ def notify_comment_reply(to_email, project_name, reply_text, project_url):
     threading.Thread(target=_fire, daemon=True).start()
 
 
+def send_test_email(to_email):
+    """Bülten SMTP ayarlarını hemen (arka plana atmadan) test eder,
+    gerçek sonucu (ok, detay) olarak döner -- admin panelde anında görünsün diye."""
+    cfg = _email_config()
+    if not cfg:
+        return False, "GMAIL_ADDRESS / GMAIL_APP_PASSWORD tanımlı değil, e-posta gönderilemiyor."
+    try:
+        msg = MIMEText(
+            "Bu bir test mesajıdır -- Derin Murnova Dünyası bülten sistemi çalışıyor.",
+            "plain", "utf-8",
+        )
+        msg["Subject"] = "🧪 Test e-postası — Derin Murnova Dünyası"
+        msg["From"] = cfg["address"]
+        msg["To"] = to_email
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+            server.login(cfg["address"], cfg["app_password"])
+            server.sendmail(cfg["address"], [to_email], msg.as_string())
+        return True, f"{to_email} adresine test maili gönderildi."
+    except Exception as e:
+        return False, f"Gönderilemedi: {e}"
+
+
 def any_enabled():
     return bool(
         _email_config()

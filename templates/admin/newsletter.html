@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Bülten — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Bülten Aboneleri</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <div style="margin-bottom:24px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:0.88rem;">
+      <span>{{ '●' if notify_status.email else '○' }} E-posta gönderimi:
+        <strong style="color:{{ 'var(--teal)' if notify_status.email else 'var(--boss-red)' }};">
+          {{ 'yapılandırılmış' if notify_status.email else 'GMAIL_ADDRESS / GMAIL_APP_PASSWORD eksik' }}
+        </strong>
+      </span>
+    </div>
+
+    <div style="margin-bottom:28px; padding:16px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px;">
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1rem; margin-bottom:10px;">🧪 Anlık test maili gönder</h2>
+      <p class="form-hint" style="margin-bottom:10px;">Devlog/proje eklemeyi beklemeden, SMTP ayarlarının gerçekten çalışıp çalışmadığını hemen görmek için.</p>
+      <form method="POST" action="{{ url_for('admin_newsletter_test') }}" style="display:flex; gap:8px; flex-wrap:wrap;">
+        <input type="email" name="email" placeholder="test@ornek.com" required style="padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:var(--bg-deep); color:var(--text); min-width:220px;">
+        <button type="submit" class="btn btn-primary">Test Maili Gönder</button>
+      </form>
+    </div>
+
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; margin-bottom:14px;">
+      Aboneler ({{ subscribers|length }})
+    </h2>
+    {% if subscribers %}
+    <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+      <thead>
+        <tr style="text-align:left; border-bottom:1px solid var(--line); color:var(--text-dim);">
+          <th style="padding:8px 6px;">E-posta</th>
+          <th style="padding:8px 6px;">Durum</th>
+          <th style="padding:8px 6px;">Kayıt tarihi</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in subscribers %}
+        <tr style="border-bottom:1px solid var(--line);">
+          <td style="padding:8px 6px;">{{ s.email }}</td>
+          <td style="padding:8px 6px; color:{{ 'var(--teal)' if s.get('active', True) else 'var(--text-dim)' }};">
+            {{ 'aktif' if s.get('active', True) else 'iptal edilmiş' }}
+          </td>
+          <td style="padding:8px 6px; color:var(--text-dim);">{{ s.get('created_at', '')[:19] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p style="color:var(--text-dim);">Henüz abone yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

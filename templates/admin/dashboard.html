@@ -59,6 +59,7 @@
 
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px; padding:14px 18px; background:var(--surface); border:1px solid var(--line); border-radius:10px; font-size:0.88rem;">
       <span>📬 Bülten aboneleri: <strong style="color:var(--text);">{{ subscriber_count }}</strong></span>
+      <a href="{{ url_for('admin_newsletter') }}" style="margin-left:8px; color:var(--teal);">listeyi gör / test maili gönder →</a>
       <span style="color:var(--text-dim); margin-left:auto;">{{ 'E-posta gönderimi açık' if notify_status.email else 'Gmail bilgileri eksik — bülten e-postaları gönderilemiyor' }}</span>
     </div>
 
