@@ -18,8 +18,10 @@
     "created_at": "2026-07-22T23:58:31.062759+00:00",
     "admin_reply": "Teşekkürler",
     "admin_reply_at": "2026-07-22T23:59:27.088122+00:00",
-    "liked_by": [],
-    "likes": 0
+    "liked_by": [
+      "e7b83ade06fb43f9a0c6d885e03676cd"
+    ],
+    "likes": 1
   },
   {
     "id": "bd1710a4b9",
