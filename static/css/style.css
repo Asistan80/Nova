@@ -757,6 +757,60 @@ img.skeleton{
 .roadmap-item p{ color:var(--text-dim); font-size:0.88rem; }
 
 /* ================================================================
+   HİKAYE / ZAMAN ÇİZELGESİ
+   ================================================================ */
+.story-stats{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:14px;
+  margin-bottom:8px;
+}
+.story-stat{
+  padding:20px 16px; text-align:center; background:var(--surface); border:1px solid var(--line); border-radius:14px;
+}
+.story-stat strong{
+  display:block; font-family:'Space Grotesk',sans-serif; font-size:1.8rem;
+  background:linear-gradient(135deg, var(--amber), var(--teal), var(--boss-red));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.story-stat span{ font-size:0.78rem; color:var(--text-dim); }
+
+.story-timeline{ position:relative; padding-left:32px; }
+.story-timeline::before{
+  content:""; position:absolute; left:7px; top:6px; bottom:6px; width:2px;
+  background:linear-gradient(var(--amber), var(--teal) 50%, var(--boss-red));
+  opacity:0.4;
+}
+.story-event{ position:relative; margin-bottom:26px; }
+.story-dot{
+  position:absolute; left:-32px; top:6px; width:16px; height:16px; border-radius:50%;
+  background:var(--bg); border:2px solid var(--teal); z-index:1;
+}
+.story-event-launch .story-dot{ border-color:var(--amber); }
+.story-event-now .story-dot{ border-color:var(--boss-red); background:var(--boss-red); }
+
+.story-card{
+  padding:18px 22px; background:var(--surface); border:1px solid var(--line); border-radius:12px;
+}
+.story-card-now{ border-style:dashed; border-color:var(--boss-red); }
+.story-date{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--teal); margin-bottom:6px; }
+.story-card h3{ font-family:'Space Grotesk',sans-serif; font-size:1.05rem; margin-bottom:6px; }
+.story-card p{ color:var(--text-dim); font-size:0.88rem; white-space:pre-line; }
+.story-card a{ color:var(--teal); }
+
+.story-launch{ display:flex; gap:16px; align-items:center; text-decoration:none; color:inherit; }
+.story-launch img{ width:88px; height:50px; object-fit:cover; border-radius:8px; flex-shrink:0; }
+.story-launch-tag{
+  display:inline-block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em;
+  color:var(--amber); margin-bottom:2px;
+}
+.story-launch h3{ margin-bottom:2px; }
+.story-launch p{ font-size:0.82rem; margin:0; }
+
+@media (max-width: 560px){
+  .story-launch{ flex-direction:column; align-items:flex-start; }
+  .story-launch img{ width:100%; height:120px; }
+}
+
+/* ================================================================
    ARAMA
    ================================================================ */
 .nav-search{ position:relative; }

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Hikayemiz — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<header class="detail-hero">
+  <div class="wrap">
+    <h1 class="detail-title">Hikayemiz</h1>
+    <p class="detail-tagline">
+      {% if started_at %}{{ started_at[:10] }} tarihinden bugüne, adım adım.{% else %}Adım adım büyüyen bir hikaye.{% endif %}
+    </p>
+  </div>
+</header>
+
+<section class="shelf">
+  <div class="wrap">
+    <div class="story-stats">
+      <div class="story-stat"><strong>{{ totals.oyun }}</strong><span>Oyun</span></div>
+      <div class="story-stat"><strong>{{ totals.uygulama }}</strong><span>Uygulama</span></div>
+      <div class="story-stat"><strong>{{ totals.medya }}</strong><span>Medya</span></div>
+      <div class="story-stat"><strong>{{ totals.plays + totals.downloads }}</strong><span>Oynanma/İndirme</span></div>
+      <div class="story-stat"><strong>{{ totals.likes }}</strong><span>Beğeni</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="shelf">
+  <div class="wrap" style="max-width:760px;">
+    {% if timeline %}
+    <div class="story-timeline">
+      {% for e in timeline %}
+      <div class="story-event story-event-{{ e.type }}{% if e.type == 'launch' %} story-event-kind-{{ e.kind }}{% endif %}">
+        <div class="story-dot"></div>
+        <div class="story-card">
+          <div class="story-date">{{ e.date[:10] if e.date else '' }}</div>
+          {% if e.type == 'devlog' %}
+            <h3>{{ e.title }}</h3>
+            <p>{{ e.body }}</p>
+          {% else %}
+            <a class="story-launch" href="{{ url_for('category_detail', group_slug=e.group, slug=e.slug) }}">
+              {% if e.cover %}
+                <img src="{{ url_for('static', filename='uploads/covers/' ~ e.cover) }}" alt="">
+              {% endif %}
+              <div>
+                <span class="story-launch-tag">{{ categories.get(e.kind, {}).get('singular', '') }} yayınlandı</span>
+                <h3>{{ e.title }}</h3>
+                {% if e.tagline %}<p>{{ e.tagline }}</p>{% endif %}
+              </div>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      <div class="story-event story-event-now">
+        <div class="story-dot"></div>
+        <div class="story-card story-card-now">
+          <div class="story-date">Bugün</div>
+          <h3>Hikaye devam ediyor…</h3>
+          <p>Yeni oyunlar, uygulamalar ve güncellemeler yolda. <a href="{{ url_for('roadmap_page') }}">Yol haritasına göz at →</a></p>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <p style="color:var(--text-dim);">Henüz bir hikaye kaydı yok.</p>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

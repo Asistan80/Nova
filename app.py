@@ -436,6 +436,63 @@ def feed_xml():
     return "\n".join(body), 200, {"Content-Type": "application/rss+xml; charset=utf-8"}
 
 
+@app.route("/hikaye")
+def story_page():
+    """Devlog kayıtları + proje yayınlanma tarihlerini birleştirip
+    kronolojik bir zaman çizelgesi olarak sunar."""
+    devlog_events = [
+        {
+            "type": "devlog",
+            "date": e["created_at"],
+            "title": e["title"],
+            "body": e["body"],
+        }
+        for e in store.all_devlog_entries()
+    ]
+
+    projects = store.all_visible_projects()
+    launch_events = [
+        {
+            "type": "launch",
+            "date": p.get("created_at") or "",
+            "title": p["name"],
+            "kind": p["kind"],
+            "slug": p["slug"],
+            "cover": p.get("cover"),
+            "tagline": p.get("tagline", ""),
+            "group": cat.group_for_kind(p["kind"]),
+        }
+        for p in projects
+        if p.get("created_at")
+    ]
+
+    timeline = sorted(devlog_events + launch_events, key=lambda e: e["date"])
+
+    kind_counts = {}
+    for p in projects:
+        kind_counts[p["kind"]] = kind_counts.get(p["kind"], 0) + 1
+
+    stats = store.get_stats()
+    totals = {
+        "oyun": kind_counts.get("oyun", 0),
+        "uygulama": kind_counts.get("uygulama", 0),
+        "medya": sum(kind_counts.get(k, 0) for k in ("resim", "gif", "ses", "video")),
+        "plays": sum(stats.get("plays", {}).values()),
+        "downloads": sum(stats.get("downloads", {}).values()),
+        "likes": sum(stats.get("likes", {}).values()),
+    }
+
+    started_at = min((e["date"] for e in timeline if e["date"]), default=None)
+
+    return render_template(
+        "story.html",
+        timeline=timeline,
+        totals=totals,
+        started_at=started_at,
+        categories=cat.CATEGORIES,
+    )
+
+
 @app.route("/devlog")
 def devlog_page():
     return render_template("devlog.html", entries=store.all_devlog_entries())
