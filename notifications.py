@@ -65,6 +65,14 @@ def _sendgrid_config():
     return {"api_key": api_key, "from_email": from_email}
 
 
+def _brevo_config():
+    api_key = os.environ.get("BREVO_API_KEY")
+    from_email = os.environ.get("BREVO_FROM_EMAIL") or os.environ.get("GMAIL_ADDRESS")
+    if not api_key or not from_email:
+        return None
+    return {"api_key": api_key, "from_email": from_email}
+
+
 def _email_config():
     """Sadece yedek plan olan Gmail SMTP için (SendGrid tanımlı değilse)."""
     address = os.environ.get("GMAIL_ADDRESS")
@@ -76,7 +84,7 @@ def _email_config():
 
 
 def _email_enabled():
-    return bool(_sendgrid_config() or _email_config())
+    return bool(_sendgrid_config() or _brevo_config() or _email_config())
 
 
 def _send_via_sendgrid(to_email, subject, body):
@@ -100,6 +108,27 @@ def _send_via_sendgrid(to_email, subject, body):
         return False, f"SendGrid bağlantı hatası: {e}"
 
 
+def _send_via_brevo(to_email, subject, body):
+    cfg = _brevo_config()
+    try:
+        r = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers={"api-key": cfg["api_key"], "Content-Type": "application/json", "Accept": "application/json"},
+            json={
+                "sender": {"email": cfg["from_email"], "name": "Derin Murnova Dünyası"},
+                "to": [{"email": to_email}],
+                "subject": subject,
+                "textContent": body,
+            },
+            timeout=15,
+        )
+        if r.status_code in (200, 201, 202):
+            return True, "gönderildi (Brevo)"
+        return False, f"Brevo HTTP {r.status_code}: {r.text[:200]}"
+    except requests.RequestException as e:
+        return False, f"Brevo bağlantı hatası: {e}"
+
+
 def _send_via_smtp(to_email, subject, body):
     cfg = _email_config()
     try:
@@ -116,17 +145,19 @@ def _send_via_smtp(to_email, subject, body):
 
 
 def send_email(to_email, subject, body):
-    """Tüm gönderimlerin geçtiği tek nokta: önce SendGrid, yoksa Gmail SMTP.
-    (ok: bool, detay: str) döner."""
+    """Tüm gönderimlerin geçtiği tek nokta: önce Brevo, sonra SendGrid, sonra
+    Gmail SMTP -- hangisi yapılandırılmışsa. (ok: bool, detay: str) döner."""
+    if _brevo_config():
+        return _send_via_brevo(to_email, subject, body)
     if _sendgrid_config():
         return _send_via_sendgrid(to_email, subject, body)
     if _email_config():
         return _send_via_smtp(to_email, subject, body)
-    return False, "Ne SENDGRID_API_KEY ne GMAIL_ADDRESS/GMAIL_APP_PASSWORD tanımlı."
+    return False, "Ne BREVO_API_KEY ne SENDGRID_API_KEY ne GMAIL_ADDRESS/GMAIL_APP_PASSWORD tanımlı."
 
 
 def notify_email(subject, body):
-    cfg = _sendgrid_config()
+    cfg = _brevo_config() or _sendgrid_config()
     to_addr = os.environ.get("NOTIFY_EMAIL_TO") or (cfg["from_email"] if cfg else None) or os.environ.get("GMAIL_ADDRESS")
     if not to_addr:
         return False
@@ -329,7 +360,7 @@ def any_enabled():
 def status():
     return {
         "email": _email_enabled(),
-        "email_via": "SendGrid" if _sendgrid_config() else ("Gmail SMTP" if _email_config() else None),
+        "email_via": "Brevo" if _brevo_config() else ("SendGrid" if _sendgrid_config() else ("Gmail SMTP" if _email_config() else None)),
         "discord": bool(os.environ.get("DISCORD_WEBHOOK_URL")),
         "ntfy": bool(os.environ.get("NTFY_TOPIC")),
         "telegram": bool(os.environ.get("TELEGRAM_BOT_TOKEN") and os.environ.get("TELEGRAM_CHAT_ID")),
