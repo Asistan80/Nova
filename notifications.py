@@ -6,10 +6,43 @@
 # ile korunur).
 
 import os
+import socket
 import smtplib
+import threading
+import contextlib
 from email.mime.text import MIMEText
 
 import requests
+
+# Render gibi bazı barındırma ortamlarında konteynerin IPv6 çıkışı çalışmıyor.
+# smtp.gmail.com hem IPv4 hem IPv6 adresi döndürdüğü için Python bazen önce
+# IPv6'yı dener ve "Network is unreachable" ile başarısız olur. Bu blok
+# içinde DNS çözümlemesini geçici olarak IPv4'e zorluyoruz. Thread-safe
+# olması için bir kilitle seri hale getiriyoruz (aynı anda tek SMTP
+# gönderimi bu şekilde bağlansın, başka bir iş parçacığının ağ çağrılarını
+# etkilemesin).
+_ipv4_lock = threading.Lock()
+
+
+@contextlib.contextmanager
+def _force_ipv4_dns():
+    original_getaddrinfo = socket.getaddrinfo
+
+    def ipv4_only(host, port, family=0, type=0, proto=0, flags=0):
+        return original_getaddrinfo(host, port, socket.AF_INET, type, proto, flags)
+
+    with _ipv4_lock:
+        socket.getaddrinfo = ipv4_only
+        try:
+            yield
+        finally:
+            socket.getaddrinfo = original_getaddrinfo
+
+
+def _smtp_ssl_connect():
+    """IPv4'e zorlanmış bir smtplib.SMTP_SSL bağlantısı açar."""
+    with _force_ipv4_dns():
+        return smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15)
 
 
 def _site_url():
@@ -36,7 +69,7 @@ def notify_email(subject, body):
         msg["Subject"] = subject
         msg["From"] = cfg["address"]
         msg["To"] = cfg["to"]
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+        with _smtp_ssl_connect() as server:
             server.login(cfg["address"], cfg["app_password"])
             server.sendmail(cfg["address"], [cfg["to"]], msg.as_string())
         return True
@@ -140,7 +173,7 @@ def notify_subscribers(subject, body_lines, subscribers, unsubscribe_url_fn):
                 msg["Subject"] = subject
                 msg["From"] = cfg["address"]
                 msg["To"] = sub["email"]
-                with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+                with _smtp_ssl_connect() as server:
                     server.login(cfg["address"], cfg["app_password"])
                     server.sendmail(cfg["address"], [sub["email"]], msg.as_string())
                 sent += 1
@@ -195,7 +228,7 @@ def notify_comment_reply(to_email, project_name, reply_text, project_url):
             msg["Subject"] = subject
             msg["From"] = cfg["address"]
             msg["To"] = to_email
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+            with _smtp_ssl_connect() as server:
                 server.login(cfg["address"], cfg["app_password"])
                 server.sendmail(cfg["address"], [to_email], msg.as_string())
         except Exception:
@@ -218,7 +251,7 @@ def send_test_email(to_email):
         msg["Subject"] = "🧪 Test e-postası — Derin Murnova Dünyası"
         msg["From"] = cfg["address"]
         msg["To"] = to_email
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
+        with _smtp_ssl_connect() as server:
             server.login(cfg["address"], cfg["app_password"])
             server.sendmail(cfg["address"], [to_email], msg.as_string())
         return True, f"{to_email} adresine test maili gönderildi."
