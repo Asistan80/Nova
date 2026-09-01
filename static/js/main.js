@@ -157,6 +157,53 @@
   });
 })();
 
+// ---------- Medya kategori sayfası: galeri görünümü (grid + gezinmeli lightbox) ----------
+(function () {
+  const toggleBtn = document.getElementById("media-gallery-toggle");
+  const grid = document.getElementById("media-gallery-grid");
+  const rack = document.getElementById("media-category-rack");
+  const lightbox = document.getElementById("media-gallery-lightbox");
+  if (!toggleBtn || !grid || !lightbox) return;
+
+  toggleBtn.addEventListener("click", function () {
+    const showingGallery = !grid.hidden;
+    grid.hidden = showingGallery;
+    if (rack) rack.hidden = !showingGallery;
+    toggleBtn.textContent = showingGallery ? "🖼️ Galeri Görünümü" : "🗂️ Kart Görünümü";
+  });
+
+  const tiles = Array.from(grid.querySelectorAll(".media-gallery-tile"));
+  const lbImg = lightbox.querySelector("img");
+  const caption = lightbox.querySelector(".lightbox-caption");
+  let currentIndex = 0;
+
+  function openAt(index) {
+    if (!tiles.length) return;
+    currentIndex = (index + tiles.length) % tiles.length;
+    const tile = tiles[currentIndex];
+    lbImg.src = tile.dataset.full;
+    caption.textContent = tile.dataset.title || "";
+    lightbox.classList.add("open");
+  }
+  function closeLightbox() {
+    lightbox.classList.remove("open");
+    lbImg.src = "";
+  }
+
+  tiles.forEach((tile, i) => tile.addEventListener("click", () => openAt(i)));
+  lightbox.querySelector(".lightbox-prev").addEventListener("click", () => openAt(currentIndex - 1));
+  lightbox.querySelector(".lightbox-next").addEventListener("click", () => openAt(currentIndex + 1));
+  lightbox.addEventListener("click", (e) => {
+    if (e.target === lightbox || e.target.classList.contains("lightbox-close")) closeLightbox();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (!lightbox.classList.contains("open")) return;
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") openAt(currentIndex - 1);
+    if (e.key === "ArrowRight") openAt(currentIndex + 1);
+  });
+})();
+
 // ---------- GIF kartlarında hover'da oynatma ----------
 (function () {
   document.querySelectorAll(".gif-hover-preview").forEach((img) => {

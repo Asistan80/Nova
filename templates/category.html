@@ -24,6 +24,9 @@
     <div class="hero-cta" style="margin-top:28px;">
       <a href="{{ url_for('index') }}" class="btn btn-ghost">← Anasayfaya dön</a>
       <span class="stat-badge" style="align-self:center;">{{ items|length }} içerik</span>
+      {% if group.slug == 'medya' %}
+      <button type="button" class="btn btn-ghost" id="media-gallery-toggle">🖼️ Galeri Görünümü</button>
+      {% endif %}
     </div>
   </div>
 </header>
@@ -53,7 +56,17 @@
     {% endif %}
 
     {% if items %}
-    <div class="rack">
+    {% set gallery_items = items|selectattr('kind', 'in', ['resim', 'gif'])|list %}
+    {% if group.slug == 'medya' and gallery_items %}
+    <div class="media-gallery-grid" id="media-gallery-grid" hidden>
+      {% for p in gallery_items %}
+      <button type="button" class="media-gallery-tile" data-full="{{ url_for('media_inline', slug=p.slug) }}" data-title="{{ p.name }}">
+        <img src="{{ url_for('media_inline', slug=p.slug) }}" alt="{{ p.name }}" loading="lazy">
+      </button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="rack" id="media-category-rack">
       {% for p in items %}
         {{ render_card(p, categories, stats) }}
       {% endfor %}
@@ -64,5 +77,13 @@
     <p class="empty-msg">Aramanla eşleşen bir içerik bulunamadı.</p>
   </div>
 </section>
+
+<div class="lightbox" id="media-gallery-lightbox">
+  <button class="lightbox-close" type="button" aria-label="Kapat">&times;</button>
+  <button class="lightbox-nav lightbox-prev" type="button" aria-label="Önceki">&#8249;</button>
+  <img src="" alt="">
+  <div class="lightbox-caption"></div>
+  <button class="lightbox-nav lightbox-next" type="button" aria-label="Sonraki">&#8250;</button>
+</div>
 
 {% endblock %}
