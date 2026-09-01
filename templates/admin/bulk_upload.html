@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Toplu Yükleme — Derin Murnova Dünyası{% endblock %}
+{% block content %}
+
+<section class="admin-shell">
+  <div class="wrap">
+    <div class="admin-head">
+      <h1>Toplu Yükleme</h1>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Panele dön</a>
+    </div>
+
+    <p class="form-hint" style="margin-bottom:20px;">
+      Birden fazla resim/GIF/ses/video dosyasını tek seferde seç — her biri kendi kartuşu olarak
+      (dosya adından türetilen başlıkla) otomatik eklenir. Sonradan admin panelden tek tek
+      düzenleyip başlık/açıklama/kapak değiştirebilirsin.
+    </p>
+
+    <form method="POST" enctype="multipart/form-data" class="form-grid">
+      <div class="form-row">
+        <div class="form-field">
+          <label for="kind">Tür</label>
+          <select id="kind" name="kind" required>
+            {% for key in bulk_kinds %}
+            <option value="{{ key }}">{{ categories[key].singular }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="tags">Ortak etiketler (virgülle ayır, ör: hayvanlar, orman)</label>
+          <input type="text" id="tags" name="tags" placeholder="hayvanlar, orman">
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label for="files">Dosyalar</label>
+        <input type="file" id="files" name="files" multiple required>
+        <p class="form-hint" id="file-count-hint"></p>
+      </div>
+
+      <div class="form-field">
+        <label><input type="checkbox" name="published" checked style="width:auto;"> Hemen yayınla</label>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Yükle</button>
+    </form>
+  </div>
+</section>
+
+<script>
+  document.getElementById('files').addEventListener('change', function (e) {
+    const hint = document.getElementById('file-count-hint');
+    hint.textContent = e.target.files.length ? e.target.files.length + ' dosya seçildi.' : '';
+  });
+</script>
+
+{% endblock %}

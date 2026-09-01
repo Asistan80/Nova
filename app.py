@@ -1,4 +1,5 @@
 import os
+import re
 import time
 from functools import wraps
 from datetime import timedelta, datetime, timezone
@@ -1034,6 +1035,80 @@ def _project_from_form(form, existing=None):
         "updated_at": "",
     })
     return data
+
+
+BULK_UPLOAD_KINDS = {"resim", "gif", "ses", "video"}
+
+
+@app.route("/admin/toplu-yukle", methods=["GET", "POST"])
+@login_required
+def admin_bulk_upload():
+    if request.method == "POST":
+        kind = request.form.get("kind")
+        if kind not in BULK_UPLOAD_KINDS:
+            flash("Geçersiz tür.")
+            return redirect(url_for("admin_bulk_upload"))
+
+        tags = [t.strip() for t in request.form.get("tags", "").split(",") if t.strip()]
+        published = request.form.get("published") == "on"
+        allowed_exts = _allowed_exts_for_kind(kind)
+        files = request.files.getlist("files")
+
+        added, skipped = [], []
+        for f in files:
+            if not f or not f.filename:
+                continue
+            if not ext_ok(f.filename, allowed_exts):
+                skipped.append(f.filename)
+                continue
+
+            base_name = os.path.splitext(f.filename)[0]
+            name = re.sub(r"[_\-]+", " ", base_name).strip().title() or "İsimsiz"
+            slug = store.unique_slug(name)
+
+            project = {
+                "name": name, "kind": kind, "status": "", "tagline": "", "desc": "",
+                "tags": list(tags), "features": [], "changelog": [], "version": "1.0",
+                "published": published, "youtube_url": None, "publish_at": None,
+                "cover": None, "gallery": [], "play_url": None, "download_url": None,
+                "download_file": None, "updated_at": "", "slug": slug,
+            }
+
+            pdir = os.path.join(DOWNLOADS_DIR, slug)
+            os.makedirs(pdir, exist_ok=True)
+            safe = secure_filename(f.filename)
+            local_path = os.path.join(pdir, safe)
+            f.save(local_path)
+
+            if kind == "resim":
+                _compress_image(local_path)
+            if kind == "gif":
+                _make_gif_poster(local_path, os.path.join(pdir, "_poster.png"))
+
+            project["download_file"] = safe
+            _ensure_auto_cover(project)  # ses/video için otomatik kapak (resim/gif zaten kendi görseli)
+
+            store.add_project(project)
+
+            if github_sync.is_enabled():
+                github_sync.push_file(local_path, f"downloads/{slug}/{safe}", f"toplu yükleme: {name}")
+                if kind == "gif":
+                    poster_path = os.path.join(pdir, "_poster.png")
+                    if os.path.exists(poster_path):
+                        github_sync.push_file(poster_path, f"downloads/{slug}/_poster.png", f"gif poster: {name}")
+
+            added.append(name)
+
+        if added:
+            _sync_projects_json(f"toplu yükleme: {len(added)} içerik eklendi")
+
+        msg = f"✅ {len(added)} içerik eklendi."
+        if skipped:
+            msg += f" ⚠️ {len(skipped)} dosya atlandı (desteklenmeyen uzantı): {', '.join(skipped[:5])}"
+        flash(msg)
+        return redirect(url_for("admin_bulk_upload"))
+
+    return render_template("admin/bulk_upload.html", categories=cat.CATEGORIES, bulk_kinds=BULK_UPLOAD_KINDS)
 
 
 @app.route("/admin/yeni", methods=["GET", "POST"])
