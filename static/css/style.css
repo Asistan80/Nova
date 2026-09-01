@@ -190,6 +190,19 @@ section.about{ padding:20px 0 120px; }
 }
 .about-box h3{ font-family:'Space Grotesk', sans-serif; font-size:1.7rem; margin-bottom:18px; }
 .about-box p{ color:var(--text-dim); font-size:0.98rem; margin-bottom:14px; }
+.about-byline{
+  display:inline-flex; align-items:center; gap:10px; margin-top:6px;
+  text-decoration:none; color:var(--text-dim); font-size:0.86rem;
+  transition:color .15s ease;
+}
+.about-byline:hover{ color:var(--amber); }
+.about-byline img{ width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--line); }
+.about-byline-fallback{
+  width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg, var(--amber), var(--teal)); color:#fff; font-family:'Space Grotesk',sans-serif;
+  font-weight:700; font-size:0.78rem; flex-shrink:0;
+}
+.about-byline strong{ color:var(--text); }
 .about-code{
   font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--teal);
   background: rgba(165,107,255,0.05); border:1px solid rgba(165,107,255,0.2);

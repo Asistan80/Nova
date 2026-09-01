@@ -237,6 +237,7 @@ def index():
         featured=featured,
         monthly_featured=monthly_featured,
         top_rated=top_rated,
+        about_photo=store.get_about().get("photo"),
     )
 
 
