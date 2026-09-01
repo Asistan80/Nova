@@ -301,7 +301,56 @@
           (has ? "" : '<span class="badge-shelf-progress">' + visited + "/" + m.count + " içerik</span>") +
           "</span></div>"
         );
-      }).join("");
+      }).join("") +
+      (unlocked.length ? '<button type="button" class="badge-shelf-share-btn" id="badge-shelf-share-btn">📤 Rozetlerimi Paylaş</button>' : "");
+
+    const shareBtn = document.getElementById("badge-shelf-share-btn");
+    if (shareBtn) shareBtn.addEventListener("click", shareBadgeCard);
+  }
+
+  function shareBadgeCard() {
+    const unlocked = getUnlocked();
+    const earned = MILESTONES.filter(function (m) { return unlocked.includes(m.count); });
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 800; canvas.height = 420;
+    const ctx = canvas.getContext("2d");
+
+    const grad = ctx.createLinearGradient(0, 0, 800, 420);
+    grad.addColorStop(0, "#4C8DFF"); grad.addColorStop(0.5, "#A56BFF"); grad.addColorStop(1, "#FF5C7A");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, 800, 420);
+    ctx.fillStyle = "rgba(8,8,18,0.45)"; ctx.fillRect(0, 0, 800, 420);
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "700 34px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Derin Murnova Dünyası'nda", 400, 90);
+    ctx.fillText(earned.length + " rozet açtım! 🏆", 400, 140);
+
+    ctx.font = "56px sans-serif";
+    const emojis = earned.map(function (m) { return m.emoji; }).join("   ");
+    ctx.fillText(emojis || "—", 400, 240);
+
+    ctx.font = "600 22px sans-serif";
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillText(window.location.hostname, 400, 380);
+
+    canvas.toBlob(function (blob) {
+      if (!blob) return;
+      const file = new File([blob], "rozetlerim.png", { type: "image/png" });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: "Rozetlerim",
+          text: earned.length + " rozet açtım! Derin Murnova Dünyası'nda sen de keşfet:",
+        }).catch(() => {});
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "rozetlerim.png";
+        link.click();
+      }
+    }, "image/png");
   }
 
   // Rozet paneli aç/kapa
