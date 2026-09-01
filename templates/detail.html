@@ -42,6 +42,10 @@
         <a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-primary">İndir</a>
       {% endif %}
       <a href="{{ url_for('category_list', group_slug=category.group) }}" class="btn btn-ghost">Rafa dön</a>
+      <button type="button" class="btn btn-ghost native-share-btn" data-url="{{ request.url }}" data-title="{{ p.name }}" data-text="{{ p.tagline or p.desc }}" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" style="vertical-align:-2px; margin-right:6px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/></svg>
+        Paylaş
+      </button>
       <button type="button" class="btn btn-ghost copy-link-btn" data-url="{{ request.url }}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" style="vertical-align:-2px; margin-right:6px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
         Linki Kopyala

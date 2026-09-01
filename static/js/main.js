@@ -521,6 +521,24 @@ if ("serviceWorker" in navigator) {
   });
 })();
 
+// ---------- Native paylaşım (Web Share API destekleniyorsa) ----------
+(function () {
+  const shareBtn = document.querySelector(".native-share-btn");
+  const copyBtn = document.querySelector(".copy-link-btn");
+  if (!shareBtn) return;
+  if (navigator.share) {
+    shareBtn.style.display = "";
+    if (copyBtn) copyBtn.style.display = "none";
+    shareBtn.addEventListener("click", function () {
+      navigator.share({
+        title: shareBtn.dataset.title || document.title,
+        text: shareBtn.dataset.text || "",
+        url: shareBtn.dataset.url || window.location.href,
+      }).catch(() => {});
+    });
+  }
+})();
+
 // ---------- Yorum beğenisi ----------
 (function () {
   document.addEventListener("click", function (e) {
