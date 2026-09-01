@@ -262,6 +262,27 @@ footer p{ font-size:0.82rem; color:var(--text-dim); }
 :root[data-theme="light"] .theme-toggle .icon-moon{ display:none; }
 :root[data-theme="light"] .theme-toggle .icon-sun{ display:block; }
 
+.badge-shelf-wrap{ position:relative; }
+.badge-shelf-btn{ font-size:15px; position:relative; }
+.badge-shelf-count{
+  position:absolute; top:-4px; right:-4px; min-width:16px; height:16px; padding:0 3px;
+  border-radius:999px; background:var(--boss-red); color:#fff; font-size:0.6rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center; line-height:1;
+}
+.badge-shelf-panel{
+  position:absolute; top:calc(100% + 10px); right:0; width:250px; z-index:50;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;
+  box-shadow:0 12px 30px rgba(0,0,0,0.35);
+  opacity:0; pointer-events:none; transform:translateY(-6px); transition:all .15s ease;
+}
+.badge-shelf-panel.open{ opacity:1; pointer-events:auto; transform:translateY(0); }
+.badge-shelf-title{ font-family:'Space Grotesk',sans-serif; font-size:0.85rem; margin-bottom:10px; color:var(--text-dim); }
+.badge-shelf-item{ display:flex; align-items:center; gap:10px; padding:6px 0; opacity:0.45; }
+.badge-shelf-item.unlocked{ opacity:1; }
+.badge-shelf-emoji{ font-size:1.3rem; width:26px; text-align:center; flex-shrink:0; }
+.badge-shelf-info{ display:flex; flex-direction:column; font-size:0.82rem; }
+.badge-shelf-progress{ font-size:0.7rem; color:var(--text-dim); }
+
 /* ================= FİLTRE / ARAMA ================= */
 .filter-bar{
   display:flex; gap:14px; align-items:center; margin-bottom:36px; flex-wrap:wrap;
@@ -755,6 +776,31 @@ img.skeleton{
 .roadmap-item .eta{ font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--teal); text-transform:uppercase; }
 .roadmap-item h3{ font-family:'Space Grotesk',sans-serif; font-size:1.05rem; margin:6px 0; }
 .roadmap-item p{ color:var(--text-dim); font-size:0.88rem; }
+
+.top-rated-list{ display:flex; flex-direction:column; gap:10px; }
+.top-rated-row{
+  display:flex; align-items:center; gap:14px; padding:12px 16px;
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  text-decoration:none; color:inherit; transition:border-color .15s ease, transform .15s ease;
+}
+.top-rated-row:hover{ border-color:var(--amber); transform:translateX(2px); }
+.top-rated-rank{
+  font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:1.1rem; width:32px; flex-shrink:0;
+  color:var(--text-dim);
+}
+.top-rated-row:nth-child(1) .top-rated-rank{ color:#FFD166; }
+.top-rated-row:nth-child(2) .top-rated-rank{ color:#C9CBD9; }
+.top-rated-row:nth-child(3) .top-rated-rank{ color:#D8985B; }
+.top-rated-cover{
+  width:56px; height:32px; border-radius:6px; overflow:hidden; flex-shrink:0;
+  background:var(--surface-2);
+}
+.top-rated-cover img{ width:100%; height:100%; object-fit:cover; }
+.top-rated-info{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.top-rated-info strong{ font-size:0.92rem; }
+.top-rated-tagline{ font-size:0.78rem; color:var(--text-dim); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.top-rated-score{ font-family:'IBM Plex Mono',monospace; font-size:0.76rem; color:var(--teal); flex-shrink:0; }
+@media (max-width: 560px){ .top-rated-tagline{ display:none; } }
 
 /* ================================================================
    HİKAYE / ZAMAN ÇİZELGESİ

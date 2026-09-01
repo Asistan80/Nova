@@ -589,12 +589,10 @@ def get_nickname_favorites(name):
 
 # ---------- Aylık öne çıkan (istatistiklere göre) ----------
 
-def monthly_featured():
-    """Bu ayki en çok oynanan/indirilen + en çok beğenilen projeyi puanlayıp döner."""
+def _scored_projects():
+    """(score, project) çiftlerini puana göre azalan sırada döner (score>0)."""
     stats = get_stats()
     items = all_visible_projects()
-    if not items:
-        return None
     plays = stats.get("plays", {})
     downloads = stats.get("downloads", {})
     likes = stats.get("likes", {})
@@ -603,8 +601,25 @@ def monthly_featured():
         score = plays.get(p["slug"], 0) * 2 + downloads.get(p["slug"], 0) * 2 + likes.get(p["slug"], 0) * 3
         if score > 0:
             scored.append((score, p))
-    if not scored:
-        return None
     scored.sort(key=lambda x: x[0], reverse=True)
-    return scored[0][1]
+    return scored
+
+
+def monthly_featured():
+    """En çok oynanan/indirilen + en çok beğenilen projeyi puanlayıp döner."""
+    scored = _scored_projects()
+    return scored[0][1] if scored else None
+
+
+def top_rated(limit=5, exclude_slug=None):
+    """Popülerlik sıralamasında ilk N projeyi (skorla birlikte) döner."""
+    scored = _scored_projects()
+    result = []
+    for score, p in scored:
+        if exclude_slug and p["slug"] == exclude_slug:
+            continue
+        result.append((p, score))
+        if len(result) >= limit:
+            break
+    return result
 

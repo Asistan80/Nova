@@ -226,6 +226,7 @@ def index():
     elif playable:
         featured = playable[0]
     monthly_featured = store.monthly_featured()
+    top_rated = store.top_rated(limit=4, exclude_slug=monthly_featured["slug"] if monthly_featured else None)
     return render_template(
         "index.html",
         stats=stats,
@@ -235,6 +236,7 @@ def index():
         categories=cat.CATEGORIES,
         featured=featured,
         monthly_featured=monthly_featured,
+        top_rated=top_rated,
     )
 
 

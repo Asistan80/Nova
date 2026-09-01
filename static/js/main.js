@@ -230,19 +230,79 @@
 
 // ---------- Ziyaretçi rozetleri (localStorage tabanlı, eğlence amaçlı) ----------
 (function () {
+  const MILESTONES = [
+    { count: 1, emoji: "🎉", label: "İlk keşif" },
+    { count: 3, emoji: "🔥", label: "3 farklı içerik" },
+    { count: 5, emoji: "⭐", label: "5 kartuş keşfettin" },
+    { count: 10, emoji: "🏆", label: "Gerçek bir kaşifsin" },
+    { count: 20, emoji: "🌌", label: "Efsane kaşif" },
+  ];
+
+  function getVisited() {
+    try { return JSON.parse(localStorage.getItem("murnova-visited") || "[]"); }
+    catch (e) { return []; }
+  }
+  function getUnlocked() {
+    try { return JSON.parse(localStorage.getItem("murnova-badges") || "[]"); }
+    catch (e) { return []; }
+  }
+  function setUnlocked(list) {
+    localStorage.setItem("murnova-badges", JSON.stringify(list));
+  }
+
+  function renderShelf() {
+    const countEl = document.getElementById("badge-shelf-count");
+    const panel = document.getElementById("badge-shelf-panel");
+    if (!panel) return;
+    const visited = getVisited().length;
+    const unlocked = getUnlocked();
+    if (countEl) countEl.textContent = unlocked.length ? unlocked.length : "";
+
+    panel.innerHTML =
+      '<div class="badge-shelf-title">Rozetlerim</div>' +
+      MILESTONES.map(function (m) {
+        const has = unlocked.includes(m.count);
+        return (
+          '<div class="badge-shelf-item' + (has ? " unlocked" : "") + '">' +
+          '<span class="badge-shelf-emoji">' + (has ? m.emoji : "🔒") + "</span>" +
+          '<span class="badge-shelf-info"><strong>' + m.label + "</strong>" +
+          (has ? "" : '<span class="badge-shelf-progress">' + visited + "/" + m.count + " içerik</span>") +
+          "</span></div>"
+        );
+      }).join("");
+  }
+
+  // Rozet paneli aç/kapa
+  const shelfBtn = document.querySelector(".badge-shelf-btn");
+  const shelfPanel = document.getElementById("badge-shelf-panel");
+  if (shelfBtn && shelfPanel) {
+    renderShelf();
+    shelfBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      shelfPanel.classList.toggle("open");
+    });
+    document.addEventListener("click", function (e) {
+      if (!shelfPanel.contains(e.target) && e.target !== shelfBtn) shelfPanel.classList.remove("open");
+    });
+  }
+
   if (!document.body.dataset.detailPage) return;
-  let visited = JSON.parse(localStorage.getItem("murnova-visited") || "[]");
+  let visited = getVisited();
   const slug = document.body.dataset.detailPage;
   if (!visited.includes(slug)) visited.push(slug);
   localStorage.setItem("murnova-visited", JSON.stringify(visited));
 
-  const milestones = { 1: "İlk keşif! 🎉", 3: "3 farklı içerik denedin 🔥", 5: "5 kartuş keşfettin ⭐", 10: "Gerçek bir kaşifsin 🏆" };
   const count = visited.length;
-  if (milestones[count] && !sessionStorage.getItem("badge-" + count)) {
-    sessionStorage.setItem("badge-" + count, "1");
+  const unlocked = getUnlocked();
+  const newlyUnlocked = MILESTONES.filter(function (m) { return m.count <= count && !unlocked.includes(m.count); });
+  if (newlyUnlocked.length) {
+    const merged = unlocked.concat(newlyUnlocked.map(function (m) { return m.count; }));
+    setUnlocked(merged);
+    renderShelf();
+    const latest = newlyUnlocked[newlyUnlocked.length - 1];
     const toast = document.createElement("div");
     toast.className = "badge-toast";
-    toast.textContent = milestones[count];
+    toast.textContent = latest.emoji + " " + latest.label + "!";
     document.body.appendChild(toast);
     requestAnimationFrame(() => toast.classList.add("show"));
     setTimeout(() => { toast.classList.remove("show"); setTimeout(() => toast.remove(), 400); }, 3200);

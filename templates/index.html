@@ -105,6 +105,34 @@
   </div>
 </section>
 
+{% if top_rated %}
+<section class="shelf">
+  <div class="wrap">
+    <div class="shelf-head">
+      <div>
+        <h2>🔥 En Popüler</h2>
+        <p>Toplam oynanma, indirme ve beğeniye göre sıralanan kartuşlar.</p>
+      </div>
+    </div>
+    <div class="top-rated-list">
+      {% for p, score in top_rated %}
+      <a class="top-rated-row" href="{{ url_for('category_detail', group_slug=categories[p.kind].group, slug=p.slug) }}">
+        <span class="top-rated-rank">#{{ loop.index }}</span>
+        <span class="top-rated-cover">
+          {% if p.cover %}<img src="{{ url_for('static', filename='uploads/covers/' ~ p.cover) }}" alt="">{% endif %}
+        </span>
+        <span class="top-rated-info">
+          <strong>{{ p.name }}</strong>
+          <span class="top-rated-tagline">{{ p.tagline }}</span>
+        </span>
+        <span class="top-rated-score">{{ score }} puan</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 {% if monthly_featured %}
 <section class="shelf">
   <div class="wrap">
