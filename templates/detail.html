@@ -171,6 +171,16 @@
       <p class="form-hint">Yorumun, onaylandıktan sonra herkese görünür olacak. E-posta bırakırsan, sadece yanıt geldiğinde haber vermek için kullanılır.</p>
     </form>
 
+    {% if collection %}
+    <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:56px; margin-bottom:6px;">🗂️ Bu Sette</h2>
+    <p style="color:var(--text-dim); font-size:0.88rem; margin-bottom:20px;">Aynı etiketi taşıyan, farklı türden içerikler.</p>
+    <div class="rack">
+      {% for cp in collection %}
+        {{ render_card(cp, categories, stats) }}
+      {% endfor %}
+    </div>
+    {% endif %}
+
     {% if similar %}
     <h2 style="font-family:'Space Grotesk',sans-serif; font-size:1.4rem; margin-top:56px; margin-bottom:20px;">Benzer İçerikler</h2>
     <div class="rack">

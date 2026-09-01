@@ -114,6 +114,23 @@ def similar_projects(project, limit=4):
     return [p for _, p in scored[:limit]]
 
 
+def collection_projects(project, limit=6):
+    """similar_projects'ten farkı: türe bakmaz -- aynı etikete sahip video,
+    resim, ses ve oyunları bir 'koleksiyon/set' olarak birlikte gösterir."""
+    my_tags = {t.lower() for t in project.get("tags", [])}
+    if not my_tags:
+        return []
+    scored = []
+    for p in all_projects():
+        if p["slug"] == project["slug"] or not is_visible(p):
+            continue
+        overlap = len({t.lower() for t in p.get("tags", [])} & my_tags)
+        if overlap:
+            scored.append((overlap, p))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [p for _, p in scored[:limit]]
+
+
 def search_projects(query, published_only=True):
     q = query.strip().lower()
     if not q:

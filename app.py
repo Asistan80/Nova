@@ -305,12 +305,16 @@ def category_detail(group_slug, slug):
         share_image = request.url_root.rstrip("/") + url_for("static", filename="uploads/covers/" + project["cover"])
     elif cat.CATEGORIES[project["kind"]].get("media_kind") and cat.CATEGORIES[project["kind"]].get("preview") == "image" and project.get("download_file"):
         share_image = request.url_root.rstrip("/") + url_for("media_inline", slug=slug)
+    similar = store.similar_projects(project)
+    exclude_slugs = {project["slug"]} | {p["slug"] for p in similar}
+    collection = [p for p in store.collection_projects(project, limit=10) if p["slug"] not in exclude_slugs][:6]
     return render_template(
         "detail.html", p=project, stats=stats,
         category=cat.CATEGORIES[project["kind"]], leaderboard=leaderboard,
         like_count=store.like_count(slug), liked=store.has_liked(slug, visitor_id),
         comments=store.comments_for(slug),
-        similar=store.similar_projects(project),
+        similar=similar,
+        collection=collection,
         categories=cat.CATEGORIES,
         share_image=share_image,
     )
