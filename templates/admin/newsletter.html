@@ -60,6 +60,7 @@
       Aboneler ({{ subscribers|length }})
     </h2>
     {% if subscribers %}
+    <div style="overflow-x:auto;">
     <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
       <thead>
         <tr style="text-align:left; border-bottom:1px solid var(--line); color:var(--text-dim);">
@@ -80,6 +81,7 @@
         {% endfor %}
       </tbody>
     </table>
+    </div>
     {% else %}
     <p style="color:var(--text-dim);">Henüz abone yok.</p>
     {% endif %}

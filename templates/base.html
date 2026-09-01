@@ -54,7 +54,19 @@
         <button class="theme-toggle badge-shelf-btn" type="button" title="Rozetlerim" aria-label="Rozetlerim">🏆<span class="badge-shelf-count" id="badge-shelf-count"></span></button>
         <div class="badge-shelf-panel" id="badge-shelf-panel"></div>
       </div>
+      <button class="theme-toggle mobile-menu-btn" type="button" title="Menü" aria-label="Menüyü aç/kapa" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
     </div>
+  </div>
+  <div class="mobile-menu-panel" id="mobile-menu-panel">
+    <form class="mobile-menu-search" action="{{ url_for('search_page') }}" method="get" role="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input type="search" name="q" placeholder="Ara..." aria-label="Sitede ara">
+    </form>
+    <a href="{{ url_for('category_list', group_slug='oyunlar') }}">Oyunlar</a>
+    <a href="{{ url_for('category_list', group_slug='uygulamalar') }}">Uygulamalar</a>
+    <a href="{{ url_for('category_list', group_slug='medya') }}">Medya</a>
   </div>
 </nav>
 

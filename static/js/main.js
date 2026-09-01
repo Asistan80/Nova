@@ -1,3 +1,24 @@
+// ---------- Mobil hamburger menü ----------
+(function () {
+  const btn = document.querySelector(".mobile-menu-btn");
+  const panel = document.getElementById("mobile-menu-panel");
+  if (!btn || !panel) return;
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    const open = panel.classList.toggle("open");
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  panel.addEventListener("click", function (e) {
+    if (e.target.tagName === "A") panel.classList.remove("open");
+  });
+  document.addEventListener("click", function (e) {
+    if (!panel.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+      panel.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+    }
+  });
+})();
+
 // ---------- Boot sekansı (sadece oturum başına bir kez) ----------
 (function () {
   const overlay = document.getElementById("boot-overlay");
@@ -249,6 +270,15 @@
   function setUnlocked(list) {
     localStorage.setItem("murnova-badges", JSON.stringify(list));
   }
+  function getSeen() {
+    try { return JSON.parse(localStorage.getItem("murnova-badges-seen") || "[]"); }
+    catch (e) { return []; }
+  }
+  function markAllSeen() {
+    localStorage.setItem("murnova-badges-seen", JSON.stringify(getUnlocked()));
+    const countEl = document.getElementById("badge-shelf-count");
+    if (countEl) countEl.textContent = "";
+  }
 
   function renderShelf() {
     const countEl = document.getElementById("badge-shelf-count");
@@ -256,10 +286,12 @@
     if (!panel) return;
     const visited = getVisited().length;
     const unlocked = getUnlocked();
-    if (countEl) countEl.textContent = unlocked.length ? unlocked.length : "";
+    const seen = getSeen();
+    const unseenCount = unlocked.filter(function (c) { return !seen.includes(c); }).length;
+    if (countEl) countEl.textContent = unseenCount ? unseenCount : "";
 
     panel.innerHTML =
-      '<div class="badge-shelf-title">Rozetlerim</div>' +
+      '<div class="badge-shelf-title">Rozetlerim (' + unlocked.length + '/' + MILESTONES.length + ')</div>' +
       MILESTONES.map(function (m) {
         const has = unlocked.includes(m.count);
         return (
@@ -280,6 +312,7 @@
     shelfBtn.addEventListener("click", function (e) {
       e.stopPropagation();
       shelfPanel.classList.toggle("open");
+      if (shelfPanel.classList.contains("open")) markAllSeen();
     });
     document.addEventListener("click", function (e) {
       if (!shelfPanel.contains(e.target) && e.target !== shelfBtn) shelfPanel.classList.remove("open");

@@ -208,10 +208,10 @@ footer p{ font-size:0.82rem; color:var(--text-dim); }
 }
 .newsletter-form{ display:flex; flex-direction:column; gap:8px; }
 .newsletter-form label{ font-size:0.82rem; color:var(--text-dim); }
-.newsletter-row{ display:flex; gap:8px; }
+.newsletter-row{ display:flex; gap:8px; flex-wrap:wrap; }
 .newsletter-row input{
   padding:9px 14px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
-  color:var(--text); font-family:'Manrope',sans-serif; font-size:0.85rem; min-width:200px;
+  color:var(--text); font-family:'Manrope',sans-serif; font-size:0.85rem; min-width:180px; flex:1;
 }
 .newsletter-row input:focus{ outline:2px solid var(--teal); outline-offset:1px; }
 .nickname-btn{ white-space:nowrap; }
@@ -220,6 +220,27 @@ footer p{ font-size:0.82rem; color:var(--text-dim); }
   header.hero, .detail-hero{ padding:80px 0 40px; }
   .about-box{ grid-template-columns:1fr; padding:32px; }
   .navlinks{ display:none; }
+  .mobile-menu-btn{ display:flex; }
+}
+.mobile-menu-btn{ display:none; }
+.mobile-menu-panel{
+  display:none; flex-direction:column; gap:2px; padding:10px 32px 16px;
+  border-top:1px solid var(--line); background:var(--bg);
+}
+.mobile-menu-panel.open{ display:flex; }
+.mobile-menu-panel a{
+  padding:12px 4px; color:var(--text); text-decoration:none; font-size:0.95rem;
+  border-bottom:1px solid var(--line);
+}
+.mobile-menu-panel a:last-child{ border-bottom:none; }
+.mobile-menu-search{
+  display:flex; align-items:center; gap:8px; padding:10px 14px; margin-bottom:6px;
+  border:1px solid var(--line); border-radius:10px; background:var(--surface);
+}
+.mobile-menu-search svg{ width:16px; height:16px; color:var(--text-dim); flex-shrink:0; }
+.mobile-menu-search input{
+  border:none; background:none; outline:none; color:var(--text); font-family:'Manrope',sans-serif;
+  font-size:0.9rem; width:100%;
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -270,7 +291,7 @@ footer p{ font-size:0.82rem; color:var(--text-dim); }
   display:flex; align-items:center; justify-content:center; line-height:1;
 }
 .badge-shelf-panel{
-  position:absolute; top:calc(100% + 10px); right:0; width:250px; z-index:50;
+  position:absolute; top:calc(100% + 10px); right:0; width:250px; max-width:calc(100vw - 48px); z-index:50;
   background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px;
   box-shadow:0 12px 30px rgba(0,0,0,0.35);
   opacity:0; pointer-events:none; transform:translateY(-6px); transition:all .15s ease;
