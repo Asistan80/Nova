@@ -38,6 +38,9 @@
           Keşfetmeye başla
         </a>
         <a href="#hakkinda" class="btn btn-ghost">Bu site nedir?</a>
+        {% if live_visitors >= 1 %}
+        <span class="live-visitors-badge"><span class="live-dot"></span>Şu an {{ live_visitors }} kişi geziyor</span>
+        {% endif %}
       </div>
       <div class="hero-stats hero-in hero-in-6">
         <div><div class="stat-num">{{ group_counts.values()|sum }}</div><div class="stat-label">yayınlanan içerik</div></div>

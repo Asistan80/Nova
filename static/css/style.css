@@ -203,6 +203,21 @@ section.about{ padding:20px 0 120px; }
   font-weight:700; font-size:0.78rem; flex-shrink:0;
 }
 .about-byline strong{ color:var(--text); }
+
+.live-visitors-badge{
+  display:inline-flex; align-items:center; gap:8px; margin-left:6px;
+  padding:8px 14px; border-radius:999px; border:1px solid var(--line);
+  color:var(--text-dim); font-size:0.82rem;
+}
+.live-dot{
+  width:8px; height:8px; border-radius:50%; background:#4ADE80; flex-shrink:0;
+  box-shadow:0 0 0 rgba(74,222,128,0.5); animation:live-pulse 2s infinite;
+}
+@keyframes live-pulse{
+  0%{ box-shadow:0 0 0 0 rgba(74,222,128,0.5); }
+  70%{ box-shadow:0 0 0 7px rgba(74,222,128,0); }
+  100%{ box-shadow:0 0 0 0 rgba(74,222,128,0); }
+}
 .about-code{
   font-family:'IBM Plex Mono', monospace; font-size:0.82rem; color:var(--teal);
   background: rgba(165,107,255,0.05); border:1px solid rgba(165,107,255,0.2);

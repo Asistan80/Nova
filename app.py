@@ -1,4 +1,5 @@
 import os
+import time
 from functools import wraps
 from datetime import timedelta, datetime, timezone
 
@@ -120,12 +121,25 @@ def _record_sync_failure(repo_filename, message, reason=""):
 
 # ---------- Ziyaretçi sayacı ----------
 
+_active_visitors = {}
+_ACTIVE_WINDOW_SECONDS = 300  # 5 dakika
+
+
+def _live_visitor_count():
+    now = time.time()
+    for vid in list(_active_visitors.keys()):
+        if now - _active_visitors[vid] > _ACTIVE_WINDOW_SECONDS:
+            del _active_visitors[vid]
+    return len(_active_visitors)
+
+
 @app.before_request
 def _count_visit():
     ep = request.endpoint or ""
     if ep in ("index", "category_list", "category_detail", "tag_page", "search_page",
               "devlog_page", "about_page", "roadmap_page", "stats_page", "favorites_page"):
         store.bump_visit()
+        _active_visitors[_get_visitor_id()] = time.time()
 
 
 # ---------- Admin girişi ----------
@@ -238,6 +252,7 @@ def index():
         monthly_featured=monthly_featured,
         top_rated=top_rated,
         about_photo=store.get_about().get("photo"),
+        live_visitors=_live_visitor_count(),
     )
 
 
