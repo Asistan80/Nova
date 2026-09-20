@@ -690,7 +690,16 @@
       "ComfyUI",
       "İçerik Üretimi"
     ],
-    "features": [],
+    "features": [
+      "AI Video Üretimi — Prompt yazarak ComfyUI üzerinden yerel video üretimi (dikey/yatay, 5sn-5dk arası süre seçenekleri)",
+      "AI Ses Efekti Üretimi — Kuş sesi, kapı sesi, rüzgar sesi gibi ortam seslerini metinden üretme (ElevenLabs entegrasyonu)",
+      "Otomatik GIF — Herhangi bir videodan tek tuşla, istediğiniz aralıkta yüksek kaliteli GIF çıkarma",
+      "Profesyonel Video Editörü — Çoklu klip, zaman aralığına özel efektler (parlaklık/kontrast/doygunluk/blur/opaklık), klipler arası geçiş efektleri (fade/dissolve/wipe/zoom/slide vb.)",
+      "Tam Export Kontrolü — Format/codec/çözünürlük/bitrate seçimi, özel klasöre kaydetme",
+      "Görsel Üretimi & Galeri — Entegre resim üretim ve galeri sistemi",
+      "AI Chat — Yerel LLM ile (Ollama) sohbet",
+      "Tamamen ücretsiz ve açık kaynak araçlarla (ComfyUI, Ollama, FFmpeg) çalışır; isteğe bağlı olarak ElevenLabs gibi ücretsiz kotalı API'lerle güçlendirilebilir"
+    ],
     "changelog": [],
     "version": "1.0",
     "published": true,
