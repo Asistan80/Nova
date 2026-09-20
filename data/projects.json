@@ -680,7 +680,7 @@
     "kind": "uygulama",
     "status": "playable",
     "tagline": "Prompt'tan videoya, ses efektinden GIF'e — kendi masaüstünüzde çalışan uçtan uca AI video prodüksiyon stüdyosu.",
-    "desc": "Easy AI Studio, içerik üretim sürecini tek bir çatı altında toplayan, tamamen yerel çalışan bir AI video prodüksiyon stüdyosudur. Sadece bir prompt yazarak video ve ses efekti üretebilir, ürettiğiniz (veya kendi yüklediğiniz) videoları profesyonel bir zaman çizelgesi editöründe düzenleyebilir, efekt/geçiş/ses ekleyebilir ve son olarak istediğiniz formatta export edebilirsiniz.\r\n\r\nÖne çıkan özellikler:\r\n\r\n🎬 AI Video Üretimi — Prompt yazarak ComfyUI üzerinden yerel video üretimi (dikey/yatay, 5sn-5dk arası süre seçenekleri)\r\n🔊 AI Ses Efekti Üretimi — Kuş sesi, kapı sesi, rüzgar sesi gibi ortam seslerini metinden üretme (ElevenLabs entegrasyonu)\r\n⚡ Otomatik GIF — Herhangi bir videodan tek tuşla, istediğiniz aralıkta yüksek kaliteli GIF çıkarma\r\n🎞️ Profesyonel Video Editörü — Çoklu klip, zaman aralığına özel efektler (parlaklık/kontrast/doygunluk/blur/opaklık), klipler arası geçiş efektleri (fade/dissolve/wipe/zoom/slide vb.)\r\n📤 Tam Export Kontrolü — Format/codec/çözünürlük/bitrate seçimi, özel klasöre kaydetme\r\n🖼️ Görsel Üretimi & Galeri — Entegre resim üretim ve galeri sistemi\r\n💬 AI Chat — Yerel LLM ile (Ollama) sohbet\r\n\r\nTamamen ücretsiz ve açık kaynak araçlarla (ComfyUI, Ollama, FFmpeg) çalışır; isteğe bağlı olarak ElevenLabs gibi ücretsiz kotalı API'lerle güçlendirilebilir.",
+    "desc": "",
     "tags": [
       "AI",
       "Video Üretimi",
