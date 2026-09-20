@@ -652,5 +652,27 @@
     "updated_at": "",
     "slug": "a-magical-forest-with-glowing-mushrooms-and-fireflies-digital-art-soft-colors",
     "created_at": "2026-09-01T23:17:26.591439+00:00"
+  },
+  {
+    "name": "Manzara",
+    "kind": "resim",
+    "status": "playable",
+    "tagline": "Manzara /Doğa",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": null,
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "289b2e79dfe94d919da2a73c1b2ee537.png",
+    "updated_at": "",
+    "slug": "manzara-3",
+    "created_at": "2026-09-20T09:29:46.929653+00:00"
   }
 ]
