@@ -872,5 +872,27 @@
     "updated_at": "",
     "slug": "ainpc",
     "created_at": "2026-10-22T13:16:43.535455+00:00"
+  },
+  {
+    "name": "Sohbet Arenası",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "Uygulama",
+    "desc": "Yapay zeka ile yapılmış farklı bir uygulama.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "sohbet-arenasi-auto.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "SohbetArenasi_Windows.zip",
+    "updated_at": "",
+    "slug": "sohbet-arenasi",
+    "created_at": "2026-10-22T13:19:11.629690+00:00"
   }
 ]
