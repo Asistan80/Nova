@@ -938,5 +938,27 @@
     "updated_at": "",
     "slug": "bozkurt-survivors",
     "created_at": "2026-10-25T13:50:44.271700+00:00"
+  },
+  {
+    "name": "Şifreli Not Defteri",
+    "kind": "uygulama",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Şifreli not defterine not almak istediğiniz bilgileri yazarak şifre ile kayıt altına alabilirsiniz.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "sifreli-not-defteri-auto.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "SifreliNotDefteri_kaynak.zip",
+    "updated_at": "",
+    "slug": "sifreli-not-defteri",
+    "created_at": "2026-10-25T14:26:44.119410+00:00"
   }
 ]
