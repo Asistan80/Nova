@@ -953,7 +953,14 @@
     "youtube_url": "",
     "publish_at": null,
     "cover": "bozkurt-survivors-auto.png",
-    "gallery": [],
+    "gallery": [
+      "10_bolge_lav.png",
+      "11_bolge_deniz.png",
+      "12_bolge_firtina.png",
+      "13_bolge_kar.png",
+      "14_bolge_yeralti.png",
+      "15_boss_yelbegen.png"
+    ],
     "play_url": "/oyna/bozkurt-survivors",
     "download_url": null,
     "download_file": "bozkurt-survivors-v6.zip",
