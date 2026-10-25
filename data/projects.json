@@ -1004,5 +1004,27 @@
     "updated_at": "",
     "slug": "korsan-gemi",
     "created_at": "2026-10-25T14:37:05.821477+00:00"
+  },
+  {
+    "name": "Kedi",
+    "kind": "video",
+    "status": "playable",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "kedi.png",
+    "gallery": [],
+    "play_url": null,
+    "download_url": null,
+    "download_file": "mp4.mp4",
+    "updated_at": "",
+    "slug": "kedi",
+    "created_at": "2026-10-25T14:38:59.245109+00:00"
   }
 ]
