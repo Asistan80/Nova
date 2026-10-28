@@ -1099,5 +1099,27 @@
     "updated_at": "",
     "slug": "strike-arena",
     "created_at": "2026-10-28T07:40:43.962149+00:00"
+  },
+  {
+    "name": "Karabasan",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "Karabasan korku oyunu yapmaya çalıştım yapay zeka ile. Arada sıkıntılar eşyalarda kaymalar var ama idare eder.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "karabasan-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/karabasan",
+    "download_url": null,
+    "download_file": "Karabasan_Windows_.zip",
+    "updated_at": "",
+    "slug": "karabasan",
+    "created_at": "2026-10-28T07:47:38.323294+00:00"
   }
 ]
