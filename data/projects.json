@@ -1077,5 +1077,27 @@
     "updated_at": "",
     "slug": "cete-i-s-basinda",
     "created_at": "2026-10-25T14:42:14.237702+00:00"
+  },
+  {
+    "name": "Strike_Arena",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Yapay zeka ile bowling oyunu yaptım. Keyifli oyunlar",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "strike-arena-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/strike-arena",
+    "download_url": null,
+    "download_file": "Strike_Arena_Windows_.zip",
+    "updated_at": "",
+    "slug": "strike-arena",
+    "created_at": "2026-10-28T07:40:43.962149+00:00"
   }
 ]
