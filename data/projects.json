@@ -1143,5 +1143,27 @@
     "updated_at": "",
     "slug": "dedektif-oyunu",
     "created_at": "2026-10-28T07:50:43.870433+00:00"
+  },
+  {
+    "name": "Sessiz Konak",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "Yapay zeka ile yapmış olduğum farklı bir oyun daha sizlerle",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "sessiz-konak-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/sessiz-konak",
+    "download_url": null,
+    "download_file": "Sessiz_Konak.zip",
+    "updated_at": "",
+    "slug": "sessiz-konak",
+    "created_at": "2026-10-28T07:52:13.847615+00:00"
   }
 ]
