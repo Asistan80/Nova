@@ -1121,5 +1121,27 @@
     "updated_at": "",
     "slug": "karabasan",
     "created_at": "2026-10-28T07:47:38.323294+00:00"
+  },
+  {
+    "name": "Dedektif Oyunu",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "Hadi bakalım ne kadar dedektifsiniz görelim.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "dedektif-oyunu-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/dedektif-oyunu",
+    "download_url": null,
+    "download_file": "Dedektif_Oyunu_.zip",
+    "updated_at": "",
+    "slug": "dedektif-oyunu",
+    "created_at": "2026-10-28T07:50:43.870433+00:00"
   }
 ]
