@@ -1165,5 +1165,28 @@
     "updated_at": "",
     "slug": "sessiz-konak",
     "created_at": "2026-10-28T07:52:13.847615+00:00"
+  },
+  {
+    "name": "Pazarcı",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "İkinci el eşya alım satım oyunu.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "pazarci-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/pazarci",
+    "download_url": null,
+    "download_file": null,
+    "updated_at": "",
+    "slug": "pazarci",
+    "has_game_files": true,
+    "created_at": "2026-10-29T09:42:27.899564+00:00"
   }
 ]
