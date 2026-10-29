@@ -36,8 +36,37 @@ def _now_iso():
 
 # ---------- Projeler ----------
 
+_STATIC_GAMES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "games_static")
+
+
+def _normalize(projects):
+    """Tarayıcıda oynanabilir bir sürümü (games_static/<slug>/index.html) olan oyunları otomatik 'oynanabilir' yapar."""
+    for p in projects:
+        if p.get("kind") == "oyun" and p.get("status") != "playable":
+            if os.path.exists(os.path.join(_STATIC_GAMES, p.get("slug", "-"), "index.html")):
+                p["status"] = "playable"
+                if not p.get("play_url"):
+                    p["play_url"] = "/oyna/" + p["slug"]
+    return projects
+
+
 def all_projects():
-    return _read_json(PROJECTS_FILE, [])
+    import seed_data
+    return seed_data.apply_patches(_normalize(_read_json(PROJECTS_FILE, [])))
+
+
+def ensure_seed_projects():
+    """Takımada Turu kaydı yoksa bir kez ekler (diğer kayıtlara dokunmaz)."""
+    import copy
+    import datetime
+    import seed_data
+    projects = _read_json(PROJECTS_FILE, [])
+    if any(p.get("slug") == "takimada-turu" for p in projects):
+        return
+    rec = copy.deepcopy(seed_data.TAKIMADA)
+    rec["created_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    projects.append(rec)
+    save_projects(projects)
 
 
 def save_projects(projects):

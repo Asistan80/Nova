@@ -688,6 +688,22 @@ def not_found(e):
 GAMES_STATIC_DIR = os.path.join(BASE_DIR, "games_static")
 
 
+@app.route("/oyna/_godot/<path:filename>")
+def godot_engine_asset(filename):
+    """Godot web oyunlarının ortak motoru (tek kopya). .wasm sıkıştırılmış (.gz) olarak servis edilir."""
+    d = os.path.join(GAMES_STATIC_DIR, "_godot")
+    if filename.endswith(".wasm"):
+        gz = os.path.join(d, filename + ".gz")
+        if os.path.exists(gz):
+            resp = send_from_directory(d, filename + ".gz", mimetype="application/wasm")
+            resp.headers["Content-Encoding"] = "gzip"
+            resp.headers["Cache-Control"] = "public, max-age=604800"
+            return resp
+    resp = send_from_directory(d, filename)
+    resp.headers["Cache-Control"] = "public, max-age=86400"
+    return resp
+
+
 @app.route("/oyna/<slug>")
 def play(slug):
     """
@@ -1337,6 +1353,12 @@ def _handle_uploads(project, files):
 
     # Hâlâ kapak yoksa (admin elle yüklemediyse) marka renkli bir tane üret
     _ensure_auto_cover(project)
+
+
+try:
+    store.ensure_seed_projects()
+except Exception as _e:
+    print("[seed] atlandı:", _e)
 
 
 if __name__ == "__main__":

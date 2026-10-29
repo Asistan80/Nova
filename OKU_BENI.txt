@@ -1,0 +1,14 @@
+SITE GUNCELLEMESI (Godot oyunlari tarayicida oynanir)
+
+ONEMLI: Bu paket data/ klasorune DOKUNMAZ. Mevcut verini (yorumlar, projeler, istatistik) ezmez.
+
+1) Bu zip'in icindeki dosya ve klasorleri GitHub reposunun (Asistan80/Nova) ayni yerlerine kopyala (ust uzerine yaz):
+   app.py, store.py, seed_data.py, templates/, games_static/, static/uploads/
+2) TakimadaTuru_Windows.zip dosyasini (ayri gonderildi) repoda downloads/takimada-turu/ klasorune koy (klasoru olustur).
+3) Commit + push, sonra Render'da deploy.
+
+Ne olacak:
+- Strike Arena, Pazarci, Karabasan, Barbaros ve yeni Takimada Turu sitede "Tarayicida Oyna" ile acilir. Hepsi tek ortak Godot motorunu kullanir (games_static/_godot).
+- Takimada Turu kaydi yoksa otomatik eklenir (kapak, 6 ekran goruntusu, ozellik listesi, indirme).
+- Bu 4 oyunun BOS alanlari (kapak otomatik gorselse, slogan, etiket, ozellik) doldurulur; senin yazdigin hicbir sey degismez.
+- Oynanabilir oyunlarda "Indir" dugmesi de gorunur.

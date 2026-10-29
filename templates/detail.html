@@ -38,6 +38,7 @@
     <div class="hero-cta">
       {% if p.kind == 'oyun' and p.status == 'playable' %}
         <a href="{{ p.play_url }}" class="btn btn-primary">Tarayıcıda Oyna</a>
+        {% if p.download_file %}<a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-ghost">İndir (Windows)</a>{% endif %}
       {% elif p.download_file %}
         <a href="{{ url_for('download', slug=p.slug) }}" class="btn btn-primary">İndir</a>
       {% endif %}

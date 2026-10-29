@@ -57,6 +57,7 @@
   <div class="cart-actions">
     {% if p.kind == 'oyun' and p.status == 'playable' %}
       <a href="{{ p.play_url }}" class="mini-btn primary">Tarayıcıda Oyna</a>
+      {% if p.download_file %}<a href="{{ url_for('download', slug=p.slug) }}" class="mini-btn">İndir</a>{% endif %}
     {% elif p.download_file %}
       <a href="{{ url_for('download', slug=p.slug) }}" class="mini-btn primary">İndir</a>
     {% endif %}
