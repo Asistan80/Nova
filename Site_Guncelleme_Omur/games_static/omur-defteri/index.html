@@ -1,0 +1,1776 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ömür Defteri</title>
+<meta name="description" content="Rastgele doğ, yıl yıl yaşa, bir ömür yaz. / Be born at random, live year by year, write a life.">
+<style>:root{--bg:#0e1020;--bg2:#161a30;--bg3:#1f2440;--line:#2c3358;--tx:#eef0ff;--mut:#9aa3cc;--gold:#ffcf66;--teal:#5eead4;--pink:#ff7a9c;--blue:#6ea8ff;--green:#7be08a;--purple:#b58cff;--bad:#ff6b6b}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:radial-gradient(1200px 700px at 20% -10%,#242a5a 0%,transparent 60%),radial-gradient(900px 600px at 110% 10%,#3a1f4d 0%,transparent 55%),var(--bg);color:var(--tx);font:16px/1.55 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif;overflow-x:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+h1,h2,h3{margin:0}
+#app{max-width:1180px;margin:0 auto;padding:14px 16px 40px;min-height:100%}
+.top{display:flex;align-items:center;gap:10px;padding:8px 2px 14px}
+.brand{font-weight:800;font-size:20px;letter-spacing:.3px;background:linear-gradient(90deg,var(--gold),var(--pink),var(--purple));-webkit-background-clip:text;color:transparent;cursor:pointer}
+.sp{flex:1}
+.ib{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:6px 12px;color:var(--mut)}
+.ib:hover{color:var(--tx);border-color:#4a5497}
+.ib.on{color:var(--gold);border-color:#7a6a2e}
+.screen{display:none;animation:fade .4s ease}.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.btn{background:linear-gradient(135deg,#ffcf66,#ff9c5e);color:#2a1a00;border:0;border-radius:14px;padding:13px 26px;font-weight:700;font-size:17px;box-shadow:0 8px 24px #ff9c5e33;transition:transform .15s}
+.btn:hover{transform:translateY(-2px)}.btn.g{background:var(--bg3);color:var(--tx);border:1px solid var(--line);box-shadow:none}
+.btn.sm{padding:8px 16px;font-size:14px;border-radius:10px}
+.card{background:linear-gradient(180deg,var(--bg2),#12152a);border:1px solid var(--line);border-radius:18px;padding:18px}
+/* home */
+.hero{text-align:center;padding:40px 10px 20px}
+.hero h1{font-size:clamp(34px,6vw,64px);font-weight:900;letter-spacing:-1px;line-height:1.05}
+.hero h1 span{background:linear-gradient(90deg,var(--gold),var(--pink),var(--purple),var(--teal));-webkit-background-clip:text;color:transparent;background-size:200%;animation:flow 8s linear infinite}
+@keyframes flow{to{background-position:200% 0}}
+.hero p{color:var(--mut);max-width:620px;margin:14px auto 24px;font-size:18px}
+.home-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.challenge{max-width:560px;margin:14px auto;background:#2a2342;border:1px solid #5b4a8f;border-radius:14px;padding:12px 16px;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:12.5px;padding:2px 9px;border-radius:99px;background:var(--bg3);border:1px solid var(--line);color:var(--mut)}
+.chip.up{color:var(--green);border-color:#2f6b3a}.chip.dn{color:var(--bad);border-color:#7a3333}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-top:26px}
+.facts div{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px;color:var(--mut);font-size:14.5px}
+.facts b{display:block;color:var(--tx);margin-bottom:4px}
+select.sel{background:var(--bg2);color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+/* birth */
+.wheel{max-width:640px;margin:30px auto;text-align:center}
+.slot{height:84px;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,5vw,46px);font-weight:800;border-radius:18px;background:linear-gradient(180deg,#1b2043,#12152a);border:1px solid var(--line);overflow:hidden;position:relative}
+.slot.spin{color:var(--mut)}.slot.land{color:var(--gold);animation:pop .5s}
+@keyframes pop{0%{transform:scale(.9)}60%{transform:scale(1.06)}100%{transform:scale(1)}}
+.cert{max-width:640px;margin:18px auto;position:relative;background:linear-gradient(180deg,#fbf1d6,#f1e0b0);color:#3a2c12;border-radius:16px;padding:26px 28px;box-shadow:0 20px 60px #0008;border:3px double #b8934a;animation:fade .6s}
+.cert h2{font-family:Georgia,serif;text-align:center;letter-spacing:2px;font-size:22px;margin-bottom:12px;color:#5a3d12}
+.cert .row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #c9ac6c;padding:6px 0;font-size:16px}
+.cert .row b{font-family:Georgia,serif}
+.cert .odds{font-size:30px;text-align:center;font-weight:800;color:#7a4d0a;margin:10px 0 2px}
+.cert .sub{text-align:center;color:#7a6330;font-size:14px}
+.attrs{margin-top:12px}.attr{display:flex;align-items:center;gap:10px;font-size:13.5px;margin:4px 0}.attr i{display:block;height:8px;border-radius:5px;background:#c9ac6c}.attr span{width:110px}.attr .bar{flex:1;background:#e3cf9a;border-radius:5px;overflow:hidden}
+/* life */
+.life{display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
+.side{position:sticky;top:10px}
+.pers{display:flex;gap:12px;align-items:center}
+.avatar{width:120px;height:132px;flex:none;border-radius:16px;background:var(--bg3);overflow:hidden}
+.pname{font-size:20px;font-weight:800;line-height:1.2}.pmeta{color:var(--mut);font-size:13.5px}
+.agebig{font-size:34px;font-weight:900;line-height:1;color:var(--gold)}
+.meters{margin-top:14px;display:grid;gap:9px}
+.m{position:relative}.m .lb{display:flex;justify-content:space-between;font-size:13px;color:var(--mut);margin-bottom:3px}.m .lb b{color:var(--tx);font-variant-numeric:tabular-nums}
+.m .bar{height:11px;background:#0b0d1d;border-radius:8px;overflow:hidden;border:1px solid #232850}
+.m .bar i{display:block;height:100%;border-radius:8px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.m .d{position:absolute;right:30px;top:-3px;font-weight:800;font-size:13px;opacity:0;pointer-events:none}.m .d.show{animation:dlt 1.6s ease-out}
+@keyframes dlt{0%{opacity:0;transform:translateY(6px)}15%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
+.pri{margin-top:14px}.pri h4{margin:0 0 6px;font-size:13px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.7px}
+.pbtn{display:block;width:100%;text-align:left;background:var(--bg3);border:1px solid var(--line);border-radius:10px;padding:7px 10px;margin-bottom:5px;transition:.15s}
+.pbtn small{display:block;color:var(--mut);font-size:11.5px}.pbtn:hover{border-color:#4a5497}.pbtn.on{border-color:var(--gold);background:#2d2a3c}
+.main{display:grid;gap:14px;min-width:0}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sbtn{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:6px 12px;color:var(--mut)}.sbtn.on{color:#2a1a00;background:var(--gold);border-color:var(--gold)}
+.yearbar{height:6px;background:#0b0d1d;border-radius:5px;overflow:hidden;flex:1;min-width:80px}.yearbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--teal),var(--blue))}
+.stage{min-height:150px;position:relative;overflow:hidden}
+.stage .ag{font-size:13px;color:var(--mut);margin-bottom:6px}
+.stage .tx{font-size:19px;line-height:1.5}.stage .rs{margin-top:8px;color:var(--teal);font-size:16px}
+.stage.q .tx{color:var(--mut)}
+.choices{display:grid;gap:8px;margin-top:14px}
+.cbtn{background:linear-gradient(180deg,#242a52,#1b2043);border:1px solid #3b4482;border-radius:12px;padding:12px 14px;text-align:left;font-size:16px;transition:.15s;display:flex;gap:10px;align-items:center}
+.cbtn:hover{border-color:var(--gold);transform:translateX(3px)}.cbtn kbd{background:#0b0d1d;border:1px solid var(--line);border-radius:6px;padding:0 7px;color:var(--mut);font-size:12px}
+.cbtn .hn{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.feed{display:grid;gap:8px;max-height:520px;overflow:auto;padding-right:4px}
+.ent{background:var(--bg2);border:1px solid var(--line);border-left:4px solid var(--c,#4a5497);border-radius:12px;padding:10px 12px;animation:slide .5s}
+@keyframes slide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.ent.quiet{opacity:.6;padding:6px 12px}
+.ent .eh{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--mut)}.ent .eh b{color:var(--gold);font-size:15px}
+.ent .et{margin-top:2px}.ent .ch{color:var(--blue);font-size:14px;margin-top:3px}.ent .er{color:var(--teal);font-size:15px;margin-top:2px}
+.star{margin-left:auto;background:none;border:0;color:#6b739f;font-size:18px;padding:0 4px}.star.on{color:var(--gold)}
+.cat-fam{--c:#ff9ec0}.cat-school{--c:#6ea8ff}.cat-work{--c:#c4a35a}.cat-health{--c:#ff6b6b}.cat-love{--c:#ff7ab8}.cat-world{--c:#9a7bff}.cat-money{--c:#7be08a}.cat-life{--c:#5eead4}.cat-quiet{--c:#2c3358}
+canvas.chart{width:100%;height:150px;display:block}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12.5px;color:var(--mut);margin-top:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px}
+/* end */
+.endhead{text-align:center;padding:22px 8px 6px}
+.stone{display:inline-block;background:linear-gradient(180deg,#3a3f66,#232745);border:1px solid #565e9a;border-radius:90px 90px 14px 14px;padding:34px 44px 22px;min-width:min(520px,92vw);box-shadow:0 20px 60px #0008}
+.stone h2{font-size:clamp(26px,5vw,38px)}.stone .yrs{color:var(--mut);margin:4px 0 12px}.stone .big{font-size:56px;font-weight:900;color:var(--gold);line-height:1}
+.stone .cause{margin-top:10px;font-size:18px}.stone .ep{color:var(--teal);margin-top:10px;font-style:italic}
+.grade{display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:50%;font-size:38px;font-weight:900;background:conic-gradient(var(--gold),var(--pink),var(--purple),var(--gold));color:#1a1030;margin-top:14px;box-shadow:0 8px 30px #ff9c5e44}
+.endgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:16px}
+.stat{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:6px 0;font-size:15px}.stat span{color:var(--mut)}
+.badges{display:flex;flex-wrap:wrap;gap:8px}.bdg{background:var(--bg3);border:1px solid #6a5a2a;border-radius:12px;padding:8px 12px;font-size:14px}.bdg small{display:block;color:var(--mut);font-size:12px}.bdg.new{border-color:var(--gold);box-shadow:0 0 18px #ffcf6644}.bdg.lock{opacity:.35;border-color:var(--line)}
+.hl{margin:6px 0;padding-left:10px;border-left:3px solid var(--gold);font-size:14.5px}.hl b{color:var(--gold)}
+/* modal */
+.modal{position:fixed;inset:0;background:#05061499;backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}.modal.on{display:flex}
+.mbox{background:var(--bg2);border:1px solid var(--line);border-radius:18px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:20px;animation:fade .3s}
+.mbox h2{margin-bottom:12px}.x{float:right}
+.bk{display:grid;gap:8px}.bk .it{background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer}.bk .it:hover{border-color:#4a5497}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#232850;border:1px solid var(--gold);padding:10px 18px;border-radius:12px;z-index:80;opacity:0;pointer-events:none;transition:.3s}.toast.on{opacity:1}
+.tip{background:#1c2a3e;border:1px solid #2f5b86;border-radius:12px;padding:10px 14px;color:#cfe6ff;font-size:14.5px}
+@media(max-width:860px){.meters{grid-template-columns:1fr 1fr;gap:8px 14px}.pri .pbtn small{display:none}.pri{display:grid;grid-template-columns:1fr 1fr;gap:5px}.pri h4{grid-column:1/-1}.pri .pbtn{margin:0;padding:6px 8px;font-size:14px}.top{flex-wrap:wrap}.ib{padding:5px 9px;font-size:13px}.brand{flex:1 1 100%}.stage .tx{font-size:17px}.life{grid-template-columns:1fr}.side{position:static}.endgrid{grid-template-columns:1fr}.avatar{width:96px;height:108px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top">
+    <span class="brand" data-t="brand">Ömür Defteri</span><span class="sp"></span>
+    <button class="ib" id="b-book" data-t="book">Hayatlar Defteri</button>
+    <button class="ib" id="b-badges" data-t="badges">Rozetler</button>
+    <button class="ib" id="b-help" data-t="help">Nasıl oynanır?</button>
+    <button class="ib" id="b-snd" title="Ses">♪</button>
+    <button class="ib" id="b-lang">EN</button>
+  </div>
+
+  <section class="screen on" id="s-home">
+    <div class="hero">
+      <h1><span data-t="brand">Ömür Defteri</span></h1>
+      <p data-t="sub"></p>
+      <p style="font-size:16px" data-t="lead"></p>
+      <div id="challenge" class="challenge" style="display:none"></div>
+      <div class="home-row"><button class="btn" id="h-start">Hayata başla</button><button class="btn g" id="h-fresh" style="display:none"></button></div>
+      <div class="home-row"><select class="sel" id="h-prac"></select></div>
+      <div class="mut" style="color:var(--mut);font-size:13px" data-t="practiceNote"></div>
+    </div>
+    <div class="facts">
+      <div><b data-t="f1t"></b><span data-t="f1"></span></div><div><b data-t="f2t"></b><span data-t="f2"></span></div>
+      <div><b data-t="f3t"></b><span data-t="f3"></span></div><div><b data-t="f4t"></b><span data-t="f4"></span></div>
+    </div>
+    <p style="text-align:center;color:var(--mut);font-size:13px;margin-top:26px" data-t="fictional"></p>
+  </section>
+
+  <section class="screen" id="s-birth">
+    <div class="wheel"><div id="birth-msg" style="color:var(--mut);margin-bottom:8px"></div><div class="slot spin" id="slot">…</div></div>
+    <div id="birth-cert"></div>
+    <div id="birth-actions" class="home-row" style="display:none"><button class="btn" id="birth-begin"></button><button class="btn g" id="birth-redo"></button></div>
+  </section>
+
+  <section class="screen" id="s-life">
+    <div class="life">
+      <aside class="side card">
+        <div class="pers"><div class="avatar" id="av"></div><div><div class="pname" id="pname"></div><div class="agebig" id="agebig"></div><div class="pmeta" id="pmeta"></div><div class="pmeta" id="pmeta2"></div></div></div>
+        <div class="meters" id="meters"></div>
+        <div class="pri" id="pri"></div>
+      </aside>
+      <div class="main">
+        <div class="ctrl">
+          <button class="sbtn" id="c-pause">Duraklat</button><button class="sbtn" id="c-next" data-t="next"></button>
+          <button class="sbtn" data-sp="1" data-t="slow"></button><button class="sbtn" data-sp="2" data-t="norm"></button><button class="sbtn" data-sp="3" data-t="fast"></button>
+          <button class="sbtn" id="c-auto" data-t="auto"></button><div class="yearbar" id="yearbar"><i></i></div>
+        </div>
+        <div class="tip" id="tip"></div>
+        <div class="card stage" id="stage"></div>
+        <div id="choices" class="choices"></div>
+        <div class="card"><h3 style="font-size:15px;color:var(--mut);margin-bottom:6px" data-t="chart"></h3><canvas class="chart" id="chart"></canvas><div class="legend" id="legend"></div></div>
+        <div><h3 style="font-size:15px;color:var(--mut);margin:4px 0 8px" data-t="feed"></h3><div class="feed" id="feed"></div></div>
+        <div style="color:var(--mut);font-size:12.5px;text-align:center" id="fict"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen" id="s-end">
+    <div class="endhead" id="end-stone"></div>
+    <div class="endgrid">
+      <div class="card"><h3 style="margin-bottom:6px" data-t="chart"></h3><canvas class="chart" id="end-chart" style="height:190px"></canvas><div class="legend" id="end-legend"></div>
+        <h3 style="margin:16px 0 6px" data-t="hls"></h3><div id="end-hl"></div></div>
+      <div class="card"><h3 style="margin-bottom:6px" data-t="avg"></h3><div class="meters" id="end-avg"></div>
+        <h3 style="margin:16px 0 6px" data-t="summary"></h3><div id="end-sum"></div>
+        <h3 style="margin:16px 0 8px" data-t="earned"></h3><div class="badges" id="end-badges"></div></div>
+    </div>
+    <div class="home-row" style="margin-top:18px"><button class="btn" id="e-share" data-t="share"></button><button class="btn g" id="e-copy" data-t="copy"></button><button class="btn g" id="e-link" data-t="link"></button></div>
+    <div class="home-row"><button class="btn g" id="e-new" data-t="again2"></button><button class="btn g" id="e-same" data-t="same"></button><button class="btn g" id="e-book" data-t="book"></button></div>
+  </section>
+</div>
+<div class="modal" id="m-book"></div><div class="modal" id="m-badges"></div><div class="modal" id="m-help"></div>
+<div class="toast" id="toast"></div>
+<script>
+/* Ömür Defteri - çekirdek (DOM yok): ülkeler, motor, ölüm, rozetler */
+const OD = {};
+(function () {
+  const T = (tr, en) => ({ tr, en });
+  OD.T = T;
+
+  // ---------------------------------------------------------------- RNG
+  OD.rng = function (seed) {
+    let a = seed >>> 0;
+    const f = function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    return f;
+  };
+  OD.hashSeed = function (s) {
+    s = String(s);
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  };
+  OD.newSeedCode = function () {
+    const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let s = "";
+    for (let i = 0; i < 6; i++) s += ch[Math.floor(Math.random() * ch.length)];
+    return s;
+  };
+
+  // ---------------------------------------------------------------- ülkeler
+  // [kod, tr, en, doğum(milyon), sağlık, eğitim, refah, huzur, yaşam beklentisi, deprem, zorunlu hizmet, isim havuzu]
+  const C = [
+    ["IN", "Hindistan", "India", 23, .45, .55, .25, .6, 70, .5, 0, "sa"],
+    ["NG", "Nijerya", "Nigeria", 7.5, .25, .35, .2, .35, 54, .1, 0, "af"],
+    ["CN", "Çin", "China", 9, .7, .7, .5, .8, 78, .4, 0, "ea"],
+    ["PK", "Pakistan", "Pakistan", 7, .35, .35, .22, .45, 67, .5, 0, "sa"],
+    ["ID", "Endonezya", "Indonesia", 4.5, .5, .6, .35, .7, 71, .7, 0, "ea"],
+    ["ET", "Etiyopya", "Ethiopia", 4.3, .3, .3, .12, .4, 67, .3, 0, "af"],
+    ["US", "ABD", "USA", 3.6, .75, .8, .9, .7, 78, .3, 0, "en"],
+    ["CD", "Kongo DC", "DR Congo", 3.7, .15, .25, .05, .2, 61, .1, 0, "af"],
+    ["BD", "Bangladeş", "Bangladesh", 3.2, .45, .5, .22, .6, 73, .4, 0, "sa"],
+    ["BR", "Brezilya", "Brazil", 2.5, .6, .65, .45, .55, 75, .05, 0, "la"],
+    ["MX", "Meksika", "Mexico", 2.0, .6, .65, .5, .5, 75, .5, 0, "la"],
+    ["EG", "Mısır", "Egypt", 2.1, .5, .55, .35, .6, 72, .1, 1, "ar"],
+    ["PH", "Filipinler", "Philippines", 2.4, .5, .6, .3, .55, 71, .6, 0, "ea"],
+    ["TZ", "Tanzanya", "Tanzania", 2.5, .3, .35, .12, .6, 66, .1, 0, "af"],
+    ["UG", "Uganda", "Uganda", 1.8, .3, .35, .1, .5, 64, .1, 0, "af"],
+    ["SD", "Sudan", "Sudan", 1.6, .2, .3, .1, .2, 66, .05, 0, "ar"],
+    ["AF", "Afganistan", "Afghanistan", 1.4, .2, .25, .08, .2, 63, .5, 0, "ar"],
+    ["IR", "İran", "Iran", 1.2, .6, .65, .35, .5, 77, .7, 1, "ar"],
+    ["TR", "Türkiye", "Türkiye", 1.0, .7, .65, .5, .6, 78, .7, 1, "tr"],
+    ["JP", "Japonya", "Japan", .75, .95, .85, .8, .9, 85, .8, 0, "ea"],
+    ["DE", "Almanya", "Germany", .7, .9, .85, .85, .85, 81, .02, 0, "eu"],
+    ["GB", "Birleşik Krallık", "United Kingdom", .65, .85, .85, .8, .85, 81, .02, 0, "en"],
+    ["FR", "Fransa", "France", .68, .9, .85, .8, .85, 82, .05, 0, "eu"],
+    ["IT", "İtalya", "Italy", .4, .9, .8, .75, .85, 83, .5, 0, "eu"],
+    ["ES", "İspanya", "Spain", .32, .9, .8, .7, .85, 83, .1, 0, "eu"],
+    ["PL", "Polonya", "Poland", .3, .8, .8, .6, .85, 77, .02, 0, "eu"],
+    ["KE", "Kenya", "Kenya", 1.6, .35, .4, .15, .55, 63, .1, 0, "af"],
+    ["VN", "Vietnam", "Vietnam", 1.5, .6, .65, .35, .8, 75, .1, 0, "ea"],
+    ["TH", "Tayland", "Thailand", .5, .7, .65, .45, .75, 78, .1, 0, "ea"],
+    ["KR", "Güney Kore", "South Korea", .25, .9, .9, .8, .75, 84, .1, 1, "ea"],
+    ["AR", "Arjantin", "Argentina", .5, .7, .7, .45, .75, 77, .2, 0, "la"],
+    ["CO", "Kolombiya", "Colombia", .6, .6, .65, .4, .5, 77, .3, 0, "la"],
+    ["SA", "Suudi Arabistan", "Saudi Arabia", .6, .75, .7, .7, .7, 77, .02, 0, "ar"],
+    ["IQ", "Irak", "Iraq", 1.2, .4, .45, .3, .3, 71, .2, 0, "ar"],
+    ["CA", "Kanada", "Canada", .37, .9, .85, .85, .9, 82, .05, 0, "en"],
+    ["AU", "Avustralya", "Australia", .3, .9, .85, .85, .9, 83, .02, 0, "en"],
+    ["GR", "Yunanistan", "Greece", .07, .85, .8, .6, .85, 81, .5, 0, "eu"],
+    ["NL", "Hollanda", "Netherlands", .17, .92, .88, .88, .9, 82, .01, 0, "eu"],
+    ["SE", "İsveç", "Sweden", .1, .92, .9, .88, .92, 83, .01, 0, "eu"],
+    ["NO", "Norveç", "Norway", .05, .93, .9, .95, .93, 83, .01, 0, "eu"],
+    ["CH", "İsviçre", "Switzerland", .09, .95, .88, .95, .93, 84, .02, 0, "eu"],
+    ["AZ", "Azerbaycan", "Azerbaijan", .12, .55, .65, .35, .6, 73, .4, 1, "tr"],
+    ["KZ", "Kazakistan", "Kazakhstan", .4, .6, .75, .45, .75, 73, .2, 1, "tr"],
+    ["MA", "Fas", "Morocco", .6, .5, .5, .3, .75, 74, .3, 0, "ar"],
+    ["ZA", "Güney Afrika", "South Africa", 1.2, .45, .55, .35, .45, 65, .02, 0, "af"],
+    ["GH", "Gana", "Ghana", .9, .4, .5, .2, .7, 65, .05, 0, "af"],
+    ["PE", "Peru", "Peru", .55, .55, .65, .4, .6, 75, .6, 0, "la"],
+    ["CL", "Şili", "Chile", .17, .8, .75, .6, .7, 80, .8, 0, "la"],
+    ["NZ", "Yeni Zelanda", "New Zealand", .06, .9, .85, .8, .93, 83, .3, 0, "en"],
+    ["NP", "Nepal", "Nepal", .6, .4, .5, .15, .65, 70, .6, 0, "sa"],
+  ];
+  OD.COUNTRIES = C.map(a => ({ code: a[0], tr: a[1], en: a[2], w: a[3], hc: a[4], ed: a[5], wl: a[6], pe: a[7], le: a[8], quake: a[9], svc: !!a[10], pool: a[11] }));
+  OD.totalBirths = OD.COUNTRIES.reduce((s, c) => s + c.w, 0);
+  OD.byCode = {};
+  OD.COUNTRIES.forEach(c => { OD.byCode[c.code] = c; });
+
+  const NAMES = {
+    tr: ["Elif", "Mehmet", "Zeynep", "Ahmet", "Defne", "Can", "Ayşe", "Emre", "Selin", "Burak", "Deniz", "Ece", "Kerem", "Naz"],
+    ar: ["Layla", "Omar", "Yasmin", "Karim", "Nour", "Hassan", "Samira", "Tariq", "Rana", "Zayd", "Huda", "Idris"],
+    sa: ["Aarav", "Priya", "Rohan", "Ananya", "Imran", "Fatima", "Arjun", "Sita", "Rahim", "Meera", "Kabir", "Isha"],
+    af: ["Amara", "Kofi", "Zawadi", "Chidi", "Nia", "Tendai", "Abena", "Jabari", "Ife", "Sefu", "Thandi", "Kwame"],
+    ea: ["Mei", "Haru", "Minjun", "Linh", "Sora", "Wei", "Yuna", "Arif", "Nari", "Kenji", "Hana", "Bao"],
+    la: ["Sofia", "Mateo", "Valentina", "Diego", "Camila", "Lucas", "Isabela", "Andres", "Luz", "Tomas", "Marisol", "Pablo"],
+    eu: ["Anna", "Lukas", "Marta", "Jonas", "Clara", "Marco", "Elena", "Pieter", "Ingrid", "Luca", "Sara", "Felix"],
+    en: ["Emma", "Noah", "Olivia", "Liam", "Ava", "Jack", "Mia", "Ethan", "Grace", "Leo", "Ruby", "Owen"],
+  };
+  OD.NAMES = NAMES;
+
+  const clamp = (v, a = 0, b = 100) => Math.max(a, Math.min(b, v));
+  OD.clamp = clamp;
+
+  // Gompertz katsayısı: beklenen ömür = le
+  function calibA(le) {
+    let lo = 1e-8, hi = 1e-2;
+    for (let i = 0; i < 40; i++) {
+      const A = Math.sqrt(lo * hi);
+      let S = 1, ex = 0;
+      for (let a = 0; a < 125; a++) { const h = Math.min(1, A * Math.exp(0.085 * a)); ex += S * (a + .5) * h; S *= 1 - h; }
+      if (ex > le) lo = A; else hi = A;
+    }
+    return Math.sqrt(lo * hi);
+  }
+  const _calib = {};
+  OD.calib = le => (_calib[le] = _calib[le] || calibA(le));
+
+  // ---------------------------------------------------------------- doğum çekilişi
+  OD.drawBirth = function (rnd) {
+    let r = rnd() * OD.totalBirths, c = OD.COUNTRIES[0];
+    for (const x of OD.COUNTRIES) { r -= x.w; if (r <= 0) { c = x; break; } }
+    return c;
+  };
+
+  OD.newLife = function (seed, opts = {}) {
+    const rnd = OD.rng(OD.hashSeed(seed));
+    const L = { seed, rnd, dead: false, pending: null, queue: [], log: [], series: [], seen: {}, last: {}, f: {}, extra: 0, stars: 0, ver: 1 };
+    L.c = opts.country ? OD.byCode[opts.country] : OD.drawBirth(rnd);
+    L.free = !!opts.country;
+    L.birthCountry = L.c;
+    L.birth = 1935 + Math.floor(rnd() * 92);
+    L.age = 0;
+    const pool = NAMES[L.c.pool] || NAMES.en;
+    L.name = opts.name || pool[Math.floor(rnd() * pool.length)];
+    L.pool = pool;
+    L.partner = null; L.kids = []; L.kidCount = 0;
+    L.edu = 0; L.job = 0; L.career = null;
+    L.lived = [L.c.code];
+    L.skin = Math.floor(rnd() * 5); L.hair = Math.floor(rnd() * 5); L.look = Math.floor(rnd() * 3);
+    // aile durumu
+    const w = L.c.wl, rr = rnd();
+    L.fam = rr < w * w * .75 ? 2 : (rr < w * w * .75 + (1 - w) * .65 ? 0 : 1);
+    L.s = {
+      h: clamp(58 + L.c.hc * 24 + (rnd() - .5) * 14),
+      m: clamp(55 + (rnd() - .5) * 20),
+      z: clamp(35 + L.c.ed * 18 + L.fam * 6 + (rnd() - .5) * 14),
+      b: clamp(52 + (rnd() - .5) * 24),
+      p: clamp(14 + L.fam * 26 + L.c.wl * 20 + (rnd() - .5) * 8),
+    };
+    L.priority = "denge";
+    L.A = OD.calib(L.c.le + 7);
+    L.odds = Math.round(OD.totalBirths / L.c.w);
+    L.sumS = { h: 0, m: 0, z: 0, b: 0, p: 0 }; L.yrs = 0;
+    L.peak = { h: 0, m: 0, z: 0, b: 0, p: 0 };
+    L.low = { h: 100, m: 100, z: 100, b: 100, p: 100 };
+    L.count = { illness: 0, accident: 0, moves: 0, crisis: 0 };
+    return L;
+  };
+
+  OD.year = L => L.birth + L.age;
+  const R = L => L.rnd();
+  OD.pick = (L, arr) => arr[Math.floor(L.rnd() * arr.length)];
+  const pickName = L => {
+    const used = [L.name, L.partner].concat(L.kids);
+    const free = L.pool.filter(n => !used.includes(n));
+    return OD.pick(L, free.length ? free : L.pool);
+  };
+
+  // ---------------------------------------------------------------- metin
+  const cName = (L, lg) => L.c[lg];
+  OD.fmt = function (L, t) {
+    if (!t) return null;
+    const out = {};
+    for (const lg of ["tr", "en"]) {
+      out[lg] = String(t[lg] || t.tr || "")
+        .replace(/\{n\}/g, L.name)
+        .replace(/\{c\}/g, cName(L, lg))
+        .replace(/\{bc\}/g, L.birthCountry[lg])
+        .replace(/\{p\}/g, L.partner || "")
+        .replace(/\{k\}/g, L.kids[L.kids.length - 1] || "")
+        .replace(/\{age\}/g, L.age)
+        .replace(/\{yr\}/g, OD.year(L));
+    }
+    return out;
+  };
+
+  // ---------------------------------------------------------------- etki uygulama
+  const KEYS = ["h", "m", "z", "b", "p"];
+  OD.applyFx = function (L, fx) {
+    if (!fx) return {};
+    const d = {};
+    for (const k of KEYS) {
+      if (fx[k]) {
+        const before = L.s[k];
+        L.s[k] = clamp(L.s[k] + fx[k]);
+        d[k] = L.s[k] - before;
+      }
+    }
+    if (fx.risk) L.extra += fx.risk;
+    return d;
+  };
+  function applyExtras(L, o) {
+    if (o.set) for (const k in o.set) L.f[k] = o.set[k];
+    if (o.inc) for (const k in o.inc) L.f[k] = (L.f[k] || 0) + o.inc[k];
+    if (o.edu != null) L.edu = o.edu;
+    if (o.job != null) L.job = o.job;
+    if (o.career) L.career = o.career;
+    if (o.count) for (const k in o.count) L.count[k] = (L.count[k] || 0) + o.count[k];
+    if (o.fn) o.fn(L);
+  }
+  function addLog(L, ev, text, res, delta, extra) {
+    const e = { age: L.age, year: OD.year(L), id: ev.id, cat: ev.cat || "life", t: OD.fmt(L, text), r: res ? OD.fmt(L, res) : null, d: delta || {}, star: !!ev.star || !!(extra && extra.star), country: L.c.code };
+    if (e.star) L.stars++;
+    L.log.push(e);
+    return e;
+  }
+  OD.toggleStar = function (L, idx) {
+    const e = L.log[idx];
+    if (!e) return;
+    e.star = !e.star;
+    L.stars += e.star ? 1 : -1;
+  };
+
+  // ---------------------------------------------------------------- olay seçimi
+  OD.EVENTS = [];
+  const inAge = (e, a) => e.at != null ? e.at === a : (a >= e.a[0] && a <= e.a[1]);
+  function eligible(L, e) {
+    if (!inAge(e, L.age)) return false;
+    if (e.once && L.seen[e.id]) return false;
+    if (e.cd && L.last[e.id] != null && L.age - L.last[e.id] < e.cd) return false;
+    if (e.cond && !e.cond(L)) return false;
+    return true;
+  }
+  function weighted(L, list) {
+    let tot = 0;
+    const ws = list.map(e => { const w = typeof e.w === "function" ? e.w(L) : (e.w == null ? 1 : e.w); tot += Math.max(0, w); return Math.max(0, w); });
+    if (tot <= 0) return null;
+    let r = R(L) * tot;
+    for (let i = 0; i < list.length; i++) { r -= ws[i]; if (r <= 0) return list[i]; }
+    return list[list.length - 1];
+  }
+
+  // Yılın olaylarını sıraya dizer
+  function planYear(L) {
+    const all = OD.EVENTS.filter(e => eligible(L, e));
+    const fixed = all.filter(e => e.at != null);
+    const pool = all.filter(e => e.at == null);
+    const q = fixed.slice();
+    let n = L.age < 2 ? (R(L) < .5 ? 1 : 0) : (() => { const r = R(L); return r < .22 ? 0 : (r < .8 ? 1 : 2); })();
+    if (q.length) n = Math.min(n, 1);
+    const used = {};
+    for (let i = 0; i < n; i++) {
+      const rest = pool.filter(e => !used[e.id]);
+      const e = weighted(L, rest);
+      if (!e) break;
+      used[e.id] = 1;
+      q.push(e);
+    }
+    L.queue = q;
+  }
+
+  OD.QUIET = [
+    [T("Sıradan, sakin bir yıl geçti.", "An ordinary, calm year went by."), 0],
+    [T("Günler birbirine benzedi ama kötü bir şey olmadı.", "The days blended together, but nothing bad happened."), 0],
+    [T("Bu yıl büyük bir olay yaşanmadı; hayat kendi ritminde aktı.", "No big events this year; life flowed at its own pace."), 0],
+    [T("Mevsimler değişti, sen de biraz değiştin.", "Seasons changed, and so did you, a little."), 0],
+  ];
+
+  // ---------------------------------------------------------------- adım
+  OD.step = function (L) {
+    if (L.dead || L.pending) return { pending: !!L.pending, dead: L.dead };
+    if (!L._planned) { planYear(L); L._planned = true; L._events = 0; }
+    return runQueue(L);
+  };
+
+  function runQueue(L) {
+    while (L.queue.length) {
+      const ev = L.queue.shift();
+      L.seen[ev.id] = 1; L.last[ev.id] = L.age; L._events++;
+      if (ev.ch && ev.ch.length) {
+        const opts = ev.ch.filter(c => !c.cond || c.cond(L));
+        if (opts.length) {
+          L.pending = { ev, choices: opts, text: OD.fmt(L, ev.x) };
+          return { pending: true, dead: false };
+        }
+      }
+      resolveNoChoice(L, ev);
+      if (L.dead) return { pending: false, dead: true };
+    }
+    return finishYear(L);
+  }
+
+  function resolveNoChoice(L, ev) {
+    let fx = ev.fx, res = null;
+    if (ev.outs) {
+      const o = weighted(L, ev.outs);
+      fx = Object.assign({}, ev.fx || {}, o.fx || {});
+      res = o.r;
+      applyExtras(L, o);
+      if (o.die) { applyExtras(L, ev); const d = OD.applyFx(L, fx); addLog(L, ev, ev.x, res, d); return die(L, o.die); }
+    }
+    const d = OD.applyFx(L, fx);
+    applyExtras(L, ev);
+    addLog(L, ev, ev.x, res, d);
+  }
+
+  OD.choose = function (L, idx) {
+    const pd = L.pending;
+    if (!pd) return null;
+    const ev = pd.ev, ch = pd.choices[idx];
+    L.pending = null;
+    applyExtras(L, ev);
+    let fx = Object.assign({}, ch.fx || {}), res = ch.r;
+    applyExtras(L, ch);
+    let dead = null;
+    if (ch.outs) {
+      const o = weighted(L, ch.outs);
+      fx = Object.assign(fx, o.fx || {});
+      res = o.r || res;
+      applyExtras(L, o);
+      L._lastOut = o;
+      if (o.die) dead = o.die;
+    }
+    const d = OD.applyFx(L, fx);
+    const e = addLog(L, ev, ev.x, res, d);
+    e.choice = OD.fmt(L, ch.t);
+    if (ch.star || (ch.outs && L._lastOut && L._lastOut.star)) { if (!e.star) { e.star = true; L.stars++; } }
+    if (dead) { die(L, dead); return { dead: true, entry: e }; }
+    const r = runQueue(L);
+    return Object.assign({ entry: e }, r);
+  };
+
+  // ---------------------------------------------------------------- yıl sonu
+  const PRI = {
+    denge: { h: .15, m: .2, z: .15, b: .1, p: 0 },
+    emek: { z: 1.3, p: 1.7, m: -.7, h: -.5, b: -.8 },
+    sosyal: { b: 2.2, m: 1.0, p: -1.2, z: -.1, h: -.1 },
+    saglik: { h: 2.0, m: .5, p: -.8, b: -.2, z: .1 },
+    dinlen: { m: 1.7, h: .5, z: .3, p: -.3, b: -.5 },
+  };
+  OD.PRI = PRI;
+
+  function finishYear(L) {
+    // öncelik
+    const pr = L.age >= 6 ? PRI[L.priority] || PRI.denge : PRI.denge;
+    let pw = L.age < 18 ? 1 : 1;
+    for (const k of KEYS) {
+      let v = pr[k] || 0;
+      if (k === "p" && L.priority === "emek" && (L.age < 16 || L.f.retired)) v = L.age < 16 ? .2 : .5;
+      L.s[k] = clamp(L.s[k] + v * pw);
+    }
+    // yaş ve çevre
+    {
+      const ht = 74 + (L.c.hc - .5) * 22 - Math.max(0, L.age - 45) * .75 - (L.f.smoker ? 6 : 0) - (L.f.fit ? -5 : 0);
+      L.s.h = clamp(L.s.h + (ht - L.s.h) * .07);
+    }
+    const tgt = 24 + .2 * L.s.b + .17 * L.s.p + .1 * L.s.h + L.c.pe * 10;
+    L.s.m = clamp(L.s.m + (tgt - L.s.m) * .14);
+    L.s.b = clamp(L.s.b - (L.partner ? .5 : 1.1) - (L.age > 70 ? .5 : 0));
+    {
+      const zt = 40 + L.c.ed * 22 + L.edu * 7 + (L.f.mentor ? 4 : 0);
+      L.s.z = clamp(L.s.z + (zt - L.s.z) * .045);
+      const bt = 36 + (L.partner ? 14 : 0) + (L.kidCount ? 10 : 0) + (L.f.bestFriend ? 6 : 0);
+      L.s.b = clamp(L.s.b + (bt - L.s.b) * .05);
+    }
+    if (L.age > 58) L.s.z = clamp(L.s.z - .35 - (L.s.b < 35 ? .35 : 0));
+    // gelir
+    if (L.age >= 18 && !L.f.retired) L.s.p = clamp(L.s.p + [-1.8, -.2, .9, 2.2][clampI(L.job, 0, 3)]);
+    if (L.f.retired) L.s.p = clamp(L.s.p - (L.c.wl > .55 ? .1 : .7));
+    if (L.age >= 3 && L.age < 18) L.s.p = clamp(L.s.p + (L.fam - 1) * .15);
+    if (L.s.p < 14) { L.s.m = clamp(L.s.m - 1.3); L.s.h = clamp(L.s.h - .8); }
+    if (L.f.hyper) L.s.h = clamp(L.s.h - .35);
+    if (L.f.depress) L.s.m = clamp(L.s.m - 1.2);
+    // seriler
+    L.series.push({ age: L.age, h: L.s.h, m: L.s.m, z: L.s.z, b: L.s.b, p: L.s.p });
+    for (const k of KEYS) { L.sumS[k] += L.s[k]; L.peak[k] = Math.max(L.peak[k], L.s[k]); L.low[k] = Math.min(L.low[k], L.s[k]); }
+    L.yrs++;
+    // sessiz yıl
+    if (L._events === 0 && !L.dead) {
+      const q = OD.pick(L, OD.QUIET);
+      L.log.push({ age: L.age, year: OD.year(L), id: "quiet", cat: "quiet", t: OD.fmt(L, q[0]), r: null, d: {}, star: false, country: L.c.code, quiet: true });
+    }
+    // ölüm
+    const dc = mortality(L);
+    if (dc) { die(L, dc); return { pending: false, dead: true, year: true }; }
+    L.extra *= .5; if (L.extra < .002) L.extra = 0;
+    L.age++; L._planned = false;
+    if (L.age > 118) { die(L, T("Çok çok uzun bir ömrün sonunda uykusunda aramızdan ayrıldı.", "At the end of a very, very long life, passed away in sleep.")); return { pending: false, dead: true, year: true }; }
+    return { pending: false, dead: false, year: true };
+  }
+  const clampI = (v, a, b) => Math.max(a, Math.min(b, v | 0));
+
+  function childHazard(L) {
+    const a = L.age;
+    if (a > 12) return 0;
+    const c0 = .002 + .028 * Math.pow(1 - L.c.hc, 2) * (1 - L.c.wl * .4) * (1 + (L.fam === 0 ? .4 : 0) - (L.fam === 2 ? .3 : 0));
+    return c0 * Math.exp(-.75 * a);
+  }
+  OD.hazard = function (L) {
+    const a = L.age;
+    const base = L.A * Math.exp(.085 * a) * (L.f.smoker && a > 35 ? 1.3 : 1);
+    const hs = L.s.h;
+    const hf = hs >= 70 ? .8 : hs >= 45 ? 1 : hs >= 25 ? 1.7 : hs >= 10 ? 3.2 : 8;
+    const acc = (a > 5 && a < 50) ? .0003 * (1.5 - L.c.pe) : 0;
+    return Math.min(.97, (base + childHazard(L)) * hf + acc + L.extra);
+  };
+  function mortality(L) {
+    if (L.s.h <= 0.01) return deathCause(L, true);
+    if (R(L) < OD.hazard(L)) return deathCause(L, false);
+    return null;
+  }
+  function deathCause(L, zero) {
+    const a = L.age, ch = [];
+    const add = (w, tr, en) => ch.push({ w, t: T(tr, en) });
+    if (a < 6) {
+      add(5, "Çocukluk hastalığı yüzünden hayata veda etti.", "Said goodbye to life because of a childhood illness.");
+      add(2, "Ağır bir enfeksiyon sonrası aramızdan ayrıldı.", "Passed away after a severe infection.");
+      add(1, "Beklenmedik bir kaza sonucu hayatını kaybetti.", "Lost their life in an unexpected accident.");
+    } else if (a < 30) {
+      add(3, "Trafik kazasında hayatını kaybetti.", "Died in a traffic accident.");
+      add(2, "Ani gelişen bir hastalığa yenik düştü.", "Succumbed to a suddenly developing illness.");
+      add(2, "Bir kaza sonucu aramızdan ayrıldı.", "Passed away following an accident.");
+      if (L.c.pe < .5) add(3 * (1 - L.c.pe), "Çevresindeki çatışmaların kurbanı oldu.", "Became a victim of the conflicts around.");
+    } else if (a < 65) {
+      add(3, "Kalp krizi geçirdi.", "Had a heart attack.");
+      add(3, "Uzun süren bir kanser mücadelesini kaybetti.", "Lost a long battle with cancer.");
+      add(1.5, "Ani bir kaza sonucu hayatını kaybetti.", "Died in a sudden accident.");
+      if (L.f.smoker) add(3, "Yıllarca süren sigaranın bedelini ağır ödedi; akciğer hastalığından öldü.", "Paid dearly for years of smoking; died of lung disease.");
+      if (L.f.hyper) add(2, "Yüksek tansiyon yüzünden felç geçirdi.", "Suffered a stroke due to high blood pressure.");
+      if (L.c.hc < .4) add(2, "Tedavi imkânlarına zamanında ulaşamadı.", "Could not reach treatment in time.");
+    } else {
+      add(5, "Uykusunda, huzur içinde aramızdan ayrıldı.", "Passed away peacefully in sleep.");
+      add(3, "Kalp yetmezliğinden hayata veda etti.", "Died of heart failure.");
+      add(2, "Zatürre sonrası vefat etti.", "Passed away after pneumonia.");
+      add(1.5, "Bir düşme sonrası gelişen komplikasyonlardan öldü.", "Died of complications after a fall.");
+      if (L.f.smoker) add(2, "Akciğer hastalığından vefat etti.", "Died of lung disease.");
+      if (L.f.hyper) add(1.5, "Felç geçirdi ve toparlanamadı.", "Had a stroke and could not recover.");
+    }
+    if (zero) add(8, "Yıllardır süren sağlık sorunları artık dayanılmaz hale geldi.", "Years of health problems finally became too much.");
+    let tot = ch.reduce((s, c) => s + c.w, 0), r = R(L) * tot;
+    for (const c of ch) { r -= c.w; if (r <= 0) return c.t; }
+    return ch[0].t;
+  }
+
+  // ---------------------------------------------------------------- ölüm ve özet
+  function die(L, cause) {
+    L.dead = true; L.cause = cause; L.deathAge = L.age;
+    L.pending = null; L.queue = [];
+    const n = Math.max(1, L.yrs);
+    L.avg = {}; for (const k of KEYS) L.avg[k] = L.sumS[k] / n;
+    L.avgAll = (L.avg.h + L.avg.m + L.avg.z + L.avg.b) / 4;
+    L.score = Math.round(L.avgAll * .5 + Math.min(L.deathAge, 100) * .5 + Math.min(L.stars, 8) * .8 + L.avg.p * .05);
+    L.grade = L.score >= 92 ? "S" : L.score >= 80 ? "A" : L.score >= 68 ? "B" : L.score >= 55 ? "C" : L.score >= 42 ? "D" : "E";
+    L.epitaph = epitaph(L);
+    L.badges = OD.BADGES.filter(b => { try { return b.ok(L); } catch (e) { return false; } }).map(b => b.id);
+    L.ended = Date.now();
+    L.series.push({ age: L.age, h: L.s.h, m: L.s.m, z: L.s.z, b: L.s.b, p: L.s.p, end: true });
+    return L;
+  }
+  OD.kill = function (L, cause) { return die(L, cause); };
+
+  function epitaph(L) {
+    const a = L.avg, best = ["h", "m", "z", "b"].sort((x, y) => a[y] - a[x])[0];
+    const E = {
+      h: T("Sağlam bir bedenle yürüdü bu yollarda.", "Walked these roads with a strong body."),
+      m: T("Neşesini yanında taşıdı, çevresine de bulaştırdı.", "Carried joy along and shared it around."),
+      z: T("Meraklı zihni hiç durmadı.", "A curious mind that never stopped."),
+      b: T("Sevdikleriyle dolu bir ömür sürdü.", "Lived a life full of loved ones."),
+    };
+    let t = E[best];
+    const extra = [];
+    if (L.deathAge < 25) extra.push(T("Kısa sürdü ama iz bıraktı.", "It was short, but it left a mark."));
+    else if (L.deathAge >= 90) extra.push(T("Neredeyse bir yüzyılı devirdi.", "Nearly turned a whole century."));
+    if (L.c.wl < .3 && L.s.p > 60) extra.push(T("Zor başlangıca rağmen yükseldi.", "Rose despite a hard start."));
+    if (L.avg.b < 30) extra.push(T("Biraz yalnız bir yoldu bu.", "It was a rather lonely road."));
+    return { main: t, extra };
+  }
+
+  // ---------------------------------------------------------------- rozetler
+  OD.BADGES = [
+    { id: "yuzyil", tr: "Yüzyıllık Çınar", en: "Century Oak", dtr: "100 yaşına ulaştın.", den: "You reached 100.", ok: L => L.deathAge >= 100 },
+    { id: "gezgin", tr: "Gezgin", en: "Wanderer", dtr: "Başka bir ülkede yaşadın.", den: "You lived in another country.", ok: L => L.lived.length > 1 },
+    { id: "kalabalik", tr: "Kalabalık Sofra", en: "Full Table", dtr: "3 veya daha fazla çocuğun oldu.", den: "You had 3 or more children.", ok: L => L.kidCount >= 3 },
+    { id: "yukselen", tr: "Sıfırdan Zirveye", en: "Rags to Riches", dtr: "Yoksul doğdun, rahat yaşadın.", den: "Born poor, lived comfortably.", ok: L => L.fam === 0 && L.s.p >= 65 },
+    { id: "bilge", tr: "Bilge", en: "Sage", dtr: "Zihnin 90'ı gördü.", den: "Your mind peaked at 90.", ok: L => L.peak.z >= 90 },
+    { id: "sevgi", tr: "Sevgi Dolu", en: "Full of Love", dtr: "Bağların ortalaması 70'in üzerindeydi.", den: "Your bonds averaged over 70.", ok: L => L.avg.b >= 70 },
+    { id: "saglam", tr: "Demir Sağlık", en: "Iron Health", dtr: "80'ini geçtin ve hiç ağır hastalanmadın.", den: "Passed 80 without a serious illness.", ok: L => L.deathAge >= 80 && !L.count.illness },
+    { id: "girisimci", tr: "Girişimci", en: "Entrepreneur", dtr: "Kendi işini kurdun ve tuttu.", den: "Started your own business and it worked.", ok: L => L.f.bizOk },
+    { id: "sanatci", tr: "Sanatçı Ruh", en: "Artistic Soul", dtr: "Sanatla uğraştın.", den: "You pursued the arts.", ok: L => L.f.talent === "sanat" || L.f.talent === "muzik" },
+    { id: "sifa", tr: "Şifa Dağıtan", en: "Healer", dtr: "Sağlık alanında çalıştın.", den: "You worked in healthcare.", ok: L => L.career === "saglik" },
+    { id: "ogretmen", tr: "Işık Yakan", en: "Light Bringer", dtr: "Öğretmenlik yaptın.", den: "You were a teacher.", ok: L => L.career === "ogretmen" },
+    { id: "uzun", tr: "Uzun Ömür", en: "Long Life", dtr: "85 yaşını gördün.", den: "You saw 85.", ok: L => L.deathAge >= 85 },
+    { id: "huzur", tr: "Huzurlu Kalp", en: "Peaceful Heart", dtr: "Mutluluğun ortalaması 65'in üzerindeydi.", den: "Your happiness averaged over 65.", ok: L => L.avg.m >= 65 },
+    { id: "sansli", tr: "Talihsiz Doğum, Güçlü Ruh", en: "Hard Start, Strong Spirit", dtr: "Zor bir ülkede doğup 70'ini geçtin.", den: "Born in a hard place and passed 70.", ok: L => L.c.le <= 66 && L.deathAge >= 70 },
+    { id: "yildiz", tr: "Anı Koleksiyoncusu", en: "Memory Collector", dtr: "10 veya daha fazla anıyı yıldızladın.", den: "Starred 10 or more memories.", ok: L => L.stars >= 10 },
+    { id: "erken", tr: "Kısa Ama Yoğun", en: "Short but Intense", dtr: "30'dan önce vefat ettin.", den: "Died before 30.", ok: L => L.deathAge < 30 },
+  ];
+
+  OD.priorityLabel = function (L, key) {
+    return key;
+  };
+
+  // otomatik seçim: en düşük göstergeyi toparlayan seçeneği tercih eder
+  OD.autoPick = function (L) {
+    const pd = L.pending; if (!pd) return 0;
+    const weights = {}; for (const k of KEYS) weights[k] = 1 + (100 - L.s[k]) / 50;
+    weights.p *= .6;
+    let best = 0, bs = -1e9;
+    pd.choices.forEach((c, i) => {
+      const fxs = c.outs ? c.outs.map(o => [o.w == null ? 1 : o.w, Object.assign({}, c.fx || {}, o.fx || {})]) : [[1, c.fx || {}]];
+      let tw = fxs.reduce((s, x) => s + x[0], 0), sc = 0;
+      for (const [w, fx] of fxs) { let s = 0; for (const k of KEYS) s += (fx[k] || 0) * weights[k]; s -= (fx.risk || 0) * 200; sc += s * w / tw; }
+      sc += R(L) * 3;
+      if (sc > bs) { bs = sc; best = i; }
+    });
+    return best;
+  };
+
+  // ---------------------------------------------------------------- yardımcılar (olaylar için)
+  OD.H = {
+    poor: L => L.fam === 0 || L.s.p < 28,
+    rich: L => L.fam === 2 || L.s.p > 70,
+    working: L => L.age >= 18 && !L.f.retired,
+    year: L => OD.year(L),
+    emigrate(L) {
+      const cand = OD.COUNTRIES.filter(c => c.code !== L.c.code && c.wl > L.c.wl + .1 && !L.lived.includes(c.code));
+      if (!cand.length) return;
+      let tot = 0; cand.forEach(c => tot += c.wl * c.wl);
+      let r = R(L) * tot, ch = cand[0];
+      for (const c of cand) { r -= c.wl * c.wl; if (r <= 0) { ch = c; break; } }
+      L.c = ch; L.lived.push(ch.code); L.f.abroad = (L.f.abroad || 0) + 1;
+      L.A = OD.calib(Math.round((ch.le + L.birthCountry.le) / 2) + 3);
+    },
+    newKid(L) { L.kids.push(pickName(L)); L.kidCount++; },
+    newPartner(L) { L.partner = pickName(L); },
+  };
+})();
+if (typeof module !== "undefined") module.exports = OD;
+
+/* Olaylar 1: doğum, çocukluk, okul, ergenlik, genç yetişkinlik */
+(function () {
+  const T = OD.T, H = OD.H;
+  const E = o => { OD.EVENTS.push(o); };
+
+  // ------------------------------------------------------------ doğum (yıl 0)
+  E({ id: "dogum_yoksul", at: 0, cat: "fam", star: true, cond: L => L.fam === 0,
+    x: T("{n}, {c} ülkesinde mütevazı bir evde doğdu. Aile her kuruşu hesaplayarak yaşıyor; ama evde sevgi eksik değil.", "{n} was born in {c} into a modest home. The family counts every coin, but love is not in short supply.") });
+  E({ id: "dogum_orta", at: 0, cat: "fam", star: true, cond: L => L.fam === 1,
+    x: T("{n}, {c} ülkesinde sıradan bir ailede doğdu. Ne bolluk var ne yokluk; hayat başlıyor.", "{n} was born in {c} into an ordinary family. Neither plenty nor want; life begins.") });
+  E({ id: "dogum_rahat", at: 0, cat: "fam", star: true, cond: L => L.fam === 2,
+    x: T("{n}, {c} ülkesinde rahat bir ailede doğdu. Kapılar daha baştan biraz daha geniş açık.", "{n} was born in {c} into a comfortable family. Doors are a little wider open from the start.") });
+
+  // ------------------------------------------------------------ bebeklik ve çocukluk
+  E({ id: "ilk_adim", a: [1, 2], once: true, cat: "fam", w: 3, star: true,
+    x: T("İlk adımlarını attın! Herkes alkışladı, sen ise yere oturup güldün.", "You took your first steps! Everyone applauded; you sat down and laughed."), fx: { m: 3, b: 3, z: 2 } });
+  E({ id: "ilk_kelime", a: [1, 3], once: true, cat: "fam", w: 3,
+    x: T("İlk kelimen ailenin hafızasına kazındı. Artık söyleyecek çok şeyin var.", "Your first word was etched in the family's memory. Now you have a lot to say."), fx: { z: 3, b: 2 } });
+  E({ id: "bebek_hasta", a: [0, 5], cat: "health", w: L => 1.2 + (1 - L.c.hc) * 3, cd: 3,
+    x: T("Yüksek ateş ve öksürük... Küçük bedenin bir enfeksiyonla savaşıyor.", "High fever and a cough... Your small body is fighting an infection."),
+    outs: [
+      { w: L => 40 + L.c.hc * 50, r: T("Doktora zamanında ulaşıldı, birkaç günde toparlandın.", "A doctor was reached in time; you recovered in a few days."), fx: { h: -4, b: 2 }, count: { illness: 0 } },
+      { w: L => 60 - L.c.hc * 40, r: T("Zor bir dönem geçirdin. İyileştin ama bedenin yorulmuş durumda.", "It was a hard stretch. You recovered, but your body is worn out."), fx: { h: -12, m: -4, b: 3 }, count: { illness: 1 } },
+      { w: L => (1 - L.c.hc) * 2.2, r: T("Ateş düşmedi, iş ciddileşti...", "The fever would not break and things turned serious..."), fx: { h: -30 }, die: T("Çocukluk hastalığına yenik düştü.", "Succumbed to a childhood illness.") },
+    ] });
+  E({ id: "sevgi_dolu", a: [1, 6], cd: 4, cat: "fam", w: 1.5, cond: L => L.fam >= 1 || L.s.b > 45,
+    x: T("Anne babanın kucağında geçen bir yıl... Güvende hissetmek sana iyi geliyor.", "A year spent in your parents' arms... Feeling safe does you good."), fx: { m: 4, b: 4, z: 1 } });
+  E({ id: "ihmal", a: [1, 6], once: true, cat: "fam", w: L => L.fam === 0 ? 1.4 : .3,
+    x: T("Ailen geçim derdinden sana yeterince vakit ayıramıyor. Sen kendi kendine oyun bulmayı öğreniyorsun.", "Your family, busy making ends meet, cannot give you enough time. You learn to find your own games."), fx: { b: -4, z: 2, m: -2 } });
+  E({ id: "evcil_hayvan", a: [3, 10], once: true, cat: "life", w: 1.2,
+    x: T("Evin önünde küçük bir sokak hayvanı dolaşıyor. Ona yiyecek vermeye başladın. Ne yapacaksın?", "A small stray wanders outside your home. You started feeding it. What will you do?"),
+    ch: [
+      { t: T("Beslemeye devam et, evimize al", "Keep feeding it, take it home"), r: T("Artık bir dostun var. Evin içi daha neşeli.", "You have a friend now. The house feels happier."), fx: { m: 6, b: 4, p: -2 }, set: { pet: 1 } },
+      { t: T("Biraz yiyecek bırak, yoluna bak", "Leave some food and move on"), r: T("Zaman zaman uğruyor, sen de gülümsüyorsun.", "It drops by from time to time, and you smile."), fx: { m: 2 } },
+    ] });
+  E({ id: "dede_nine", a: [4, 12], once: true, cat: "fam", w: L => L.f.noGrand ? 0 : 1.3, star: true,
+    x: T("Büyükanne ya da büyükbabanın sana anlattığı eski hikâyeler aklında kaldı. Bir şeyler öğrendin.", "The old stories your grandparent told you stayed with you. You learned something."), fx: { b: 5, z: 3, m: 3 } });
+  E({ id: "mahalle_oyun", a: [4, 11], cd: 3, cat: "life", w: 2,
+    x: T("Sokakta, bahçede, çatıda... Arkadaşlarınla oyun oynadığın bir yaz yaşadın.", "In the street, the yard, on the roof... you had a summer of playing with friends."), fx: { m: 5, b: 4, h: 2 } });
+  E({ id: "dusme_kirik", a: [4, 16], cd: 4, cat: "health", w: 1.3,
+    x: T("Oyun sırasında düştün ve kolun kırıldı.", "You fell during play and broke your arm."),
+    outs: [
+      { w: L => 40 + L.c.hc * 50, r: T("Alçıya alındı, bir iki ayda iyileştin.", "It was put in a cast; you healed in a couple of months."), fx: { h: -5, m: -2 } },
+      { w: L => 60 - L.c.hc * 50, r: T("Tedavi gecikti, kemik biraz yamuk kaynadı.", "Treatment was delayed and the bone healed slightly crooked."), fx: { h: -9, m: -3 } },
+    ] });
+  E({ id: "lakap", a: [5, 10], once: true, cat: "life", w: 1,
+    x: T("Sınıfta sana bir lakap taktılar. Önce kızdın, sonra gülmeye başladın.", "They gave you a nickname in class. You got angry at first, then began to laugh."), fx: { b: 3, m: 1 } });
+
+  // ------------------------------------------------------------ okul
+  E({ id: "okul_normal", at: 6, once: true, cat: "school", star: true, cond: L => !(L.fam === 0 && L.c.ed < .5),
+    x: T("Yeni çantan, yeni defterlerin... Bugün ilk okul günün!", "A new bag, new notebooks... Today is your first day at school!"), fx: { z: 4, b: 2, m: 2 }, edu: 1 });
+  E({ id: "okul_zor", at: 6, once: true, cat: "school", star: true, cond: L => L.fam === 0 && L.c.ed < .5,
+    x: T("Okul yaşın geldi ama evde bir fazla çalışan eli herkes için değerli. Aile bu konuda kararsız.", "You are old enough for school, but at home an extra pair of working hands matters. Your family is undecided."),
+    ch: [
+      { t: T("Okula gitmek istediğini söyle", "Say you want to go to school"), outs: [
+        { w: 65, r: T("Ailen ikna oldu. Okula başlıyorsun, ama yük hafif değil.", "Your family agreed. You start school, though the load is heavy."), fx: { z: 4, m: 2, p: -2 }, edu: 1 },
+        { w: 35, r: T("Ailen vazgeçmedi: ilk yıllarda yarı zamanlı gidebiliyorsun.", "Your family would not budge: you can attend only part-time at first."), fx: { z: 2, m: -2, p: 1 }, edu: 1 },
+      ] },
+      { t: T("Aileye yardım et, okulu sonra düşün", "Help the family, think about school later"), r: T("Erken yaşta çalışmayı öğreniyorsun. Cebinde biraz para, kalbinde biraz özlem var.", "You learn to work early. A little money in your pocket, a little longing in your heart."), fx: { p: 5, z: -2, m: -3, h: -3 }, set: { dropout: 1 }, edu: 0, job: 1 },
+    ] });
+  E({ id: "ogretmen_ilham", a: [7, 15], once: true, cat: "school", w: L => L.edu >= 1 ? 1.4 : 0, star: true,
+    x: T("Bir öğretmenin seni fark etti: 'Sende bir şey var' dedi. Bu cümle yıllarca sende kaldı.", "A teacher noticed you: 'There's something in you,' they said. The sentence stayed with you for years."), fx: { z: 6, m: 4 }, set: { mentor: 1 } });
+  E({ id: "zorbalik", a: [8, 15], once: true, cat: "school", w: L => L.edu >= 1 ? 1.3 : 0,
+    x: T("Sınıfta biri sana sürekli zorbalık yapıyor. Her gün okula giderken karnın ağrıyor.", "Someone in class keeps bullying you. Every day on the way to school your stomach aches."),
+    ch: [
+      { t: T("Karşı çık", "Stand up to them"), outs: [
+        { w: 55, r: T("Cesaretin onları şaşırttı; zorbalık bitti, saygı kazandın.", "Your courage surprised them; the bullying stopped and you earned respect."), fx: { m: 4, b: 3, z: 1 } },
+        { w: 45, r: T("Tartışma büyüdü, bir azar yedin ama en azından sustun.", "It escalated and you got scolded, but at least you did not stay silent."), fx: { m: -3, b: -1, h: -2 } },
+      ] },
+      { t: T("Öğretmene ve aileye anlat", "Tell a teacher and your family"), r: T("Yetişkinler devreye girdi. Seninle konuşuldu, durum yavaş yavaş düzeldi.", "The adults stepped in. Things slowly got better."), fx: { b: 5, m: 2 } },
+      { t: T("Sessizce katlan", "Endure it silently"), r: T("Bir süre sonra geçti ama içinde bir iz kaldı.", "It passed after a while, but it left a mark inside."), fx: { m: -7, b: -3 }, set: { scar: 1 } },
+    ] });
+  E({ id: "en_iyi_arkadas", a: [7, 14], once: true, cat: "school", w: 2, star: true,
+    x: T("Sıranı paylaştığın biriyle en yakın arkadaş oldun. Sırlarınızı, kahkahalarınızı paylaşıyorsunuz.", "You became best friends with the person who shares your desk. You share secrets and laughter."), fx: { b: 9, m: 5 }, set: { bestFriend: 1 } });
+  E({ id: "yetenek", a: [8, 14], once: true, cat: "school", w: 2,
+    x: T("Bir şeyde diğerlerinden biraz daha iyi olduğunu fark ettin. Hangisine zaman ayıracaksın?", "You noticed you are a bit better at something than others. What will you spend time on?"),
+    ch: [
+      { t: T("Spor", "Sports"), r: T("Antrenmanlar seni zinde tutuyor.", "Training keeps you fit."), fx: { h: 7, b: 3, m: 3 }, set: { talent: "spor" } },
+      { t: T("Müzik", "Music"), r: T("Bir enstrüman bulup çalışmaya başladın; sesin kalbine dokunuyor.", "You found an instrument and began practicing; its sound touches your heart."), fx: { m: 7, z: 3, b: 2 }, set: { talent: "muzik" } },
+      { t: T("Kitaplar ve resim", "Books and drawing"), r: T("Hayal gücün sınırsız bir alan buldu.", "Your imagination found a limitless field."), fx: { z: 7, m: 4 }, set: { talent: "sanat" } },
+      { t: T("Makine, bilgisayar, merak", "Machines, computers, curiosity"), r: T("Her şeyi sökmek, anlamak istiyorsun.", "You want to take everything apart and understand it."), fx: { z: 8, m: 3 }, set: { talent: "teknik" } },
+    ] });
+  E({ id: "kopya", a: [10, 17], cd: 3, cat: "school", w: L => L.edu >= 1 ? 1 : 0,
+    x: T("Zor bir sınav var ve hazır değilsin. Yanındaki arkadaşın cevaplarını gösteriyor.", "There's a hard exam and you are not ready. A friend next to you is showing the answers."),
+    ch: [
+      { t: T("Kopya çek", "Copy"), outs: [
+        { w: 60, r: T("Fark edilmedin, ama içinde bir huzursuzluk kaldı.", "You were not caught, but unease stayed inside."), fx: { z: -1, m: -2 } },
+        { w: 40, r: T("Yakalandın! Utanç ve bir ceza.", "You got caught! Shame and a punishment."), fx: { m: -6, b: -4, z: -1 } },
+      ] },
+      { t: T("Kendi bildiğini yaz", "Write what you know"), r: T("Notun çok iyi değil ama alnın açık.", "The grade is not great, but your conscience is clear."), fx: { z: 3, m: 1 } },
+    ] });
+  E({ id: "aile_ayrilik", a: [7, 16], once: true, cat: "fam", w: L => (L.c.wl > .3 ? 1 : .6),
+    x: T("Anne babanın arası açıldı ve evde gerginlik büyüdü. Sonunda ayrıldılar.", "Your parents drifted apart and tension grew at home. In the end they separated."), fx: { m: -8, b: -6, p: -4 }, set: { divorceKid: 1 } });
+  E({ id: "tasinma", a: [6, 17], once: true, cat: "fam", w: 1.4,
+    x: T("Ailen yeni bir şehre taşınmaya karar verdi. Eski arkadaşların geride kalacak.", "Your family decided to move to a new city. Your old friends will stay behind."),
+    ch: [
+      { t: T("Yeni yerde hemen arkadaş edinmeye çalış", "Try to make friends right away"), outs: [
+        { w: 60, r: T("Birkaç ay içinde yeni bir çevre edindin.", "Within months you built a new circle."), fx: { b: 5, m: 2 } },
+        { w: 40, r: T("Zor oldu; uzun süre yabancı hissettin.", "It was hard; you felt like a stranger for a long time."), fx: { b: -2, m: -4 } },
+      ] },
+      { t: T("Kitaplara ve kendine dön", "Retreat into books and yourself"), r: T("Daha içine kapanık ama bilgili biri oldun.", "You became more reserved, but better read."), fx: { z: 4, b: -4, m: -1 } },
+    ] });
+  E({ id: "okul_gezisi", a: [9, 14], once: true, cat: "school", w: L => L.edu >= 1 ? 1.2 : 0,
+    x: T("Okul gezisi! İlk kez bu kadar uzağa gidiyorsun; gördüklerin dünyanı büyüttü.", "A school trip! First time going this far; what you saw widened your world."), fx: { z: 4, m: 5, b: 3 } });
+  E({ id: "sinav_liseye", at: 14, once: true, cat: "school", cond: L => L.edu >= 1,
+    x: T("Ortaokul bitiyor. Geleceğini etkileyecek bir sınav kapıda.", "Middle school is ending. An exam that will shape your future is at the door."),
+    ch: [
+      { t: T("Gece gündüz çalış", "Study day and night"), outs: [
+        { w: L => 20 + L.s.z * .8, r: T("Çabanın karşılığını aldın: istediğin liseyi kazandın.", "Your effort paid off: you got into the school you wanted."), fx: { z: 5, m: 5, h: -3 } },
+        { w: L => 80 - L.s.z * .5, r: T("Çok çalıştın ama puan yetmedi; ikinci tercihe girdin.", "You worked hard but the score fell short; you got your second choice."), fx: { z: 2, m: -3, h: -3 } },
+      ] },
+      { t: T("Dengeli çalış, kendine vakit ayır", "Study in balance, keep time for yourself"), outs: [
+        { w: L => 10 + L.s.z * .6, r: T("İyi bir okula girdin ve yorgun da değilsin.", "You got into a good school and you're not exhausted."), fx: { z: 3, m: 4 } },
+        { w: L => 90 - L.s.z * .4, r: T("Ortalama bir liseye yerleştin.", "You were placed in an average school."), fx: { z: 1, m: 1 } },
+      ] },
+    ] });
+  E({ id: "ergenlik", a: [12, 16], once: true, cat: "life", w: 2,
+    x: T("Ergenlik: bedenin değişiyor, ruh halin her gün farklı. Kendini anlamaya çalışıyorsun.", "Puberty: your body is changing, your mood differs every day. You are trying to understand yourself."), fx: { m: -3, z: 2, h: 1 } });
+  E({ id: "ilk_ask", a: [13, 18], once: true, cat: "love", w: 2,
+    x: T("Kalbin ilk kez bu kadar hızlı çarptı. Sınıftan biri ilgini çekiyor.", "Your heart raced like never before. Someone in class has caught your eye."),
+    ch: [
+      { t: T("Cesaret edip konuş", "Muster the courage to talk"), outs: [
+        { w: 50, r: T("Gülümsedi! Masum ama güzel bir yakınlık başladı.", "They smiled! An innocent yet lovely closeness began."), fx: { m: 8, b: 4 } },
+        { w: 50, r: T("Pek ilgilenmedi. Utandın ama bir şey öğrendin.", "They weren't interested. You were embarrassed, but you learned something."), fx: { m: -4, z: 1 } },
+      ] },
+      { t: T("Uzaktan hayran kal", "Admire from afar"), r: T("Mektuplar yazdın, hiç göndermedin. Tatlı bir hüzün.", "You wrote letters and never sent them. A sweet sadness."), fx: { m: 1, z: 1 } },
+    ] });
+  E({ id: "ekran", a: [10, 22], once: true, cat: "life", w: L => OD.year(L) >= 2008 ? 2 : 0,
+    x: T("Telefon, sosyal medya, sonsuz videolar... Ekranın başında saatlerin nasıl geçtiğini anlamıyorsun.", "Phone, social media, endless videos... you lose track of how the hours pass at the screen."),
+    ch: [
+      { t: T("Kendine sınır koy", "Set limits for yourself"), r: T("Zor oldu ama dengeyi buldun.", "It was hard, but you found balance."), fx: { z: 3, m: 2, h: 2 } },
+      { t: T("Akışına bırak", "Go with the flow"), r: T("Eğlendin ama uykusuz ve dağınık kaldın.", "You had fun but stayed sleepless and scattered."), fx: { m: 3, z: -4, h: -3, b: -2 } },
+    ] });
+  E({ id: "zor_donem_savas", a: [3, 70], cd: 8, cat: "world", w: L => L.c.pe < .5 ? (.5 - L.c.pe) * 5 : 0,
+    x: T("Bölgende çatışmalar şiddetlendi. Okullar kapanıyor, insanlar tedirgin.", "Conflicts intensified in your region. Schools close and people are uneasy."),
+    ch: [
+      { t: T("Kal ve dayan", "Stay and endure"), outs: [
+        { w: 75, r: T("Zor bir dönem geçti. Hayattasın ama yaralar var.", "A hard period passed. You are alive, but there are wounds."), fx: { m: -10, h: -6, p: -8, b: 3 } },
+        { w: 25, r: T("Çok daha kötüsü oldu: yakın birini kaybettin.", "Something much worse happened: you lost someone close."), fx: { m: -20, b: -12, h: -6 } },
+      ] },
+      { t: T("Başka yere kaç", "Flee elsewhere"), r: T("Her şeyi geride bırakıp yola çıktın. Yeni bir başlangıç, ama bedeli ağır.", "You left everything behind. A new start, but a heavy price."), fx: { m: -8, b: -8, p: -10, risk: .01 }, fn: L => H.emigrate(L), star: true },
+    ] });
+  E({ id: "kuraklik", a: [3, 70], cd: 10, cat: "world", w: L => L.c.wl < .25 ? 1.2 : .1,
+    x: T("Kıtlık ve pahalılık geldi çattı. Sofradaki yemek azaldı.", "Famine and soaring prices arrived. There is less food on the table."),
+    fx: { h: -8, m: -6, p: -6, risk: .004 } });
+  E({ id: "deprem", a: [2, 80], cd: 12, cat: "world", w: L => L.c.quake * .55,
+    x: T("Gece yarısı yer sallandı. Herkes sokağa döküldü; korku büyüktü.", "At midnight the ground shook. Everyone poured into the street; the fear was huge."),
+    outs: [
+      { w: 60, r: T("Evin ayakta kaldı, hasar az. Ama korku uzun süre geçmedi.", "Your home stood with little damage. But the fear lingered."), fx: { m: -5, p: -3 } },
+      { w: 30, r: T("Evin hasar gördü; aylar boyunca çadırda ya da akrabalarda kaldınız.", "Your home was damaged; you stayed for months in tents or with relatives."), fx: { m: -10, p: -12, h: -4, b: 3 } },
+      { w: L => 10 + (1 - L.c.wl) * 8, r: T("Bu gece çok şeyi aldı...", "This night took a great deal..."), fx: { m: -20, h: -20, b: -10, p: -10, risk: .03 } },
+    ] });
+  E({ id: "ahbap_destek", a: [6, 40], once: true, cat: "life", w: .8, cond: L => L.fam === 0,
+    x: T("Komşular zor günlerde kapınızı çaldı; ellerinde sıcak yemekle. Dayanışma insanı ısıtıyor.", "Neighbors knocked on your door in hard times, with warm food. Solidarity warms the soul."), fx: { b: 6, m: 4, p: 2 } });
+
+  // ------------------------------------------------------------ lise ve üniversite kararları
+  E({ id: "lise_alan", at: 15, once: true, cat: "school", cond: L => L.edu >= 1 && !L.f.dropout,
+    x: T("Lise yıllarında hangi alana yöneleceksin?", "Which direction will you take in high school?"),
+    ch: [
+      { t: T("Fen ve matematik", "Science and math"), r: T("Zorlu ama ufuk açıcı.", "Tough but eye-opening."), fx: { z: 6, m: -2 }, set: { track: "fen" }, edu: 2 },
+      { t: T("Sosyal bilimler ve dil", "Social sciences and languages"), r: T("Dünyayı anlatan hikâyelere dalıyorsun.", "You dive into stories that explain the world."), fx: { z: 5, b: 2 }, set: { track: "sosyal" }, edu: 2 },
+      { t: T("Meslek lisesi, el becerisi", "Vocational school, hands-on skills"), r: T("Bir işi öğreniyorsun; hayat tecrüberi çabuk geliyor.", "You are learning a trade; practical experience comes fast."), fx: { z: 3, p: 3, m: 1 }, set: { track: "meslek" }, edu: 2, job: 1 },
+      { t: T("Sanat ve spor odaklı", "Arts and sports focus"), r: T("Tutkularına zaman buldun.", "You made time for your passions."), fx: { m: 6, h: 3, z: 2 }, set: { track: "sanat" }, edu: 2 },
+    ] });
+  E({ id: "isyan", a: [14, 19], once: true, cat: "life", w: 1.5,
+    x: T("Her şeye itiraz ettiğin bir dönem. Kurallar canını sıkıyor, ailenle tartışıyorsun.", "A period in which you object to everything. Rules annoy you and you argue with your family."),
+    ch: [
+      { t: T("Biraz sınır zorla, sonra yumuşa", "Push boundaries, then soften"), r: T("Kavgalardan sonra barıştınız; birbirinizi daha iyi anladınız.", "After the fights you made peace; you understand each other better."), fx: { b: 2, m: 2 } },
+      { t: T("Evden uzaklaş, kendi yolunu çiz", "Drift away, chart your own way"), r: T("Özgürlük güzel ama yalnızlık da var.", "Freedom is nice, but there is loneliness too."), fx: { m: 2, b: -6, z: 1 } },
+      { t: T("Kendini aile işine ver", "Throw yourself into family duties"), r: T("Aile yükünü paylaşıyorsun; sorumluluk seni olgunlaştırdı.", "You share the family load; responsibility matured you."), fx: { b: 5, p: 3, m: -2 } },
+    ] });
+  E({ id: "riskli_gece", a: [15, 21], cd: 4, cat: "life", w: 1.2,
+    x: T("Arkadaşların bir parti planlıyor; sigara, içki ve hızlı araba da işin içinde.", "Your friends planned a party; cigarettes, alcohol and fast cars are involved."),
+    ch: [
+      { t: T("Git ve her şeye dal", "Go and dive into everything"), outs: [
+        { w: 55, r: T("Harika eğlendin; ertesi gün de pişman değilsin.", "You had a great time and have no regrets the next day."), fx: { m: 6, b: 4, h: -3 } },
+        { w: 30, r: T("Sigaraya alıştın. Bırakmak kolay olmayacak.", "You got hooked on smoking. Quitting won't be easy."), fx: { m: 2, h: -5 }, set: { smoker: 1 } },
+        { w: L => 10 + (1 - L.c.pe) * 4, r: T("Gece kötü bitti: kaza ve hastane.", "The night ended badly: a crash and a hospital."), fx: { h: -22, m: -8, p: -4, risk: .01 }, count: { accident: 1 } },
+      ] },
+      { t: T("Git ama kendini koru", "Go, but look after yourself"), r: T("Eğlendin, sınırı bildin.", "You had fun and knew your limits."), fx: { m: 4, b: 3 } },
+      { t: T("Evde kal", "Stay home"), r: T("Sakin bir gece; kimse bir şey kaçırdığını söylemedi.", "A quiet night; nobody said you missed anything."), fx: { m: 1, z: 1 } },
+    ] });
+  E({ id: "ilk_is", a: [15, 22], once: true, cat: "work", w: 1.5, cond: L => L.job === 0,
+    x: T("Harçlığını çıkarmak için bir yarı zamanlı iş buldun.", "You found a part-time job to earn some pocket money."), fx: { p: 6, z: 1, m: 2, h: -2 }, job: 1 });
+  E({ id: "gonullu", a: [14, 70], once: true, cat: "life", w: .8,
+    x: T("Bir gönüllü grubuna katıldın. Başkalarına yardım etmek içini ısıttı.", "You joined a volunteer group. Helping others warmed your heart."), fx: { m: 5, b: 6, z: 2 } });
+  E({ id: "bunalim", a: [15, 60], cd: 8, cat: "health", w: L => L.s.m < 40 ? 2.5 : .3,
+    x: T("Son zamanlarda hiçbir şey zevk vermiyor. İçindeki ağırlık gittikçe büyüyor.", "Lately nothing brings joy. The weight inside keeps growing."),
+    ch: [
+      { t: T("Birine açıl ya da yardım iste", "Open up to someone or seek help"), r: T("Zor bir adımdı ama konuştukça hafifledin.", "It was a hard step, but you lightened as you spoke."), fx: { m: 9, b: 5, h: 2 } },
+      { t: T("Tek başına baş etmeye çalış", "Try to cope alone"), r: T("Haftalar süründü; yavaş yavaş toparlandın ama yoruldun.", "Weeks dragged on; you slowly recovered but are tired."), fx: { m: 2, b: -3, h: -3 }, set: { depress: 1 } },
+    ] });
+  E({ id: "universite", at: 18, once: true, cat: "school", cond: L => L.edu >= 2,
+    x: T("Lise bitti. Büyük karar zamanı: devam mı, iş mi, yurtdışı mı?", "High school is over. Time for the big decision: study on, work, or go abroad?"),
+    ch: [
+      { t: T("Üniversite sınavına hazırlan", "Prepare for the university exam"), outs: [
+        { w: L => 18 + L.s.z * .8 + L.c.ed * 10 + (L.fam === 2 ? 8 : 0) - (L.fam === 0 ? 12 : 0), r: T("Kazandın! Üniversite kapıları sana açıldı.", "You passed! The doors of university opened for you."), fx: { z: 5, m: 6, b: 2 }, edu: 3, set: { uni: 1 } },
+        { w: L => 78 - L.s.z * .5, r: T("Puan yetmedi. İşe başlayıp yeniden denemeye karar verdin.", "The score fell short. You decided to start work and try again."), fx: { m: -4, p: 3 }, edu: 2, job: 1 },
+      ] },
+      { t: T("Hemen çalışmaya başla", "Start working right away"), r: T("Kendi paranı kazanıyorsun. Hayat okulu başladı.", "You are earning your own money. The school of life has begun."), fx: { p: 8, m: 2, z: 1 }, job: 1 },
+      { t: T("Yurtdışında okumayı dene", "Try studying abroad"), cond: L => L.s.p > 38 || L.s.z > 65, outs: [
+        { w: L => 25 + L.s.z * .4 + L.s.p * .3, r: T("Bursu ve başvuruyu başardın! Yeni bir ülke, yeni bir hayat.", "You nailed the scholarship and application! A new country, a new life."), fx: { z: 7, m: 6, b: -6, p: -5 }, edu: 3, set: { uni: 1 }, fn: L => H.emigrate(L), star: true },
+        { w: 50, r: T("Olmadı; masraflar ve vize engeli aştırmadı.", "It did not work out; costs and visas stood in the way."), fx: { m: -5, p: -3 }, edu: 2, job: 1 },
+      ] },
+    ] });
+  E({ id: "ilk_is_yetiskin", at: 18, once: true, cat: "work", cond: L => L.edu < 2,
+    x: T("Okul sana yetmedi ya da imkân olmadı; artık tam zamanlı çalışmak gerekiyor.", "School didn't work out or wasn't possible; now it's time to work full-time."), fx: { p: 6, m: -1, h: -2 }, job: 1 });
+  E({ id: "askerlik", at: 20, once: true, cat: "life", cond: L => L.c.svc && L.f.service !== "done",
+    x: T("Zorunlu hizmet çağrısı geldi. Bir süre evinden uzakta olacaksın.", "The mandatory service call came. You will be away from home for a while."),
+    fx: { h: 3, b: 3, m: -2, z: 1, p: -2 }, set: { service: "done" } });
+  E({ id: "uni_hayat", a: [19, 22], once: true, cat: "school", cond: L => L.edu >= 3 && !L.f.uniDone,
+    x: T("Üniversite hayatı: dersler, arkadaşlar, ucuz yemekler... Zamanını nasıl kullanacaksın?", "University life: classes, friends, cheap meals... How will you spend your time?"),
+    ch: [
+      { t: T("Derslere odaklan", "Focus on classes"), r: T("Notların yüksek; bir hayli de yoruldun.", "High grades; you are rather tired."), fx: { z: 8, m: -2, h: -2 }, set: { uniDone: 1, honor: 1 } },
+      { t: T("Sosyal hayata dal", "Dive into social life"), r: T("Hayat boyu sürecek arkadaşlıklar kurdun.", "You formed friendships that will last a lifetime."), fx: { b: 8, m: 6, z: 2 }, set: { uniDone: 1 } },
+      { t: T("Çalışarak oku", "Work while studying"), r: T("Yorucu ama bağımsızsın.", "Tiring but independent."), fx: { p: 6, z: 4, h: -4, m: -2 }, set: { uniDone: 1 }, job: 1 },
+    ] });
+  E({ id: "meslek", at: 22, once: true, cat: "work",
+    x: T("Hayatının işini seçme vakti geldi. Hangi yola gireceksin?", "Time to choose your life's work. Which path will you take?"),
+    ch: [
+      { t: T("Sağlık", "Healthcare"), cond: L => L.edu >= 3, r: T("Başkalarının hayatına dokunacaksın; vardiyalar ağır ama anlamlı.", "You'll touch other people's lives; shifts are heavy but meaningful."), fx: { z: 3, m: 3, h: -3, p: 4 }, career: "saglik", job: 3 },
+      { t: T("Öğretmenlik", "Teaching"), cond: L => L.edu >= 3, r: T("Bir sınıf dolusu geleceğe omuz veriyorsun.", "You support a classroom full of futures."), fx: { b: 5, m: 4, z: 3, p: 1 }, career: "ogretmen", job: 2 },
+      { t: T("Mühendislik ve teknoloji", "Engineering and technology"), cond: L => L.edu >= 3 || L.f.talent === "teknik", r: T("Sorunları çözmek senin işin. Maaş da fena değil.", "Solving problems is your job. The pay isn't bad either."), fx: { z: 5, p: 6, m: 1 }, career: "muhendis", job: 3 },
+      { t: T("Esnaf veya kendi dükkânı", "Shopkeeper or your own shop"), r: T("Kendi kapını açıyorsun; müşteri ilişkileri hayat okulun.", "You open your own door; customer relations are your school."), fx: { p: 3, b: 4, m: 2 }, career: "esnaf", job: 2 },
+      { t: T("Sanat, medya, üretim", "Art, media, creation"), r: T("Maddi olarak dalgalı ama içsel olarak zengin bir yol.", "Financially bumpy but inwardly rich."), fx: { m: 7, z: 3, p: -2 }, career: "sanat", job: 1 },
+      { t: T("Fabrika, atölye, inşaat", "Factory, workshop, construction"), r: T("Zor ama düzenli bir iş. Elinden gelen çok şey var.", "Hard but steady work. There's a lot you can do."), fx: { p: 5, h: -4, b: 2 }, career: "isci", job: 2 },
+      { t: T("Çiftçilik ve hayvancılık", "Farming and livestock"), r: T("Toprakla ve mevsimlerle iç içe bir hayat.", "A life entwined with soil and seasons."), fx: { h: 2, m: 3, p: 2, b: 3 }, career: "ciftci", job: 1 },
+    ] });
+  E({ id: "toksik_patron", a: [22, 55], cd: 8, cat: "work", w: L => L.age >= 22 && L.job > 0 ? 1.4 : 0,
+    x: T("Yeni müdürün çok talepkâr; hafta sonlarını da işe ayırıyorsun. Tükenmişliğin kıyısındasın.", "Your new manager is very demanding; you spend weekends on work too. You're on the edge of burnout."),
+    ch: [
+      { t: T("Sınır koy, gerekirse işi değiştir", "Set limits, change jobs if need be"), outs: [
+        { w: 60, r: T("Daha iyi bir yer buldun; maaş da artık daha iyi.", "You found a better place; the pay is better too."), fx: { m: 6, p: 2, h: 3 } },
+        { w: 40, r: T("Bir süre işsiz kaldın ama kendine geldin.", "You were jobless for a while, but you recovered."), fx: { m: 2, p: -6, h: 2 } },
+      ] },
+      { t: T("Katlan ve yüksel", "Endure it and climb"), outs: [
+        { w: 50, r: T("Terfi aldın ama bedelini sağlığınla ödedin.", "You got promoted but paid with your health."), fx: { p: 7, h: -8, m: -4, b: -3 }, job: 3 },
+        { w: 50, r: T("Tükendin; bir süre hiçbir şey yapamadın.", "You burned out; you couldn't do anything for a while."), fx: { h: -10, m: -9, p: -3 } },
+      ] },
+    ] });
+  E({ id: "terfi", a: [24, 58], cd: 6, cat: "work", w: L => L.job > 0 && L.job < 3 && L.s.z > 45 ? 1.6 : .2,
+    x: T("Çalışkanlığın fark edildi; sorumluluğu büyük bir pozisyon sana teklif edildi.", "Your diligence was noticed; a higher-responsibility position was offered."),
+    ch: [
+      { t: T("Kabul et", "Accept"), r: T("Daha çok para, daha çok stres.", "More money, more stress."), fx: { p: 8, m: 2, h: -3, z: 2 }, job: 3 },
+      { t: T("Mevcut düzenini koru", "Keep your current balance"), r: T("Maaş aynı ama akşamların sana ait.", "Same pay but your evenings are yours."), fx: { m: 3, b: 3 } },
+    ] });
+  E({ id: "yurt_disi", a: [20, 45], once: true, cat: "work", w: L => (L.lived.length === 1 && L.s.z > 40) ? 1.1 : 0,
+    x: T("Yurtdışından bir iş fırsatı geldi. Her şey değişebilir.", "A job opportunity from abroad arrived. Everything could change."),
+    ch: [
+      { t: T("Git, yeni bir hayat kur", "Go and build a new life"), cond: L => L.c.wl < .95, outs: [
+        { w: 70, r: T("Yeni ülkeye alıştın; kariyerin yükseldi ama ailen uzakta.", "You adapted to the new country; your career rose but your family is far."), fx: { p: 14, z: 5, b: -8, m: 2 }, fn: L => H.emigrate(L), star: true },
+        { w: 30, r: T("İlk yıllar zordu: yalnızlık, dil, kültür. Sonunda alıştın.", "The first years were hard: loneliness, language, culture. Eventually you adjusted."), fx: { p: 8, z: 4, b: -12, m: -5 }, fn: L => H.emigrate(L), star: true },
+      ] },
+      { t: T("Burada kal", "Stay here"), r: T("Ailenin yanında kalmayı seçtin.", "You chose to stay near your family."), fx: { b: 5, m: 2 } },
+    ] });
+})();
+
+/* Olaylar 2: yetişkinlik, aile, sağlık, dünya olayları, yaşlılık */
+(function () {
+  const T = OD.T, H = OD.H;
+  const E = o => { OD.EVENTS.push(o); };
+
+  // ------------------------------------------------------------ aşk, evlilik, çocuk
+  E({ id: "partner_tani", a: [19, 36], once: true, cat: "love", w: L => L.partner ? 0 : 2.2, cond: L => !L.partner,
+    x: T("Ortak bir arkadaşın düğününde biriyle tanıştın; sohbet saatlerce sürdü.", "At a mutual friend's wedding you met someone; the conversation went on for hours."),
+    ch: [
+      { t: T("Numaranı ver, görüşmeye başlayın", "Give your number and start seeing each other"), outs: [
+        { w: 65, r: T("Güzel bir ilişki başladı. Yanında kendin gibisin.", "A lovely relationship began. You can be yourself with them."), fx: { m: 8, b: 8 }, fn: L => H.newPartner(L), set: { partner: 1 }, star: true },
+        { w: 35, r: T("Birkaç randevudan sonra yolların ayrıldı; yine de iyi bir anıydı.", "After a few dates you parted ways; still a good memory."), fx: { m: -2, z: 1 } },
+      ] },
+      { t: T("Kariyerine odaklan, şimdi zamanı değil", "Focus on your career, not now"), r: T("İşine daha çok yoğunlaştın.", "You concentrated more on your work."), fx: { p: 3, m: -2 } },
+    ] });
+  E({ id: "evlilik", a: [22, 42], once: true, cat: "love", w: L => L.partner && !L.f.married ? 2.2 : 0, cond: L => L.partner && !L.f.married && !L.f.divorced,
+    x: T("{p} ile ilişkiniz ciddileşti. Evlilik konuşuluyor.", "Your relationship with {p} has become serious. Marriage is being discussed."),
+    ch: [
+      { t: T("Büyük bir düğün yap", "Throw a big wedding"), r: T("Herkes oradaydı; unutulmaz bir gündü ama cüzdan hafifledi.", "Everyone was there; an unforgettable day, but the wallet got lighter."), fx: { m: 9, b: 8, p: -9 }, set: { married: 1 }, star: true },
+      { t: T("Sade ve yakınlarla evlen", "Marry simply with close ones"), r: T("Küçük, samimi ve huzurlu bir tören.", "A small, warm and peaceful ceremony."), fx: { m: 7, b: 6, p: -2 }, set: { married: 1 }, star: true },
+      { t: T("Birlikte yaşa, evlenme", "Live together, do not marry"), r: T("Kendi kurallarınızla birlikte yaşıyorsunuz.", "You live together on your own terms."), fx: { m: 4, b: 4 } },
+      { t: T("Yollarınızı ayırın", "Part ways"), r: T("Zor bir karar; ama dürüst bir karar.", "A hard decision, but an honest one."), fx: { m: -8, b: -6 }, fn: L => { L.partner = null; L.f.partner = 0; } },
+    ] });
+  E({ id: "cocuk", a: [24, 40], once: true, cat: "love", w: L => L.partner ? 2.2 : .4, cond: L => !L.f.noKids,
+    x: T("Bir çocuk sahibi olmayı düşünüyorsun. Bu, hayatını kökten değiştirecek.", "You are thinking of having a child. It will change your life radically."),
+    ch: [
+      { t: T("Evet, aile büyüsün", "Yes, let the family grow"), outs: [
+        { w: 88, r: T("Bir bebeğin oldu: {k}. Uykusuz geceler ve sonsuz sevgi.", "You had a baby: {k}. Sleepless nights and endless love."), fx: { m: 9, b: 10, p: -6, h: -3 }, fn: L => { H.newKid(L); L.f.kids = L.kidCount; }, star: true },
+        { w: 12, r: T("Uzun bir bekleyiş ve zorlu bir süreç... Henüz olmadı.", "A long wait and a hard process... not yet."), fx: { m: -4, b: -2 } },
+      ] },
+      { t: T("Henüz değil", "Not yet"), r: T("Zamanı gelmedi; önce kendi hayatını kuruyorsun.", "The time has not come; you are building your life first."), fx: { p: 3, m: 1 } },
+      { t: T("Hayır, çocuk istemiyorum", "No, I do not want children"), r: T("Kararın net. Hayatını kendi kurduğun biçimde yaşıyorsun.", "Your decision is clear. You live life in the way you set it."), fx: { m: 2, p: 3 }, set: { noKids: 1 } },
+    ] });
+  E({ id: "cocuk_ikinci", a: [26, 44], cd: 3, cat: "love", w: L => (L.kidCount > 0 && L.kidCount < 4 && L.partner) ? 1.1 : 0,
+    x: T("Evde yeni bir bebek sesi... Aile bir kişi daha büyüyor.", "A new baby's sound at home... the family grows by one."), fx: { m: 6, b: 8, p: -7, h: -3 }, fn: L => { H.newKid(L); } });
+  E({ id: "ebeveynlik", a: [26, 55], cd: 3, cat: "love", w: L => L.kidCount > 0 ? 1.7 : 0,
+    x: T("Çocuğun okula başladı; hayat artık onun programına göre akıyor.", "Your child started school; life now follows their schedule."),
+    ch: [
+      { t: T("Çocuğuna çok vakit ayır", "Spend a lot of time with your child"), r: T("Yorgunsun ama onun gözlerindeki parıltı her şeye değer.", "You are tired, but the sparkle in their eyes is worth everything."), fx: { b: 8, m: 5, p: -3, h: -2 } },
+      { t: T("Kariyerini öne al, dolu dolu çalış", "Put your career first"), r: T("Para geliyor ama çocuğun seni çok görmüyor.", "Money comes in, but your child doesn't see much of you."), fx: { p: 6, b: -5, m: -2 } },
+    ] });
+  E({ id: "evlilik_kriz", a: [28, 60], cd: 10, cat: "love", w: L => L.f.married ? 1.3 : 0,
+    x: T("{p} ile aranızda soğukluk var. Aynı evde iki yabancı gibisiniz.", "There is a chill between you and {p}. Two strangers in the same house."),
+    ch: [
+      { t: T("Konuş, destek al, çabala", "Talk, get support, work on it"), outs: [
+        { w: 65, r: T("Zor konuşmalar sizi yeniden yaklaştırdı.", "Difficult talks brought you closer again."), fx: { b: 8, m: 6 } },
+        { w: 35, r: T("Uğraştınız ama araya mesafe girdi.", "You tried but distance set in."), fx: { b: -4, m: -4 } },
+      ] },
+      { t: T("Ayrılmaya karar ver", "Decide to separate"), r: T("Acı ama gerekliydi. Yeniden kendini buluyorsun.", "Painful but necessary. You are finding yourself again."), fx: { m: -8, b: -8, p: -8 }, fn: L => { L.f.married = 0; L.f.divorced = 1; L.partner = null; } },
+      { t: T("Görmezden gel, işe daldır kendini", "Ignore it and bury yourself in work"), r: T("Sorunlar büyüdü ama zamana yayıldı.", "The problems grew but spread over time."), fx: { p: 3, b: -5, m: -5 } },
+    ] });
+  E({ id: "yeni_ask", a: [30, 65], cd: 10, cat: "love", w: L => (!L.partner || L.f.divorced) ? 1.2 : 0, cond: L => !L.partner,
+    x: T("Hayatına yeni biri girdi. Yaralar kapanmış; yeniden güvenebilir misin?", "Someone new entered your life. The wounds have closed; can you trust again?"),
+    ch: [
+      { t: T("Şans ver", "Give it a chance"), outs: [
+        { w: 70, r: T("İkinci bir bahar: yeniden gülüyorsun.", "A second spring: you laugh again."), fx: { m: 8, b: 8 }, fn: L => H.newPartner(L), set: { partner: 1 }, star: true },
+        { w: 30, r: T("Olmadı ama pişman değilsin.", "It did not work, but you do not regret it."), fx: { m: -2, z: 1 } },
+      ] },
+      { t: T("Yalnızlığı seç", "Choose solitude"), r: T("Kendi huzurunu buldun.", "You found your own peace."), fx: { m: 2, b: -2 } },
+    ] });
+  E({ id: "ev_al", a: [25, 50], once: true, cat: "money", w: 1.6, cond: L => L.s.p > 30,
+    x: T("Kira ödemekten yoruldun. Kendi evini almak mümkün; ama büyük bir borç gerekecek.", "Tired of paying rent. Buying your own home is possible, but it needs a big loan."),
+    ch: [
+      { t: T("Kredi çek, ev al", "Take a loan, buy a home"), r: T("Kendi evin! Taksitler ağır ama bir kök salmışsın.", "Your own home! Payments are heavy but you have put down roots."), fx: { m: 7, p: -9, b: 3 }, set: { homeowner: 1 }, star: true },
+      { t: T("Kirada kal, esnek ol", "Keep renting, stay flexible"), r: T("Taşınmak kolay, huzurun bozulmadı.", "Moving is easy, your peace is intact."), fx: { p: 2, m: 1 } },
+    ] });
+  E({ id: "girisim", a: [24, 55], once: true, cat: "money", w: 1.4, cond: L => L.s.p > 28 && L.s.z > 35,
+    x: T("Aklında bir iş fikri var. Kendi işini kurmak istiyorsun ama risk büyük.", "You have a business idea. You want to start on your own, but the risk is high."),
+    ch: [
+      { t: T("Birikimini yatır ve dene", "Invest your savings and try"), outs: [
+        { w: L => 22 + L.s.z * .35 + (L.career === "esnaf" ? 12 : 0), r: T("Tuttu! İşin büyüyor ve sen patronsun.", "It worked! Your business grows and you are the boss."), fx: { p: 22, m: 8, h: -3, z: 3 }, set: { bizOk: 1 }, job: 3, star: true },
+        { w: 55, r: T("Zorlandın; küçük ama sürdürülebilir bir işe dönüştü.", "It was hard; it turned into a small but sustainable business."), fx: { p: 3, z: 3, m: 1 }, job: 2 },
+        { w: 28, r: T("Batırdın; borçlar ve ders kaldı.", "It failed; debts and a lesson remain."), fx: { p: -18, m: -9, z: 4 } },
+      ] },
+      { t: T("Düşün ama maaşlı kal", "Think about it but keep the salary"), r: T("Güvenli yol; fırsatlar da gelip geçti.", "The safe road; chances came and went."), fx: { p: 2, m: -1 } },
+    ] });
+  E({ id: "ekonomik_kriz", a: [20, 65], cd: 8, cat: "world", w: L => { const y = OD.year(L); return (y >= 2008 && y <= 2010) || (y >= 2001 && y <= 2002) || (y >= 1997 && y <= 1999) || (y >= 1979 && y <= 1982) ? 8 : .08; },
+    x: T("Büyük bir ekonomik kriz tüm ülkeyi vurdu: işyerleri kapanıyor, fiyatlar fırladı.", "A major economic crisis hit the whole country: businesses close and prices soar."),
+    outs: [
+      { w: 50, r: T("İşini korudun ama kemer sıkmak zorundaydın.", "You kept your job but had to tighten your belt."), fx: { p: -9, m: -5 }, count: { crisis: 1 } },
+      { w: 30, r: T("İşten çıkarıldın; zor aylar geçirdin.", "You lost your job; hard months followed."), fx: { p: -16, m: -9, h: -3, b: 2 }, job: 1, count: { crisis: 1 } },
+      { w: 20, r: T("Kriz sana teğet geçti.", "The crisis passed you by."), fx: { m: -2 } },
+    ] });
+  E({ id: "pandemi", a: [0, 105], once: true, cat: "world", w: L => OD.year(L) === 2020 ? 200 : 0,
+    x: T("Bir salgın dünyayı durdurdu. Evlere kapanıldı, maskeler, belirsizlik...", "A pandemic stopped the world. Lockdowns, masks, uncertainty..."),
+    outs: [
+      { w: 66, r: T("Zor ama atlatılabilir bir dönem; sevdiklerinle yeniden bağ kurdun.", "A hard but survivable period; you reconnected with loved ones."), fx: { m: -6, b: 2, p: -3 } },
+      { w: L => 22 + Math.max(0, L.age - 40) * .4, r: T("Hastalığı ağır geçirdin; iyileşmen aylar sürdü.", "You had the illness severely; recovery took months."), fx: { h: -16, m: -8, p: -4 }, count: { illness: 1 } },
+      { w: L => Math.max(0, (L.age - 55) * .45) + (L.c.hc < .5 ? 3 : 0), r: T("Bu hastalık seni yendi.", "This illness defeated you."), fx: { h: -60 }, die: T("Salgın hastalığın kurbanı oldu.", "Became a victim of the pandemic.") },
+    ] });
+  E({ id: "dost_borc", a: [22, 65], cd: 6, cat: "money", w: 1.2,
+    x: T("Yakın bir arkadaşın, paraya sıkıştığını söyleyerek senden borç istiyor.", "A close friend, saying they are strapped for cash, asks to borrow money."),
+    ch: [
+      { t: T("Borç ver", "Lend the money"), outs: [
+        { w: 60, r: T("Parayı zamanında geri ödedi; dostluğunuz güçlendi.", "They paid it back on time; your friendship got stronger."), fx: { b: 5, m: 3 } },
+        { w: 40, r: T("Para geri dönmedi; hem para hem arkadaş kaybettin.", "The money never came back; you lost both money and a friend."), fx: { p: -9, b: -6, m: -4 } },
+      ] },
+      { t: T("Nazikçe reddet", "Politely decline"), r: T("Zor bir konuşmaydı; arada küçük bir soğukluk kaldı.", "A hard conversation; a small chill remained."), fx: { b: -3, p: 1 } },
+    ] });
+  E({ id: "dolandirici", a: [22, 85], cd: 8, cat: "money", w: 1,
+    x: T("Telefonla biri seni arayıp acil bir ödeme istedi. Sesi çok inandırıcı.", "Someone phoned asking for an urgent payment. They sound very convincing."),
+    ch: [
+      { t: T("Parayı gönder", "Send the money"), r: T("Dolandırıldığını sonradan fark ettin. Hem para hem güven kaybı.", "You realised later you'd been scammed. Money and trust lost."), fx: { p: -12, m: -6 } },
+      { t: T("Kapat, yakınlarına danış", "Hang up and check with relatives"), r: T("Doğru kararı verdin; dolandırıcılık girişimiymiş.", "Good call; it was a scam attempt."), fx: { z: 2, m: 1 } },
+    ] });
+  E({ id: "miras_sans", a: [20, 80], cd: 15, cat: "money", w: .7,
+    x: T("Uzak bir akrabadan beklenmedik bir miras ya da ufak bir ikramiye çıktı.", "An unexpected inheritance or a small bonus came from a distant relative."), fx: { p: 10, m: 5 } });
+  E({ id: "kaza_agir", a: [18, 70], cd: 6, cat: "health", w: L => .55 + (1 - L.c.pe) * .4,
+    x: T("Bir anda hayat yön değiştirdi: ciddi bir kaza.", "In an instant life changed direction: a serious accident."),
+    outs: [
+      { w: L => 45 + L.c.hc * 25, r: T("Hastanede aylar geçti; iyileştin ama kalıcı bir iz kaldı.", "Months in the hospital; you recovered but a lasting mark remains."), fx: { h: -14, m: -7, p: -6, b: 3 }, count: { accident: 1 } },
+      { w: 45, r: T("Hafif atlattın; ders çıkardın.", "A light brush; you took the lesson."), fx: { h: -5, m: -3 }, count: { accident: 1 } },
+      { w: L => 1 + (1 - L.c.hc) * 2, r: T("Bu kez şans yanında değildi.", "Luck was not on your side this time."), fx: { h: -60 }, die: T("Ağır bir kazadan kurtulamadı.", "Did not survive a serious accident.") },
+    ] });
+  E({ id: "gezi_macera", a: [20, 70], cd: 6, cat: "life", w: L => L.s.p > 30 ? 1.4 : .4,
+    x: T("Biriktirdiğin parayla uzak bir yere seyahat ettin; yeni yüzler, yeni tatlar.", "With the money you saved you travelled far; new faces, new tastes."), fx: { m: 8, z: 4, p: -5, b: 2 } });
+  E({ id: "hobi", a: [20, 80], cd: 5, cat: "life", w: 1.4,
+    x: T("Bir hobi edindin ya da eski hobini canlandırdın: bahçe, balık, kitap, el işi...", "You picked up a hobby or revived an old one: garden, fishing, books, crafts..."), fx: { m: 5, z: 3, h: 1 } });
+  E({ id: "spor_aliskanlik", a: [20, 70], cd: 6, cat: "health", w: 1.3,
+    x: T("Sağlığını düşünmenin zamanı: spor ve düzenli beslenme konusunda bir karar vermelisin.", "Time to think about your health: you must decide about exercise and regular eating."),
+    ch: [
+      { t: T("Düzenli spor yap", "Exercise regularly"), r: T("İlk haftalar zor ama kendini çok iyi hissediyorsun.", "The first weeks are hard but you feel great."), fx: { h: 9, m: 4, p: -2 }, set: { fit: 1 } },
+      { t: T("Beslenmene dikkat et", "Watch your diet"), r: T("Daha hafif ve enerjiksin.", "You are lighter and more energetic."), fx: { h: 6, m: 2 } },
+      { t: T("Erteleyelim, işim yoğun", "Postpone, I'm busy"), r: T("Bir süre daha böyle gider.", "It goes on like this a while longer."), fx: { p: 1, h: -2 } },
+    ] });
+  E({ id: "sigara_birak", a: [25, 70], cd: 8, cat: "health", w: L => L.f.smoker ? 2 : 0, cond: L => L.f.smoker,
+    x: T("Öksürüğün artıyor, doktor sigarayı bırakmanı söylüyor.", "Your cough is worsening; the doctor tells you to quit smoking."),
+    ch: [
+      { t: T("Bırak", "Quit"), outs: [
+        { w: 55, r: T("Bıraktın! Nefesin açıldı.", "You quit! Your breathing opened up."), fx: { h: 8, m: 3 }, set: { smoker: 0 } },
+        { w: 45, r: T("Birkaç kez denedin ama olmadı.", "You tried several times but it didn't work."), fx: { m: -3 } },
+      ] },
+      { t: T("Devam et", "Carry on"), r: T("Çok kötü hissetmiyorsun... şimdilik.", "You don't feel too bad... for now."), fx: { h: -3 } },
+    ] });
+  E({ id: "tansiyon", a: [38, 65], once: true, cat: "health", w: L => 1.2 + (L.s.h < 55 ? 1 : 0) + (L.f.smoker ? .5 : 0),
+    x: T("Rutin kontrolde tansiyonunun yüksek olduğu söylendi.", "At a routine checkup you were told your blood pressure is high."),
+    ch: [
+      { t: T("İlaç ve yaşam tarzı değişikliği", "Medication and lifestyle changes"), r: T("Disiplinle kontrol altına aldın.", "You brought it under control with discipline."), fx: { h: 3, p: -2 }, set: { hyper: 0 } },
+      { t: T("Önemsememek", "Brush it off"), r: T("Şimdilik belirti yok ama bu iş böyle kalmaz.", "No symptoms for now, but this won't stay this way."), fx: { h: -2 }, set: { hyper: 1 } },
+    ] });
+  E({ id: "ciddi_hastalik", a: [40, 85], cd: 6, cat: "health", w: L => (L.s.h < 55 ? 2.4 : 1) + (L.age > 60 ? 1 : 0),
+    x: T("Bir ağrı geçmeyince tahlil yaptırdın: ciddi bir sağlık sorunu çıktı.", "A pain that wouldn't pass led you to tests: a serious health problem was found."),
+    ch: [
+      { t: T("En iyi tedaviyi ara, masraftan kaçınma", "Seek the best treatment, spare no expense"), cond: L => L.s.p > 22, outs: [
+        { w: L => 40 + L.c.hc * 40, r: T("Tedavi başarılı; zor bir yıl geçirdin ama toparlandın.", "The treatment worked; a hard year, but you recovered."), fx: { h: -8, p: -10, m: -4, b: 4 }, count: { illness: 1 } },
+        { w: 35, r: T("Tedavi iyi gitti ama kalıcı bir yan etki kaldı.", "Treatment went well but a lasting side effect remains."), fx: { h: -16, p: -12, m: -6 }, count: { illness: 1 } },
+        { w: 14, r: T("Hastalık ilerledi...", "The illness advanced..."), fx: { h: -50 }, die: T("Ağır hastalığa yenik düştü.", "Succumbed to a serious illness.") },
+      ] },
+      { t: T("Devlet hastanesi, olanla yetin", "Public hospital, make do"), outs: [
+        { w: L => 28 + L.c.hc * 38, r: T("Uzun beklemeler ve zor günlerden sonra toparlandın.", "After long waits and hard days you recovered."), fx: { h: -12, m: -6, b: 4 }, count: { illness: 1 } },
+        { w: 45, r: T("Bir yan etkiyle yaşamayı öğreniyorsun.", "You are learning to live with a side effect."), fx: { h: -20, m: -8 }, count: { illness: 1 } },
+        { w: 24, r: T("Zamanında yeterli tedaviye ulaşamadın.", "You couldn't get adequate treatment in time."), fx: { h: -55 }, die: T("Tedaviye zamanında ulaşamadan hayata veda etti.", "Said goodbye before reaching treatment in time.") },
+      ] },
+      { t: T("Alternatif yöntemlere sarıl", "Cling to alternative methods"), outs: [
+        { w: 30, r: T("Bir şekilde dengelendi.", "Somehow it stabilised."), fx: { h: -10, m: 1 }, count: { illness: 1 } },
+        { w: 70, r: T("İyi gitmedi; vakit kaybettin.", "It went badly; you lost time."), fx: { h: -30, m: -8 }, count: { illness: 1 }, die: null },
+      ] },
+    ] });
+  E({ id: "ebeveyn_kayip", a: [35, 70], once: true, cat: "fam", star: true, w: 2,
+    x: T("Annen ya da baban hayata veda etti. Çocukluk evinin kapısı artık eskisi gibi açılmayacak.", "Your mother or father passed away. The door of your childhood home will never open the same."), fx: { m: -12, b: -4, z: 2 }, set: { noGrand: 1 } });
+  E({ id: "ebeveyn_bakim", a: [38, 70], once: true, cat: "fam", w: 1.4,
+    x: T("Yaşlı bir ebeveynin bakıma muhtaç. İşin, ailen, ve onun bakımı arasında kalıyorsun.", "An elderly parent needs care. You are stuck between work, family and their care."),
+    ch: [
+      { t: T("Yanına al, kendin bak", "Take them in and care yourself"), r: T("Yorucu ama anlamlı; birbirinize daha çok yaklaştınız.", "Tiring but meaningful; you grew closer."), fx: { b: 9, m: 2, h: -5, p: -4 } },
+      { t: T("Bakım evi ya da yardımcı tut", "Hire help or a care home"), cond: L => L.s.p > 30, r: T("Maddi yük var ama herkes huzurlu.", "A financial burden, but everyone is at peace."), fx: { p: -9, h: 1, b: 2 } },
+    ] });
+  E({ id: "orta_yas", a: [42, 52], once: true, cat: "life", w: 2.5,
+    x: T("Ortalık yaşı krizi: Hayatım böyle mi geçecek? Ya hayallerim?", "Midlife crisis: Is this how my life will go? What about my dreams?"),
+    ch: [
+      { t: T("Büyük bir değişiklik yap (şehir, iş, hayat)", "Make a big change (city, job, life)"), outs: [
+        { w: 55, r: T("Cesaret etmek iyi geldi; yeni bir enerji doğdu.", "Daring was good; new energy was born."), fx: { m: 10, z: 4, p: -4, b: -2 }, star: true },
+        { w: 45, r: T("Karışıklık yarattın ama yeniden başlamak yine de ilginçti.", "You created confusion, but starting over was interesting anyway."), fx: { m: 3, p: -8, b: -5 } },
+      ] },
+      { t: T("Mevcut hayatı sevmeyi öğren", "Learn to love the life you have"), r: T("Küçük şeylerde mutluluğu buldun.", "You found happiness in small things."), fx: { m: 6, b: 4 } },
+      { t: T("Hayal et ama yerinde kal", "Daydream but stay put"), r: T("Zaman geçti; için hâlâ kıpır kıpır.", "Time went by; you are still restless inside."), fx: { m: -2 } },
+    ] });
+  E({ id: "dostluk_eski", a: [30, 80], cd: 7, cat: "fam", w: 1.4,
+    x: T("Yıllardır görüşmediğin bir dostunla tesadüfen karşılaştın.", "You bumped into a friend you hadn't seen in years."),
+    ch: [
+      { t: T("Hemen buluşma ayarla", "Arrange a meeting right away"), r: T("Saatlerce eski günleri andınız; dostluk canlandı.", "You reminisced for hours; the friendship revived."), fx: { b: 9, m: 6 } },
+      { t: T("Selam verip geç", "Say hello and move on"), r: T("Yine her şey olduğu gibi kaldı.", "Everything stayed as it was."), fx: { b: -1 } },
+    ] });
+  E({ id: "komsu_toplum", a: [28, 75], once: true, cat: "life", w: 1, 
+    x: T("Mahallede bir işe öncülük ettin: park, kütüphane ya da yardım derneği. İnsanlar seni sever hale geldi.", "You led a neighborhood effort: a park, library or aid group. People grew fond of you."), fx: { b: 7, m: 5, z: 2, p: -2 }, star: true });
+  E({ id: "evden_ayrilan", a: [46, 66], once: true, cat: "fam", w: L => L.kidCount > 0 ? 3 : 0, cond: L => L.kidCount > 0,
+    x: T("Çocuğun evden ayrıldı. Ev sessiz; ama onun hayatını kurduğunu görmek gurur verici.", "Your child left home. The house is quiet; but seeing them build their life is proud-making."), fx: { m: -2, b: -2, p: 3, h: 1 } });
+  E({ id: "emeklilik", at: 63, once: true, cat: "work", star: true,
+    x: T("Emeklilik zamanı. Yılların emeği sonrasında ne yapacaksın?", "Retirement time. What will you do after years of work?"),
+    ch: [
+      { t: T("Tam emekli ol, dinlen", "Fully retire and rest"), r: T("Sabahları acele yok; ama zamanın nasıl dolacağı sorusu var.", "No rushing mornings; but the question is how to fill the time."), fx: { m: 5, h: 3, p: -3 }, set: { retired: 1 } },
+      { t: T("Yarı zamanlı çalışmaya devam et", "Keep working part-time"), r: T("Kendini üretken hissediyorsun; harçlığın da bol.", "You feel productive; and the pocket money is nice."), fx: { z: 3, p: 2, m: 2 }, set: { retired: 0 } },
+      { t: T("Gönüllü işlere ve torunlara zaman ayır", "Devote yourself to volunteering and grandchildren"), r: T("Hayatın yeni bir anlamı var.", "Life has a new meaning."), fx: { b: 8, m: 7, z: 2, p: -2 }, set: { retired: 1 } },
+    ] });
+  E({ id: "torun", a: [48, 90], once: true, cat: "fam", star: true, w: L => L.kidCount > 0 ? 3 : 0, cond: L => L.kidCount > 0,
+    x: T("Bir torunun oldu! Kucağında ilk kez tutarken her şeyi yeniden hissettin.", "You have a grandchild! Holding them for the first time you felt everything anew."), fx: { m: 10, b: 8, h: 1 } });
+  E({ id: "es_kayip", a: [55, 95], once: true, cat: "love", star: true, w: L => L.f.married ? 2 : 0, cond: L => L.f.married,
+    x: T("Hayat arkadaşın {p} bu dünyadan ayrıldı. Evde en çok onun sesi eksik.", "Your life partner {p} left this world. At home, it's their voice you miss most."),
+    fx: { m: -16, b: -8, h: -5 }, fn: L => { L.f.married = 0; L.f.widowed = 1; L.partner = null; } });
+  E({ id: "arkadas_kayip", a: [60, 100], cd: 5, cat: "fam", w: 2,
+    x: T("Yaşıtların teker teker veda ediyor. Taziye evlerinde sık sık görüşür oldun.", "Your peers are saying goodbye one by one. You meet more often at condolence houses."), fx: { m: -7, b: -5 } });
+  E({ id: "anilar", a: [58, 100], cd: 6, cat: "life", w: 1.6,
+    x: T("Eski fotoğraflara bakarken çocukluğunu, gençliğini, dostlarını hatırladın. Bir yandan huzur, bir yandan hasret.", "Looking at old photos you remembered childhood, youth and friends. Peace on one hand, longing on the other."), fx: { m: 4, b: 2, z: 1 } });
+  E({ id: "bilgelik", a: [55, 100], cd: 8, cat: "life", w: 1.6, cond: L => L.s.b > 30,
+    x: T("Gençler sana akıl danışıyor. Anlatacak çok şeyin var; birileri dinliyor.", "Young people come to you for advice. You've much to tell and someone listens."), fx: { m: 6, b: 5, z: 2 } });
+  E({ id: "yeni_beceri", a: [55, 90], cd: 8, cat: "life", w: 1.2, cond: L => L.s.z > 25,
+    x: T("Yaşın ilerlese de merakın azalmadı: yeni bir dil, bir enstrüman ya da bir sanat öğrenmeye başladın.", "Though older, your curiosity hasn't faded: you began learning a language, instrument or craft."), fx: { z: 5, m: 5 } });
+  E({ id: "dusme_yasli", a: [65, 100], cd: 4, cat: "health", w: L => 1 + (L.s.h < 50 ? 1.5 : 0),
+    x: T("Bir gün evde dengeni kaybedip düştün.", "One day at home you lost your balance and fell."),
+    outs: [
+      { w: 55, r: T("Hafif bir sıyrık; ama artık daha dikkatli olacaksın.", "A light scrape; but you'll be more careful now."), fx: { h: -3 } },
+      { w: 36, r: T("Kalça kırıldı; uzun ve zor bir iyileşme süreci.", "A broken hip; a long, hard recovery."), fx: { h: -16, m: -7, b: 3, p: -4 }, count: { accident: 1 } },
+      { w: 9, r: T("Düşme sonrası gelişen komplikasyonlar...", "Complications after the fall..."), fx: { h: -40 }, die: T("Bir düşme sonrası komplikasyonlardan vefat etti.", "Died of complications after a fall.") },
+    ] });
+  E({ id: "hafiza", a: [70, 105], cd: 6, cat: "health", w: L => L.s.z < 45 ? 2.2 : .5,
+    x: T("Bazı isimleri ve yılları karıştırmaya başladın. Hafızan eskisi gibi değil.", "You started mixing up names and years. Your memory isn't what it was."),
+    ch: [
+      { t: T("Zihnini çalıştır: bulmaca, sohbet, yürüyüş", "Train your mind: puzzles, talk, walks"), r: T("Yavaşladı ama tutunuyorsun.", "It slowed, but you are holding on."), fx: { z: 4, m: 2, b: 2 } },
+      { t: T("Doğal akışına bırak", "Let it take its course"), r: T("Zihin yıpranıyor; aileniz daha çok yanınızda.", "The mind wears; your family stays closer."), fx: { z: -6, b: 3, m: -3 } },
+    ] });
+  E({ id: "uzlasma", a: [60, 100], once: true, cat: "life", star: true, w: 2,
+    x: T("Yıllar önce küs kaldığın biriyle barışma fırsatı çıktı.", "A chance came to make peace with someone you fell out with years ago."),
+    ch: [
+      { t: T("Elini uzat", "Reach out"), outs: [
+        { w: 78, r: T("Sarıldınız. Yılların yükü kalktı.", "You embraced. Years of weight lifted."), fx: { m: 10, b: 9 } },
+        { w: 22, r: T("Karşılık bulamadın ama kendi içinde hafifledin.", "No response, but you felt lighter inside."), fx: { m: 3, b: -1 } },
+      ] },
+      { t: T("Kırgınlığı bırakma", "Hold on to the grudge"), r: T("Gururun kazandı; kalbin pek rahat değil.", "Pride won; your heart is not at ease."), fx: { m: -4, b: -3 } },
+    ] });
+  E({ id: "yasam_ozeti", at: 80, once: true, cat: "life", star: true,
+    x: T("80. yaşın! Arkana dönüp baktığında geçen onca yıl bir film şeridi gibi gözünün önünden geçiyor.", "Your 80th year! Looking back, all those years pass before your eyes like a film."), fx: { m: 5, b: 3 } });
+  E({ id: "yuz", at: 100, once: true, cat: "life", star: true,
+    x: T("100. yaş günün! Gazeteciler, aile ve yüzlerce kutlama mesajı... Yüz yıl.", "Your 100th birthday! Reporters, family and hundreds of messages... A hundred years."), fx: { m: 8, b: 6 } });
+  E({ id: "kirsal_sessizlik", a: [60, 100], cd: 5, cat: "life", w: 1.2,
+    x: T("Bahçede çay içerken günün ağır ağır gidişini izledin. Hiçbir şey yapmamak da güzelmiş.", "Drinking tea in the garden you watched the day pass slowly. Doing nothing is good too."), fx: { m: 5, h: 1 } });
+  E({ id: "gundelik_dostluk", a: [20, 75], cd: 3, cat: "life", w: 2,
+    x: T("Akşamları arkadaşlarla çay, sohbet, kahkaha... Küçük ama değerli anlar.", "Evenings of tea, chat and laughter with friends... small but precious moments."), fx: { b: 5, m: 4 } });
+  E({ id: "ek_gelir", a: [20, 60], cd: 4, cat: "money", w: 1, cond: L => L.job > 0,
+    x: T("Beklenmedik bir ek iş buldun; cüzdanın biraz doldu.", "You found an unexpected side gig; your wallet filled a little."), fx: { p: 6, h: -2 } });
+  E({ id: "dogal_afet", a: [5, 90], cd: 12, cat: "world", w: L => .35 + (1 - L.c.wl) * .3,
+    x: T("Sel, yangın ya da fırtına: bölgende bir doğal afet yaşandı.", "Flood, fire or storm: a natural disaster struck your region."),
+    outs: [
+      { w: 60, r: T("Evin zarar gördü ama toparlandınız; komşular yardım etti.", "Your home was damaged but you recovered; neighbors helped."), fx: { p: -8, m: -4, b: 4 } },
+      { w: 36, r: T("Büyük kayıp yaşadınız; yeniden başlamak gerekti.", "Heavy losses; you had to begin again."), fx: { p: -16, m: -9, h: -4 } },
+      { w: L => (1 - L.c.wl) * 1.2, r: T("Afet çok ağır oldu...", "The disaster was very severe..."), fx: { h: -45, b: -8 }, die: T("Bir doğal afette hayatını kaybetti.", "Lost their life in a natural disaster.") },
+    ] });
+  E({ id: "teknoloji", a: [25, 80], once: true, cat: "life", w: 1.2,
+    x: T("Hayatın içine yeni bir teknoloji girdi: internet, cep telefonu ya da yapay zekâ. Uyum sağlamaya çalışıyorsun.", "A new technology entered life: internet, mobile phones or AI. You are trying to adapt."),
+    ch: [
+      { t: T("Merakla öğren ve kullan", "Learn and use with curiosity"), r: T("İşin ve sosyal hayatın kolaylaştı.", "Work and social life got easier."), fx: { z: 5, p: 3, m: 3 } },
+      { t: T("Eski yöntemlere sadık kal", "Stick to the old ways"), r: T("Kendi hızında yaşıyorsun; ama biraz geride kaldın.", "You live at your own pace, though a bit behind."), fx: { m: 1, z: -2, p: -1 } },
+    ] });
+  E({ id: "kayip_is", a: [25, 62], cd: 10, cat: "work", w: L => L.job > 0 ? .7 : 0,
+    x: T("Şirket küçülmeye gitti; sen de çıkarılanlar arasındasın.", "The company downsized; you are among those let go."),
+    ch: [
+      { t: T("Hemen yeni iş ara", "Look for a new job at once"), outs: [
+        { w: 65, r: T("Birkaç ayda yeni bir iş buldun.", "You found a new job in a few months."), fx: { p: -4, m: -2 } },
+        { w: 35, r: T("Uzun süre iş bulamadın; birikimler eridi.", "No work for a long while; savings melted away."), fx: { p: -14, m: -8 }, job: 1 },
+      ] },
+      { t: T("Fırsat bil: yeni bir alana yönel", "Seize the moment: pivot to a new field"), r: T("Yeni bir beceri edinmek zor ama heyecan verici.", "Gaining a new skill is hard but exciting."), fx: { z: 5, m: 3, p: -8 } },
+    ] });
+  E({ id: "cocuk_sorun", a: [28, 62], cd: 6, cat: "fam", w: L => L.kidCount > 0 ? 1.1 : 0, cond: L => L.kidCount > 0,
+    x: T("Çocuğun okulda sorun yaşıyor; onunla ilgilenmen gerekiyor.", "Your child is having trouble at school; you need to attend to them."),
+    ch: [
+      { t: T("Yanında ol, dinle", "Be there and listen"), r: T("Bağınız güçlendi; sorun yavaş yavaş çözüldü.", "Your bond strengthened; the problem slowly resolved."), fx: { b: 8, m: 3, h: -1 } },
+      { t: T("Ceza ve baskı", "Punishment and pressure"), r: T("Kısa vadede düzeldi ama aranız soğudu.", "Fixed in the short term but your relationship cooled."), fx: { b: -7, m: -3 } },
+    ] });
+  E({ id: "beklenmedik_nezaket", a: [10, 90], cd: 5, cat: "life", w: 1,
+    x: T("Hiç tanımadığın biri, zor bir anında sana yardım etti. İnsanlara inancın tazelendi.", "A total stranger helped you in a hard moment. Your faith in people was renewed."), fx: { m: 5, b: 3 } });
+})();
+
+/* Ömür Defteri - arayüz */
+(function () {
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
+  };
+
+  // ------------------------------------------------------------ metinler
+  const S = {
+    tr: {
+      brand: "Ömür Defteri", sub: "Doğduğun yeri sen seçemezsin. Hayatını seçebilirsin.",
+      lead: "Dünyanın bir yerinde, rastgele bir ailede doğacaksın. Sonra yıl yıl büyüyecek, seçimler yapacak, kazanıp kaybedecek ve bir gün veda edeceksin. Hayatın tek bir kaydı kalacak: Ömür Defteri.",
+      start: "Hayata başla", book: "Hayatlar Defteri", badges: "Rozetler", help: "Nasıl oynanır?", practice: "Antrenman: ülke seç", practiceNote: "Antrenman hayatları deftere ve rozetlere işlenmez.",
+      f1t: "Doğum çekilişi", f1: "Ülkeler her yıl doğan bebek sayısına göre ağırlıklandırılır. Kimi zaman 1/20 şansla, kimi zaman 1/900 şansla doğarsın.",
+      f2t: "Dört gösterge", f2: "Sağlık, Mutluluk, Zihin, Bağlar. Birini ihmal edersen diğerleri de zamanla etkilenir. Ayrıca bir Refah durumu var.",
+      f3t: "Yıl yıl", f3: "Her yıl bir şey olur ya da olmaz. Dönüm noktalarında karar sana ait; ya da otomatik moda bırakabilirsin.",
+      f4t: "Meydan oku", f4: "Aynı doğum koduyla arkadaşına meydan oku: aynı ülke, aynı aile, farklı yollar.",
+      challenge: "Bir arkadaşın seni aynı doğum koduyla hayata davet ediyor:", fresh: "Yeni, rastgele hayat",
+      lang: "Dil", sound: "Ses", rolling: "Doğacağın yer çekiliyor...", certTitle: "DOĞUM BELGESİ", name: "Ad", year: "Doğum yılı", place: "Doğum yeri", family: "Aile durumu",
+      famL: ["Yoksul", "Orta halli", "Rahat"], odds: "1 / {n}", oddsSub: "bu ülkede doğma şansın", ex: "Beklenen ömür", yrs: "yıl",
+      aHc: "Sağlık hizmeti", aEd: "Eğitim", aWl: "Refah", aPe: "Huzur", begin: "Bu hayatı yaşa", again: "Çekilişi yeniden başlat",
+      age: "Yaş", years: "yıl", pause: "Duraklat", resume: "Devam", next: "Sonraki yıl", auto: "Otomatik seçim", speed: "Hız", slow: "Yavaş", norm: "Normal", fast: "Hızlı",
+      mH: "Sağlık", mM: "Mutluluk", mZ: "Zihin", mB: "Bağlar", mP: "Refah", priority: "Bu yıl önceliğin",
+      pDenge: "Dengeli", pDengeH: "Küçük ve eşit etkiler", pSosyal: "Arkadaş ve aile", pSosyalH: "+Bağlar +Mutluluk −Refah", pSaglik: "Sağlık ve spor", pSaglikH: "+Sağlık −Refah", pDinlen: "Dinlen ve eğlen", pDinlenH: "+Mutluluk −Bağlar",
+      pEmekC: "Ders çalış", pEmekW: "Çalış", pEmekO: "Üret ve öğren", pEmekH: "+Zihin +Refah −Mutluluk −Sağlık",
+      choose: "Karar zamanı", star: "Anıyı yıldızla", feed: "Hayat akışı", chart: "Hayat grafiği", died: "Hayata veda etti.",
+      endTitle: "Bir ömür tamamlandı", cause: "Veda", score: "Ömür notu", avg: "Ortalamalar", summary: "Özet", hls: "Yıldızlı anılar", earned: "Kazanılan rozetler", none: "Bu hayatta rozet çıkmadı.", newb: "YENİ",
+      share: "Kartı indir", copy: "Metni kopyala", link: "Meydan okuma bağlantısı", again2: "Yeni hayat", same: "Aynı doğumla tekrar", copied: "Kopyalandı!", saved: "Defterine eklendi",
+      country: "Doğum yeri", liveds: "Yaşadığı ülkeler", career: "Meslek", kids: "Çocuk", lifespan: "Yaşam süresi", odd: "Doğum şansı", practiceDone: "Antrenman hayatı (deftere işlenmedi)",
+      careers: { saglik: "Sağlık", ogretmen: "Öğretmen", muhendis: "Mühendis", esnaf: "Esnaf", sanat: "Sanat", isci: "İşçi", ciftci: "Çiftçi" }, noJob: "Belirli bir meslek yok",
+      bookEmpty: "Henüz tamamlanmış hayat yok.", bookSum: "{n} hayat · ortalama {a} yıl · en uzun {m} yıl", clear: "Defteri sil", confirm: "Defterdeki tüm hayatlar silinsin mi?",
+      close: "Kapat", fictional: "Bu bir simülasyondur; kurgusaldır ve gerçek yaşam olasılıklarını birebir yansıtmaz.",
+      helpBody: "<p><b>Amaç:</b> Doğum çekilişinden çıkan hayatı yaşa; mümkün olduğunca uzun, dolu ve dengeli bir ömür sür.</p><p><b>Göstergeler:</b> Sağlık, Mutluluk, Zihin ve Bağlar. Sağlık 0'a düşerse ya da yaşlandıkça risk artarsa hayat biter. Refah ise para ve güvenliktir.</p><p><b>Öncelik:</b> 6 yaşından sonra her yıl zamanını neye ayıracağını seçersin. Her seçimin bir bedeli var.</p><p><b>Kararlar:</b> Dönüm noktalarında bir karar çıkar. Süre durur, sen seçersin. Klavyede 1-4 ile seçebilirsin.</p><p><b>Klavye:</b> Boşluk = duraklat, N = sonraki yıl, A = otomatik seçim.</p><p><b>Anılar:</b> ★ ile işaretlediğin anılar defterine ve paylaşım kartına girer.</p>",
+      tip1: "İpucu: Önceliğini yaşa göre değiştir. Çocukken ders, genç yetişkinken çalışma, yaşlılıkta sağlık ve sevdiklerin.", tip2: "Kararlarda hızlı olma; bazı seçimler risk taşır.",
+      shareText: "{n} {c} ülkesinde doğdu (1/{o} şansla) ve {a} yıl yaşadı. Ömür notu: {g}. Aynı doğumla sen de dene:", seedTxt: "Doğum kodu",
+      cardTitle: "ÖMÜR DEFTERİ", lifeOf: "Bir ömür", mostly: "En güçlü yanı",
+      eras: "Dönem", dead: "Hayat bitti",
+    },
+    en: {
+      brand: "Book of Lives", sub: "You can't choose where you're born. You can choose how you live.",
+      lead: "Somewhere in the world, into a random family, you will be born. Then you'll grow year by year, make choices, win and lose, and one day say goodbye. One record will remain: your Book of Lives.",
+      start: "Begin a life", book: "Book of Lives", badges: "Badges", help: "How to play", practice: "Practice: pick a country", practiceNote: "Practice lives are not recorded in the book or badges.",
+      f1t: "Birth lottery", f1: "Countries are weighted by the number of babies born each year. Sometimes a 1-in-20 chance, sometimes 1-in-900.",
+      f2t: "Four meters", f2: "Health, Happiness, Mind, Bonds. Neglect one and the others suffer in time. There is also a Wealth level.",
+      f3t: "Year by year", f3: "Each year something happens, or doesn't. At turning points the decision is yours; or leave it to auto mode.",
+      f4t: "Challenge", f4: "Challenge a friend with the same birth code: same country, same family, different paths.",
+      challenge: "A friend invites you to live from the same birth code:", fresh: "New random life",
+      lang: "Language", sound: "Sound", rolling: "Drawing your birthplace...", certTitle: "BIRTH CERTIFICATE", name: "Name", year: "Birth year", place: "Birthplace", family: "Family situation",
+      famL: ["Poor", "Middle", "Comfortable"], odds: "1 in {n}", oddsSub: "your odds of being born here", ex: "Life expectancy", yrs: "yrs",
+      aHc: "Healthcare", aEd: "Education", aWl: "Wealth", aPe: "Peace", begin: "Live this life", again: "Restart the draw",
+      age: "Age", years: "yrs", pause: "Pause", resume: "Resume", next: "Next year", auto: "Auto choices", speed: "Speed", slow: "Slow", norm: "Normal", fast: "Fast",
+      mH: "Health", mM: "Happiness", mZ: "Mind", mB: "Bonds", mP: "Wealth", priority: "Your focus this year",
+      pDenge: "Balanced", pDengeH: "Small even effects", pSosyal: "Friends and family", pSosyalH: "+Bonds +Happiness −Wealth", pSaglik: "Health and sport", pSaglikH: "+Health −Wealth", pDinlen: "Rest and enjoy", pDinlenH: "+Happiness −Bonds",
+      pEmekC: "Study", pEmekW: "Work", pEmekO: "Create and learn", pEmekH: "+Mind +Wealth −Happiness −Health",
+      choose: "Decision time", star: "Star this memory", feed: "Life feed", chart: "Life chart", died: "Passed away.",
+      endTitle: "A life is complete", cause: "Farewell", score: "Life score", avg: "Averages", summary: "Summary", hls: "Starred memories", earned: "Badges earned", none: "No badges this life.", newb: "NEW",
+      share: "Download card", copy: "Copy text", link: "Challenge link", again2: "New life", same: "Same birth again", copied: "Copied!", saved: "Added to your book",
+      country: "Birthplace", liveds: "Countries lived in", career: "Career", kids: "Children", lifespan: "Lifespan", odd: "Birth odds", practiceDone: "Practice life (not recorded)",
+      careers: { saglik: "Healthcare", ogretmen: "Teacher", muhendis: "Engineer", esnaf: "Shopkeeper", sanat: "Arts", isci: "Worker", ciftci: "Farmer" }, noJob: "No fixed career",
+      bookEmpty: "No completed lives yet.", bookSum: "{n} lives · average {a} years · longest {m}", clear: "Clear book", confirm: "Delete all lives in the book?",
+      close: "Close", fictional: "This is a simulation; fictional, and not an exact reflection of real life odds.",
+      helpBody: "<p><b>Goal:</b> Live the life the birth lottery gives you; make it long, full and balanced.</p><p><b>Meters:</b> Health, Happiness, Mind and Bonds. If Health hits 0, or risk grows with age, life ends. Wealth is money and security.</p><p><b>Focus:</b> After age 6 you choose each year what to spend time on. Every choice has a cost.</p><p><b>Decisions:</b> At turning points a decision appears. Time stops while you choose. Press 1-4 on the keyboard.</p><p><b>Keys:</b> Space = pause, N = next year, A = auto choices.</p><p><b>Memories:</b> Memories you star with ★ go into your book and share card.</p>",
+      tip1: "Tip: Change your focus with age. Study as a child, work as a young adult, health and loved ones when old.", tip2: "Don't rush decisions; some choices carry risk.",
+      shareText: "{n} was born in {c} (a 1 in {o} chance) and lived {a} years. Life score: {g}. Try the same birth:", seedTxt: "Birth code",
+      cardTitle: "BOOK OF LIVES", lifeOf: "A life", mostly: "Strongest side",
+      eras: "Era", dead: "Life ended",
+    },
+  };
+  let lang = store.get("od_lang", (navigator.language || "en").toLowerCase().startsWith("tr") ? "tr" : "en");
+  const t = k => (S[lang][k] != null ? S[lang][k] : S.en[k] != null ? S.en[k] : k);
+  const tx = o => (o ? (o[lang] || o.en || o.tr || "") : "");
+  const fillT = (k, o) => t(k).replace(/\{(\w+)\}/g, (m, n) => o[n]);
+  const cname = c => c[lang] || c.en;
+
+  const MET = [["h", "mH", "#ff7a9c"], ["m", "mM", "#ffcf66"], ["z", "mZ", "#6ea8ff"], ["b", "mB", "#7be08a"], ["p", "mP", "#b58cff"]];
+
+  // ------------------------------------------------------------ ses
+  let AC = null, soundOn = store.get("od_sound", true);
+  function tone(freq, dur = .12, type = "sine", vol = .05, when = 0) {
+    if (!soundOn) return;
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = type; o.frequency.value = freq;
+      const t0 = AC.currentTime + when;
+      g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+      o.connect(g); g.connect(AC.destination); o.start(t0); o.stop(t0 + dur + .02);
+    } catch (e) { }
+  }
+  const sfx = {
+    tick() { tone(520, .05, "triangle", .025); },
+    event() { tone(660, .12, "sine", .05); },
+    good() { tone(660, .1); tone(880, .16, "sine", .05, .09); },
+    bad() { tone(300, .2, "sawtooth", .03); },
+    star() { tone(880, .1); tone(1320, .25, "sine", .05, .08); },
+    choice() { tone(440, .08, "square", .02); },
+    death() { tone(196, .9, "sine", .07); tone(147, 1.2, "sine", .06, .4); },
+    birth() { tone(523, .2); tone(659, .2, "sine", .05, .15); tone(784, .4, "sine", .05, .3); },
+  };
+
+  // ------------------------------------------------------------ yardımcılar
+  function toast(msg) { const el = $("#toast"); el.textContent = msg; el.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove("on"), 1800); }
+  function show(id) { $$(".screen").forEach(s => s.classList.toggle("on", s.id === id)); window.scrollTo(0, 0); }
+  function modal(id, on) { $("#" + id).classList.toggle("on", on); }
+  const fam = L => t("famL")[L.fam];
+  const careerName = L => L.career ? t("careers")[L.career] : t("noJob");
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const fmtD = d => { const o = []; for (const [k, key] of [["h", "mH"], ["m", "mM"], ["z", "mZ"], ["b", "mB"], ["p", "mP"]]) { const v = Math.round(d[k] || 0); if (v) o.push(`<span class="chip ${v > 0 ? "up" : "dn"}">${v > 0 ? "+" : ""}${v} ${t(key)}</span>`); } return o.join(""); };
+
+  // ------------------------------------------------------------ avatar
+  const SKIN = ["#f6d3b3", "#e8b98d", "#c98f62", "#9a6440", "#6b4328"];
+  const HAIR = ["#2a1c14", "#5a3a22", "#b07a3c", "#d9b25a", "#c2503a"];
+  const SHIRT = { saglik: "#5eead4", ogretmen: "#ffcf66", muhendis: "#6ea8ff", esnaf: "#ff9c5e", sanat: "#b58cff", isci: "#e0a53a", ciftci: "#7be08a" };
+  function avatar(L) {
+    const a = L.age, skin = SKIN[L.skin], hc = a >= 62 ? "#d8d8e4" : HAIR[L.hair];
+    const happy = L.s.m, mouth = happy > 62 ? "M78 108 Q100 126 122 108" : happy > 38 ? "M82 112 L118 112" : "M80 118 Q100 104 120 118";
+    const shirt = L.career && a >= 18 ? SHIRT[L.career] : ["#6ea8ff", "#ff9ec0", "#7be08a"][L.look];
+    const sc = a < 2 ? .62 : a < 6 ? .74 : a < 13 ? .86 : a < 20 ? .95 : 1;
+    const bg = L.s.p > 66 ? "#2c2a52" : L.s.p < 22 ? "#2b2630" : "#202648";
+    let hair = "";
+    if (a < 3) hair = `<path d="M78 62 Q100 42 122 62 Q100 54 78 62Z" fill="${hc}"/>`;
+    else if (L.look === 0) hair = `<path d="M66 82 Q66 38 100 38 Q134 38 134 82 Q122 56 100 56 Q78 56 66 82Z" fill="${hc}"/>`;
+    else if (L.look === 1) hair = `<path d="M64 96 Q60 36 100 36 Q140 36 136 96 L128 70 Q100 52 72 70Z" fill="${hc}"/><rect x="62" y="80" width="10" height="38" rx="5" fill="${hc}"/><rect x="128" y="80" width="10" height="38" rx="5" fill="${hc}"/>`;
+    else hair = `<path d="M70 70 Q74 40 100 40 Q126 40 130 70 Q116 54 100 54 Q84 54 70 70Z" fill="${hc}"/><circle cx="100" cy="36" r="9" fill="${hc}"/>`;
+    if (a >= 72 && L.look !== 1) hair = `<path d="M72 68 Q100 44 128 68 Q118 60 100 60 Q82 60 72 68Z" fill="${hc}" opacity=".9"/>`;
+    const glasses = (L.s.z > 72 && a > 24) || a > 66 ? `<g fill="none" stroke="#2a2a3a" stroke-width="2.4"><circle cx="86" cy="92" r="10"/><circle cx="114" cy="92" r="10"/><path d="M96 92h8"/></g>` : "";
+    const cane = a > 76 ? `<path d="M158 150 L158 214" stroke="#a27b4c" stroke-width="6" stroke-linecap="round"/><path d="M158 150 q0 -12 -10 -8" stroke="#a27b4c" stroke-width="6" fill="none" stroke-linecap="round"/>` : "";
+    const sparkle = L.f.married || L.partner ? `<text x="20" y="34" font-size="18" fill="#ff7ab8">&#9829;</text>` : "";
+    return `<svg viewBox="0 0 200 220" width="100%" height="100%" aria-hidden="true"><rect width="200" height="220" fill="${bg}"/>
+      <circle cx="40" cy="40" r="26" fill="#ffffff08"/><circle cx="170" cy="190" r="40" fill="#ffffff06"/>${sparkle}
+      <g transform="translate(100 220) scale(${sc}) translate(-100 -220)">
+      <path d="M52 220 Q52 160 100 154 Q148 160 148 220Z" fill="${shirt}"/>
+      <rect x="88" y="134" width="24" height="26" rx="8" fill="${skin}"/>
+      <ellipse cx="100" cy="94" rx="36" ry="40" fill="${skin}"/>${hair}
+      <circle cx="86" cy="92" r="4" fill="#26202b"/><circle cx="114" cy="92" r="4" fill="#26202b"/>${glasses}
+      <path d="${mouth}" stroke="#7a3d3d" stroke-width="4" fill="none" stroke-linecap="round"/>
+      ${happy > 62 ? `<ellipse cx="76" cy="106" rx="6" ry="4" fill="#ff8a8a" opacity=".35"/><ellipse cx="124" cy="106" rx="6" ry="4" fill="#ff8a8a" opacity=".35"/>` : ""}
+      ${cane}</g></svg>`;
+  }
+
+  // ------------------------------------------------------------ oyun durumu
+  const G = { L: null, speed: 2, paused: false, auto: store.get("od_auto", false), timer: null, shown: 0, last: null, practice: false, tipShown: false, ending: false };
+  const SPEED_MS = { 1: 5200, 2: 3000, 3: 1200 };
+
+  // ------------------------------------------------------------ ana ekran
+  function renderHome() {
+    const m = location.hash.match(/s=([A-Za-z0-9]{4,12})/);
+    const seed = m ? m[1].toUpperCase() : null;
+    $("#challenge").innerHTML = seed ? `<div>${t("challenge")}</div><div style="font-size:22px;font-weight:800;margin:4px 0;color:var(--gold);letter-spacing:3px">${seed}</div>` : "";
+    $("#h-start").textContent = seed ? t("start") + " (" + seed + ")" : t("start");
+    const fr = $("#h-fresh"); fr.style.display = seed ? "" : "none"; fr.textContent = t("fresh");
+    const sel = $("#h-prac"); sel.innerHTML = `<option value="">${t("practice")}</option>` + OD.COUNTRIES.slice().sort((a, b) => cname(a).localeCompare(cname(b), lang)).map(c => `<option value="${c.code}">${esc(cname(c))}</option>`).join("");
+  }
+  function i18nStatic() {
+    $$("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+    $$("[data-h]").forEach(el => { el.innerHTML = t(el.dataset.h); });
+    document.title = t("brand");
+    $("#b-lang").textContent = lang === "tr" ? "EN" : "TR";
+    $("#b-snd").classList.toggle("on", soundOn); $("#b-snd").textContent = soundOn ? "♪" : "♪×";
+  }
+
+  // ------------------------------------------------------------ doğum çekilişi
+  let birthTimer = null;
+  function startBirth(seed, practiceCode) {
+    clearTimeout(birthTimer); clearInterval(G.timer); G.timer = null;
+    const L = OD.newLife(seed, practiceCode ? { country: practiceCode } : {});
+    G.L = L; G.practice = !!practiceCode; G.shown = 0; G.last = null; G.ending = false;
+    show("s-birth");
+    $("#birth-cert").innerHTML = ""; $("#birth-actions").style.display = "none";
+    const slot = $("#slot"); slot.className = "slot spin";
+    $("#birth-msg").textContent = t("rolling");
+    let i = 0, delay = 55;
+    const names = OD.COUNTRIES.map(cname);
+    const spin = () => {
+      if (delay > 380) { land(); return; }
+      slot.textContent = names[Math.floor(Math.random() * names.length)];
+      sfx.tick(); i++; delay *= 1.11; birthTimer = setTimeout(spin, delay);
+    };
+    spin();
+  }
+  function land() {
+    const L = G.L, slot = $("#slot");
+    slot.className = "slot land"; slot.textContent = cname(L.c); sfx.birth();
+    $("#birth-msg").textContent = "";
+    const bar = v => `<div class="bar"><i style="width:${Math.round(v * 100)}%"></i></div>`;
+    $("#birth-cert").innerHTML = `<div class="cert"><h2>${t("certTitle")}</h2>
+      <div class="row"><span>${t("name")}</span><b>${esc(L.name)}</b></div>
+      <div class="row"><span>${t("year")}</span><b>${L.birth}</b></div>
+      <div class="row"><span>${t("place")}</span><b>${esc(cname(L.c))}</b></div>
+      <div class="row"><span>${t("family")}</span><b>${fam(L)}</b></div>
+      <div class="row"><span>${t("ex")}</span><b>~${L.c.le} ${t("yrs")}</b></div>
+      <div class="odds">${fillT("odds", { n: L.odds })}</div><div class="sub">${t("oddsSub")}</div>
+      <div class="attrs"><div class="attr"><span>${t("aHc")}</span>${bar(L.c.hc)}</div><div class="attr"><span>${t("aEd")}</span>${bar(L.c.ed)}</div><div class="attr"><span>${t("aWl")}</span>${bar(L.c.wl)}</div><div class="attr"><span>${t("aPe")}</span>${bar(L.c.pe)}</div></div></div>`;
+    $("#birth-actions").style.display = "flex";
+    $("#birth-begin").textContent = t("begin"); $("#birth-redo").textContent = t("again");
+    // her ayrı doğum kendi bilgisini hatırlar
+    G.birthL = L;
+  }
+
+  // ------------------------------------------------------------ yaşam ekranı
+  function renderLifeFrame() {
+    const L = G.L;
+    $("#feed").innerHTML = ""; $("#stage").innerHTML = ""; $("#choices").innerHTML = "";
+    G.prev = Object.assign({}, L.s);
+    renderSide(true);
+    drawChart($("#chart"), L.series.length ? L.series : [], L);
+  }
+  function priLabel(L, key) {
+    if (key === "emek") return L.age < 18 ? t("pEmekC") : (L.age < 65 && !L.f.retired ? t("pEmekW") : t("pEmekO"));
+    return { denge: t("pDenge"), sosyal: t("pSosyal"), saglik: t("pSaglik"), dinlen: t("pDinlen") }[key];
+  }
+  function renderSide(force) {
+    const L = G.L;
+    $("#av").innerHTML = avatar(L);
+    $("#pname").textContent = L.name;
+    $("#pmeta").textContent = `${cname(L.c)} · ${OD.year(L)}`;
+    $("#pmeta2").textContent = `${fam(L)}${L.career ? " · " + careerName(L) : ""}`;
+    $("#agebig").textContent = L.age + " " + t("years");
+    const ms = $("#meters"); if (!ms.dataset.built) {
+      ms.innerHTML = MET.map(([k, key, col]) => `<div class="m" data-k="${k}"><div class="lb"><span data-lbl>${t(key)}</span><b>0</b></div><div class="bar"><i style="background:${col};width:0"></i></div><span class="d"></span></div>`).join("");
+      ms.dataset.built = 1;
+    }
+    MET.forEach(([k, key]) => {
+      const el = $(`.m[data-k="${k}"]`, ms), v = L.s[k], prev = G.prev ? G.prev[k] : v;
+      el.querySelector("[data-lbl]").textContent = t(key);
+      el.querySelector("b").textContent = Math.round(v);
+      el.querySelector(".bar i").style.width = Math.round(v) + "%";
+      const dd = Math.round(v - prev);
+      if (dd && !force) { const d = el.querySelector(".d"); d.textContent = (dd > 0 ? "+" : "") + dd; d.style.color = dd > 0 ? "var(--green)" : "var(--bad)"; d.classList.remove("show"); void d.offsetWidth; d.classList.add("show"); }
+    });
+    G.prev = Object.assign({}, L.s);
+    // öncelik
+    const pr = $("#pri");
+    const items = [["denge", "pDengeH"], ["emek", "pEmekH"], ["sosyal", "pSosyalH"], ["saglik", "pSaglikH"], ["dinlen", "pDinlenH"]];
+    pr.innerHTML = `<h4>${t("priority")}</h4>` + (L.age < 6 ? `<div class="mut" style="color:var(--mut);font-size:13px">${lang === "tr" ? "Henüz çok küçüksün; ailen yönlendiriyor." : "Too young yet; your family steers."}</div>` :
+      items.map(([k, h]) => `<button class="pbtn ${L.priority === k ? "on" : ""}" data-p="${k}">${priLabel(L, k)}<small>${t(h)}</small></button>`).join(""));
+    $$(".pbtn", pr).forEach(b => b.onclick = () => { L.priority = b.dataset.p; sfx.choice(); renderSide(); });
+    $("#c-pause").textContent = G.paused ? t("resume") : t("pause");
+    $$(".sbtn[data-sp]").forEach(b => b.classList.toggle("on", +b.dataset.sp === G.speed));
+    $("#c-auto").classList.toggle("on", G.auto);
+  }
+  const CATC = { fam: "cat-fam", school: "cat-school", work: "cat-work", health: "cat-health", love: "cat-love", world: "cat-world", money: "cat-money", life: "cat-life", quiet: "cat-quiet" };
+  function entryHTML(e, idx) {
+    const choice = e.choice ? `<div class="ch">&rsaquo; ${esc(tx(e.choice))}</div>` : "";
+    const res = e.r ? `<div class="er">${esc(tx(e.r))}</div>` : "";
+    return `<div class="ent ${CATC[e.cat] || ""} ${e.quiet ? "quiet" : ""}" data-i="${idx}"><div class="eh"><b>${e.age}</b><span>${e.year}</span><span>· ${esc(cname(OD.byCode[e.country]))}</span><button class="star ${e.star ? "on" : ""}" title="${t("star")}">${e.star ? "★" : "☆"}</button></div><div class="et">${esc(tx(e.t))}</div>${choice}${res}<div class="chips">${fmtD(e.d)}</div></div>`;
+  }
+  function pushEntries() {
+    const L = G.L, feed = $("#feed");
+    let lastReal = null;
+    for (; G.shown < L.log.length; G.shown++) {
+      const e = L.log[G.shown];
+      feed.insertAdjacentHTML("afterbegin", entryHTML(e, G.shown));
+      if (!e.quiet) lastReal = e; else if (!lastReal) lastReal = e;
+      if (e.star) sfx.star(); else if (!e.quiet) {
+        const net = Object.values(e.d).reduce((s, v) => s + v, 0);
+        (net < -6) ? sfx.bad() : (net > 6 ? sfx.good() : sfx.event());
+      }
+    }
+    if (lastReal) setStage(lastReal);
+    $$(".star", feed).forEach(b => { b.onclick = () => { const i = +b.closest(".ent").dataset.i; OD.toggleStar(L, i); b.classList.toggle("on", L.log[i].star); b.textContent = L.log[i].star ? "★" : "☆"; if (L.log[i].star) sfx.star(); }; });
+  }
+  function setStage(e) {
+    const st = $("#stage");
+    st.className = "card stage" + (e.quiet ? " q" : "");
+    st.innerHTML = `<div class="ag">${t("age")} ${e.age} · ${e.year}</div><div class="tx">${esc(tx(e.t))}</div>${e.choice ? `<div class="ch" style="color:var(--blue);margin-top:6px">&rsaquo; ${esc(tx(e.choice))}</div>` : ""}${e.r ? `<div class="rs">${esc(tx(e.r))}</div>` : ""}<div class="chips">${fmtD(e.d)}</div>`;
+  }
+  function showPending() {
+    const L = G.L, pd = L.pending;
+    const st = $("#stage");
+    st.className = "card stage";
+    st.innerHTML = `<div class="ag">${t("age")} ${L.age} · ${OD.year(L)} · <b style="color:var(--gold)">${t("choose")}</b></div><div class="tx">${esc(tx(pd.text))}</div>`;
+    sfx.event();
+    const ch = $("#choices");
+    ch.innerHTML = pd.choices.map((c, i) => `<button class="cbtn" data-i="${i}"><kbd>${i + 1}</kbd><span>${esc(tx(OD.fmt(L, c.t)))}</span></button>`).join("");
+    $$(".cbtn", ch).forEach(b => b.onclick = () => pick(+b.dataset.i));
+    if (!G.tipShown && L.age >= 6) { G.tipShown = true; }
+    if (G.auto) { clearTimeout(G.autoT); G.autoT = setTimeout(() => { if (L.pending && G.auto) pick(OD.autoPick(L)); }, 1400); }
+  }
+  function pick(i) {
+    const L = G.L; if (!L.pending || G.ending) return;
+    clearTimeout(G.autoT); sfx.choice();
+    $("#choices").innerHTML = "";
+    const r = OD.choose(L, i);
+    afterStep(r);
+  }
+  function afterStep(r) {
+    const L = G.L;
+    pushEntries();
+    renderSide();
+    drawChart($("#chart"), L.series, L);
+    if (L.dead) { onDeath(); return; }
+    if (L.pending) { showPending(); return; }
+    schedule();
+  }
+  function advance() {
+    const L = G.L; if (!L || L.dead || L.pending || G.ending) return;
+    const r = OD.step(L);
+    sfx.tick();
+    afterStep(r);
+  }
+  function schedule() {
+    clearTimeout(G.timer);
+    const L = G.L; if (!L || L.dead || L.pending || G.paused || G.ending) return;
+    const ms = SPEED_MS[G.speed];
+    $("#yearbar i").style.transition = "none"; $("#yearbar i").style.width = "0";
+    void $("#yearbar i").offsetWidth;
+    $("#yearbar i").style.transition = `width ${ms}ms linear`; $("#yearbar i").style.width = "100%";
+    G.timer = setTimeout(() => { if (!G.paused) advance(); }, ms);
+  }
+  function setPaused(p) {
+    G.paused = p; clearTimeout(G.timer);
+    if (!p) schedule(); else { $("#yearbar i").style.transition = "none"; }
+    $("#c-pause").textContent = G.paused ? t("resume") : t("pause");
+  }
+  function beginLife() {
+    clearTimeout(birthTimer);
+    const L = G.L; G.paused = false; G.ending = false;
+    show("s-life");
+    $("#meters").dataset.built = ""; $("#meters").innerHTML = "";
+    renderLifeFrame();
+    $("#tip").style.display = store.get("od_tip", false) ? "none" : "block";
+    $("#tip").textContent = t("tip1");
+    store.set("od_tip", true);
+    $("#fict").textContent = t("fictional");
+    setTimeout(advance, 700);
+  }
+
+  // ------------------------------------------------------------ grafik
+  function drawChart(cv, series, L, big) {
+    if (!cv) return;
+    const dpr = window.devicePixelRatio || 1, w = cv.clientWidth || 500, h = cv.clientHeight || 150;
+    cv.width = w * dpr; cv.height = h * dpr;
+    const c = cv.getContext("2d"); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, w, h);
+    c.strokeStyle = "#2c3358"; c.lineWidth = 1; c.fillStyle = "#6b739f"; c.font = "11px sans-serif";
+    for (let v = 0; v <= 100; v += 25) { const y = h - 18 - (h - 26) * v / 100; c.beginPath(); c.moveTo(26, y); c.lineTo(w - 4, y); c.stroke(); c.fillText(v, 2, y + 3); }
+    if (!series.length) return;
+    const maxA = Math.max(20, series[series.length - 1].age);
+    const X = a => 28 + (w - 34) * a / maxA, Y = v => h - 18 - (h - 26) * v / 100;
+    for (let a = 0; a <= maxA; a += maxA > 80 ? 20 : 10) c.fillText(a, X(a) - 6, h - 4);
+    MET.slice(0, 4).forEach(([k, , col]) => {
+      c.strokeStyle = col; c.lineWidth = 2; c.beginPath();
+      series.forEach((p, i) => { const x = X(p.age), y = Y(p[k]); i ? c.lineTo(x, y) : c.moveTo(x, y); });
+      c.stroke();
+    });
+    // yıldızlı anılar
+    if (L) L.log.forEach(e => { if (e.star) { c.fillStyle = "#ffcf66"; c.beginPath(); c.arc(X(e.age), h - 18, 3.2, 0, 7); c.fill(); } });
+  }
+  function legend() { return MET.slice(0, 4).map(([k, key, col]) => `<span><i style="background:${col}"></i>${t(key)}</span>`).join(""); }
+
+  // ------------------------------------------------------------ ölüm ve son
+  function onDeath() {
+    const L = G.L; if (G.ending) return; G.ending = true;
+    clearTimeout(G.timer); clearTimeout(G.autoT);
+    sfx.death();
+    const st = $("#stage"); st.className = "card stage";
+    st.innerHTML = `<div class="ag">${t("age")} ${L.deathAge} · ${OD.year(L)}</div><div class="tx" style="font-size:22px">${esc(L.name)} — ${esc(tx(OD.fmt(L, L.cause)))}</div>`;
+    $("#choices").innerHTML = "";
+    setTimeout(() => finishLife(), 2600);
+  }
+  function loadBook() { return store.get("od_lives", []); }
+  function finishLife() {
+    const L = G.L;
+    // rozetler
+    const have = store.get("od_badges", {}); const fresh = [];
+    if (!G.practice) {
+      L.badges.forEach(id => { if (!have[id]) { have[id] = L.ended; fresh.push(id); } });
+      store.set("od_badges", have);
+      const book = loadBook();
+      book.unshift({ seed: L.seed, name: L.name, c: L.birthCountry.code, birth: L.birth, age: L.deathAge, cause: L.cause, score: L.score, grade: L.grade, badges: L.badges, at: L.ended, kids: L.kidCount, career: L.career, odds: L.odds,
+        stars: L.log.filter(e => e.star).slice(0, 14).map(e => ({ age: e.age, t: e.t, r: e.r })) });
+      store.set("od_lives", book.slice(0, 60));
+    }
+    G.fresh = fresh;
+    renderEnd();
+    show("s-end"); sfx.good();
+  }
+  function renderEnd() {
+    const L = G.L, fresh = G.fresh || [];
+    const stars = L.log.filter(e => e.star);
+    $("#end-stone").innerHTML = `<div class="stone"><div style="color:var(--mut);letter-spacing:3px;font-size:13px">${t("endTitle").toUpperCase()}</div><h2>${esc(L.name)}</h2><div class="yrs">${L.birth} – ${L.birth + L.deathAge} · ${esc(cname(L.birthCountry))}</div><div class="big">${L.deathAge}<span style="font-size:20px;color:var(--mut)"> ${t("years")}</span></div>
+      <div class="cause">${esc(tx(OD.fmt(L, L.cause)))}</div><div class="ep">${esc(tx(L.epitaph.main))}${L.epitaph.extra.map(x => " " + esc(tx(x))).join("")}</div>
+      <div><span class="grade">${L.grade}</span></div><div style="color:var(--mut);margin-top:6px;font-size:14px">${t("score")}: ${L.score}</div>${G.practice ? `<div class="chip" style="margin-top:8px">${t("practiceDone")}</div>` : `<div class="chip up" style="margin-top:8px">${t("saved")}</div>`}</div>`;
+    drawChart($("#end-chart"), L.series, L); $("#end-legend").innerHTML = legend();
+    const A = L.avg;
+    $("#end-avg").innerHTML = MET.map(([k, key, col]) => `<div class="m"><div class="lb"><span>${t(key)}</span><b>${Math.round(A[k])}</b></div><div class="bar"><i style="background:${col};width:${Math.round(A[k])}%"></i></div></div>`).join("");
+    $("#end-sum").innerHTML = [
+      [t("country"), cname(L.birthCountry)], [t("odd"), fillT("odds", { n: L.odds })], [t("family"), fam(L)],
+      [t("liveds"), L.lived.map(c => cname(OD.byCode[c])).join(" → ")], [t("career"), careerName(L)], [t("kids"), L.kidCount], [t("seedTxt"), L.seed],
+    ].map(([a, b]) => `<div class="stat"><span>${a}</span><b>${esc(b)}</b></div>`).join("");
+    $("#end-hl").innerHTML = stars.length ? stars.slice(0, 14).map(e => `<div class="hl"><b>${e.age}</b> ${esc(tx(e.t))}${e.r ? " <span style='color:var(--teal)'>" + esc(tx(e.r)) + "</span>" : ""}</div>`).join("") : "<div class='mut' style='color:var(--mut)'>—</div>";
+    $("#end-badges").innerHTML = L.badges.length ? L.badges.map(id => { const b = OD.BADGES.find(x => x.id === id); return `<div class="bdg ${fresh.includes(id) ? "new" : ""}">${fresh.includes(id) ? `<small style="color:var(--gold)">${t("newb")}</small>` : ""}<b>${lang === "tr" ? b.tr : b.en}</b><small>${lang === "tr" ? b.dtr : b.den}</small></div>`; }).join("") : `<div class="mut" style="color:var(--mut)">${t("none")}</div>`;
+  }
+  const shareText = () => { const L = G.L; return fillT("shareText", { n: L.name, c: cname(L.birthCountry), o: L.odds, a: L.deathAge, g: L.grade }) + " " + shareLink(); };
+  const shareLink = () => location.href.split("#")[0] + "#s=" + G.L.seed;
+
+  // ------------------------------------------------------------ paylaşım kartı
+  function cardCanvas() {
+    const L = G.L, W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+    const c = cv.getContext("2d");
+    const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#1c2150"); g.addColorStop(.55, "#2a1d4d"); g.addColorStop(1, "#0e1020");
+    c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.globalAlpha = .08; c.fillStyle = "#fff"; for (let i = 0; i < 70; i++) { c.beginPath(); c.arc(Math.random() * W, Math.random() * H, Math.random() * 3 + 1, 0, 7); c.fill(); } c.globalAlpha = 1;
+    c.textAlign = "center"; c.fillStyle = "#ffcf66"; c.font = "700 34px sans-serif"; c.fillText(t("cardTitle"), W / 2, 96);
+    c.fillStyle = "#eef0ff"; c.font = "800 84px sans-serif"; c.fillText(L.name, W / 2, 220);
+    c.fillStyle = "#9aa3cc"; c.font = "400 38px sans-serif"; c.fillText(`${L.birth} – ${L.birth + L.deathAge}  ·  ${cname(L.birthCountry)}`, W / 2, 285);
+    c.fillStyle = "#ffcf66"; c.font = "900 220px sans-serif"; c.fillText(L.deathAge, W / 2, 500);
+    c.fillStyle = "#9aa3cc"; c.font = "400 40px sans-serif"; c.fillText(t("years"), W / 2, 550);
+    // not
+    const gr = c.createLinearGradient(W / 2 - 60, 600, W / 2 + 60, 720); gr.addColorStop(0, "#ffcf66"); gr.addColorStop(1, "#ff7a9c");
+    c.fillStyle = gr; c.beginPath(); c.arc(W / 2, 640, 62, 0, 7); c.fill(); c.fillStyle = "#1a1030"; c.font = "900 76px sans-serif"; c.fillText(L.grade, W / 2, 668);
+    c.fillStyle = "#eef0ff"; c.font = "400 38px sans-serif";
+    wrap(c, tx(OD.fmt(L, L.cause)), W / 2, 760, 880, 50);
+    c.fillStyle = "#5eead4"; c.font = "italic 36px sans-serif"; wrap(c, tx(L.epitaph.main), W / 2, 850, 880, 48);
+    // grafik
+    const gx = 90, gy = 930, gw = W - 180, gh = 220;
+    c.fillStyle = "#ffffff0a"; roundRect(c, gx - 20, gy - 20, gw + 40, gh + 60, 22); c.fill();
+    const maxA = Math.max(20, L.series[L.series.length - 1].age);
+    MET.slice(0, 4).forEach(([k, , col]) => { c.strokeStyle = col; c.lineWidth = 5; c.beginPath(); L.series.forEach((p, i) => { const x = gx + gw * p.age / maxA, y = gy + gh - gh * p[k] / 100; i ? c.lineTo(x, y) : c.moveTo(x, y); }); c.stroke(); });
+    c.font = "26px sans-serif"; c.textAlign = "left"; let lx = gx;
+    MET.slice(0, 4).forEach(([k, key, col]) => { c.fillStyle = col; c.fillRect(lx, gy + gh + 18, 18, 18); c.fillStyle = "#c8cdef"; c.fillText(t(key), lx + 26, gy + gh + 35); lx += 210; });
+    c.textAlign = "center"; c.fillStyle = "#9aa3cc"; c.font = "30px sans-serif";
+    c.fillText(`${fillT("odds", { n: L.odds })} · ${t("odd")}`, W / 2, 1215);
+    c.fillStyle = "#ffcf66"; c.font = "700 36px sans-serif"; c.fillText(`${t("seedTxt")}: ${L.seed}`, W / 2, 1270);
+    c.fillStyle = "#6b739f"; c.font = "26px sans-serif"; c.fillText(location.host || "omur-defteri", W / 2, 1315);
+    return cv;
+  }
+  function wrap(c, text, x, y, mw, lh) { const words = text.split(" "); let line = "", yy = y; for (const w of words) { const test = line + w + " "; if (c.measureText(test).width > mw && line) { c.fillText(line.trim(), x, yy); line = w + " "; yy += lh; } else line = test; } c.fillText(line.trim(), x, yy); }
+  function roundRect(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  async function shareCard() {
+    const cv = cardCanvas();
+    cv.toBlob(async blob => {
+      const file = new File([blob], "omur-defteri.png", { type: "image/png" });
+      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: shareText() }); return; } } catch (e) { }
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "omur-defteri-" + G.L.name + ".png"; a.click();
+      toast(t("saved"));
+    });
+  }
+  async function copyText(txt) { try { await navigator.clipboard.writeText(txt); } catch (e) { const ta = document.createElement("textarea"); ta.value = txt; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e2) { } ta.remove(); } toast(t("copied")); }
+
+  // ------------------------------------------------------------ defter, rozetler, yardım
+  function openBook() {
+    const book = loadBook();
+    const avg = book.length ? Math.round(book.reduce((s, b) => s + b.age, 0) / book.length) : 0, mx = book.length ? Math.max(...book.map(b => b.age)) : 0;
+    $("#m-book").innerHTML = `<div class="mbox"><button class="ib x" id="x-book">${t("close")}</button><h2>${t("book")}</h2>${book.length ? `<div class="mut" style="color:var(--mut);margin-bottom:10px">${fillT("bookSum", { n: book.length, a: avg, m: mx })}</div>` : ""}
+      <div class="bk">${book.length ? book.map((b, i) => `<div class="it" data-i="${i}"><b>${esc(b.name)}</b> · ${esc(cname(OD.byCode[b.c]))} · ${b.birth}–${b.birth + b.age} <span class="chip" style="float:right">${b.grade} · ${b.age} ${t("years")}</span><div style="color:var(--mut);font-size:13.5px">${esc(tx(OD.fmt({ name: b.name, c: OD.byCode[b.c], birthCountry: OD.byCode[b.c], kids: [], age: b.age, birth: b.birth }, b.cause)))}</div><div class="det" style="display:none;margin-top:8px">${b.stars.map(s => `<div class="hl"><b>${s.age}</b> ${esc(tx(s.t))}${s.r ? " <span style='color:var(--teal)'>" + esc(tx(s.r)) + "</span>" : ""}</div>`).join("")}<div style="margin-top:6px"><button class="btn sm g" data-ch="${b.seed}">${t("link")}</button></div></div></div>`).join("") : `<div class="mut" style="color:var(--mut)">${t("bookEmpty")}</div>`}</div>
+      ${book.length ? `<div style="margin-top:12px"><button class="btn sm g" id="b-clear">${t("clear")}</button></div>` : ""}</div>`;
+    modal("m-book", true);
+    $("#x-book").onclick = () => modal("m-book", false);
+    $$("#m-book .it").forEach(it => it.onclick = e => { if (e.target.closest("button")) return; const d = it.querySelector(".det"); d.style.display = d.style.display === "none" ? "block" : "none"; });
+    $$("#m-book [data-ch]").forEach(b => b.onclick = () => copyText(location.href.split("#")[0] + "#s=" + b.dataset.ch));
+    const cl = $("#b-clear"); if (cl) cl.onclick = () => { if (confirm(t("confirm"))) { store.set("od_lives", []); openBook(); } };
+  }
+  function openBadges() {
+    const have = store.get("od_badges", {});
+    $("#m-badges").innerHTML = `<div class="mbox"><button class="ib x" id="x-bdg">${t("close")}</button><h2>${t("badges")} · ${Object.keys(have).length}/${OD.BADGES.length}</h2><div class="badges">${OD.BADGES.map(b => `<div class="bdg ${have[b.id] ? "" : "lock"}"><b>${lang === "tr" ? b.tr : b.en}</b><small>${lang === "tr" ? b.dtr : b.den}</small></div>`).join("")}</div></div>`;
+    modal("m-badges", true); $("#x-bdg").onclick = () => modal("m-badges", false);
+  }
+  function openHelp() {
+    $("#m-help").innerHTML = `<div class="mbox"><button class="ib x" id="x-help">${t("close")}</button><h2>${t("help")}</h2>${t("helpBody")}<p style="color:var(--mut);font-size:14px">${t("fictional")}</p></div>`;
+    modal("m-help", true); $("#x-help").onclick = () => modal("m-help", false);
+  }
+
+  // ------------------------------------------------------------ olaylar
+  function newGame(seedFromHash, practice) {
+    const seed = seedFromHash || OD.newSeedCode();
+    if (!practice) history.replaceState(null, "", "#s=" + seed);
+    startBirth(seed, practice || null);
+  }
+  function init() {
+    i18nStatic(); renderHome();
+    $("#b-lang").onclick = () => { lang = lang === "tr" ? "en" : "tr"; store.set("od_lang", lang); i18nStatic(); renderHome(); if (G.L) { if ($("#s-life").classList.contains("on")) { relang(); } else if ($("#s-end").classList.contains("on")) renderEnd(); else if ($("#s-birth").classList.contains("on") && G.birthL) land(); } };
+    $("#b-snd").onclick = () => { soundOn = !soundOn; store.set("od_sound", soundOn); i18nStatic(); };
+    $("#b-book").onclick = openBook; $("#b-badges").onclick = openBadges; $("#b-help").onclick = openHelp;
+    $(".brand").onclick = () => { clearTimeout(G.timer); G.L = null; renderHome(); show("s-home"); };
+    $("#h-start").onclick = () => {
+      const pr = $("#h-prac").value;
+      const m = location.hash.match(/s=([A-Za-z0-9]{4,12})/);
+      newGame(m ? m[1].toUpperCase() : null, pr || null);
+    };
+    $("#h-fresh").onclick = () => { history.replaceState(null, "", location.pathname); renderHome(); newGame(null, $("#h-prac").value || null); };
+    $("#birth-begin").onclick = beginLife;
+    $("#birth-redo").onclick = () => newGame(G.practice ? OD.newSeedCode() : null, G.practice ? G.L.c.code : null);
+    $("#c-pause").onclick = () => setPaused(!G.paused);
+    $("#c-next").onclick = () => { if (G.L && !G.L.pending && !G.L.dead) { clearTimeout(G.timer); advance(); } };
+    $("#c-auto").onclick = () => { G.auto = !G.auto; store.set("od_auto", G.auto); renderSide(); if (G.auto && G.L && G.L.pending) showPending(); };
+    $$(".sbtn[data-sp]").forEach(b => b.onclick = () => { G.speed = +b.dataset.sp; renderSide(); if (!G.paused) schedule(); });
+    $("#e-share").onclick = shareCard;
+    $("#e-copy").onclick = () => copyText(shareText());
+    $("#e-link").onclick = () => copyText(shareLink());
+    $("#e-new").onclick = () => { history.replaceState(null, "", location.pathname); newGame(null, G.practice ? G.L.c.code : null); };
+    $("#e-same").onclick = () => newGame(G.L.seed, G.practice ? G.L.c.code : null);
+    $("#e-book").onclick = openBook;
+    document.addEventListener("keydown", e => {
+      if (e.target.closest && e.target.closest("input,select,textarea")) return;
+      if (!$("#s-life").classList.contains("on")) return;
+      if (e.key === " ") { e.preventDefault(); setPaused(!G.paused); }
+      else if (e.key.toLowerCase() === "n") $("#c-next").click();
+      else if (e.key.toLowerCase() === "a") $("#c-auto").click();
+      else if (/^[1-9]$/.test(e.key) && G.L && G.L.pending) { const i = +e.key - 1; if (i < G.L.pending.choices.length) pick(i); }
+    });
+    document.addEventListener("visibilitychange", () => { if (document.hidden && G.L && $("#s-life").classList.contains("on") && !G.paused) setPaused(true); });
+    window.addEventListener("resize", () => { if (G.L && $("#s-life").classList.contains("on")) drawChart($("#chart"), G.L.series, G.L); });
+    window.addEventListener("hashchange", renderHome);
+    $("#legend").innerHTML = legend();
+    window.__OD_G = G;
+  }
+  function relang() {
+    const L = G.L;
+    $("#feed").innerHTML = ""; G.shown = 0;
+    // geçmiş girişleri yeniden çiz (eski -> yeni)
+    const feed = $("#feed");
+    L.log.forEach((e, i) => feed.insertAdjacentHTML("afterbegin", entryHTML(e, i)));
+    G.shown = L.log.length;
+    $$(".star", feed).forEach(b => { b.onclick = () => { const i = +b.closest(".ent").dataset.i; OD.toggleStar(L, i); b.classList.toggle("on", L.log[i].star); b.textContent = L.log[i].star ? "★" : "☆"; }; });
+    renderSide(true); $("#legend").innerHTML = legend(); $("#fict").textContent = t("fictional");
+    if (L.pending) showPending(); else { const last = [...L.log].reverse().find(e => !e.quiet) || L.log[L.log.length - 1]; if (last) setStage(last); }
+  }
+  document.addEventListener("DOMContentLoaded", init);
+})();
+
+</script>
+</body></html>
