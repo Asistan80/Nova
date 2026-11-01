@@ -720,7 +720,7 @@
   {
     "name": "ENERJİ ÇEKİRDEĞİ",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [
@@ -744,7 +744,7 @@
   {
     "name": "KARTAL SAVUNMA TANK",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [],
@@ -766,7 +766,7 @@
   {
     "name": "NEON KALE",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [],
@@ -788,7 +788,7 @@
   {
     "name": "NEON TETRIS",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [],
@@ -841,7 +841,7 @@
   {
     "name": "Sınır Boyu",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Yapay zeka ile yaptığım eğlenceli oyun.",
     "tags": [],
@@ -863,7 +863,7 @@
   {
     "name": "Sudoko",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Yapay zeka ile yaptığım eğlenceli farklı ve güzel oyun. Kolay zor uzman  seçenekleri mevcut. Keyifli oyunlar.",
     "tags": [],
@@ -885,7 +885,7 @@
   {
     "name": "Masaüstü Arkadaşı",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Masaüstünde kendi kendine gezen oynayan oyun. Çeşitli karakterler mevcut. Yapay zeka ile yaptım.",
     "tags": [],
@@ -907,7 +907,7 @@
   {
     "name": "Kadim Kervan",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Güzel bir strateji oyunu. Yapay zeka ile yaptım.",
     "tags": [],
@@ -929,7 +929,7 @@
   {
     "name": "Ai Lab",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Yapay zeka ile yaptım. Farklı bir uygulama oyun.",
     "tags": [],
@@ -951,7 +951,7 @@
   {
     "name": "Bozkurt-Survivors",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "Oyun",
     "desc": "Yapay zeka ile yaptığım güzel oyunlardan bir tane daha size. Oynayıp deneyin.",
     "tags": [],
@@ -1174,7 +1174,7 @@
   {
     "name": "Sessiz Konak",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "Yapay zeka ile yapmış olduğum farklı bir oyun daha sizlerle",
     "tags": [],
@@ -1276,7 +1276,7 @@
   {
     "name": "Ömür Defteri",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [],
@@ -1294,5 +1294,27 @@
     "updated_at": "",
     "slug": "omur-defteri",
     "created_at": "2026-11-01T08:04:18.227658+00:00"
+  },
+  {
+    "name": "Evrim Havuzu",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "Yapay zeka ile yaptığım değişik bir oyun.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "evrim-havuzu-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/evrim-havuzu",
+    "download_url": null,
+    "download_file": "EvrimHavuzu_Windows.zip",
+    "updated_at": "",
+    "slug": "evrim-havuzu",
+    "created_at": "2026-11-01T09:00:54.649698+00:00"
   }
 ]
