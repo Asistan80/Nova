@@ -58,6 +58,37 @@ TAKIMADA = {
     "updated_at": "",
 }
 
+OMUR = {
+    "slug": "omur-defteri",
+    "name": "Ömür Defteri",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Rastgele bir ülkede doğ, yıl yıl yaşa, bir ömür yaz",
+    "desc": "Doğum çekilişiyle dünyanın bir yerinde, rastgele bir ailede doğarsın. Her yıl bir şey olur: okul, aşk, iş, sağlık, kriz, fırsat. Dört gösterge (Sağlık, Mutluluk, Zihin, Bağlar) ve Refah arasında denge kur, kararlarını ver, anılarını yıldızla. Sonunda hayatın tek kartta: paylaş, arkadaşına aynı doğumla meydan oku.",
+    "tags": ["Tarayıcı", "Hayat simülasyonu", "Seçimli", "Türkçe/English"],
+    "features": [
+        "50 ülkeden doğum çekilişi ve doğum belgesi (1/N şansı)",
+        "Yıl yıl 170'ten fazla olay, dönüm noktalarında kararlar",
+        "Sağlık, Mutluluk, Zihin, Bağlar ve Refah göstergeleri",
+        "Hayatlar Defteri, rozetler ve paylaşılabilir hayat kartı",
+        "Aynı doğum koduyla arkadaşına meydan oku",
+        "Türkçe ve İngilizce, kurulum gerektirmez",
+    ],
+    "changelog": [{"version": "1.1", "date": "2026-11-01", "text": "Olay sayısı 179'a çıktı: ülke, dönem, yetenek ve meslek olayları."}, {"version": "1.0", "date": "2026-10-31", "text": "İlk sürüm."}],
+    "version": "1.1",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "cover": "omur-defteri-oyun.png",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg", "ekran-6.jpg"],
+    "play_url": "/oyna/omur-defteri",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+}
+
+SEEDS = [TAKIMADA, OMUR]
+
 
 def _empty(v):
     return v in (None, "", [], {}) or v == "Oyun"

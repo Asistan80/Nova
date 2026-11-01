@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sessiz Konak</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;background:#000;color:#d8cdb8;font:18px/1.6 Georgia,'Times New Roman',serif;min-height:100%}
+body{display:flex;flex-direction:column;align-items:center;min-height:100vh}
+#wrap{width:100%;max-width:880px;padding:12px}
+#stage{position:relative;border:1px solid #2a211a;background:#000;overflow:hidden}
+#cv{display:block;width:100%;height:auto;aspect-ratio:16/9;filter:contrast(1.05) saturate(.85)}
+body.low #cv{filter:contrast(1.2) saturate(.5) hue-rotate(-10deg)}body.vlow #cv{filter:contrast(1.4) saturate(.2) brightness(.8);animation:tw .4s infinite}
+@keyframes tw{0%,100%{transform:translate(0)}30%{transform:translate(2px,-1px)}60%{transform:translate(-2px,1px)}}
+#hud{position:absolute;left:0;right:0;top:0;display:flex;gap:12px;align-items:center;padding:8px 10px;background:linear-gradient(#000c,#0000);font-size:13px}
+#hud.hit{animation:hit .6s}@keyframes hit{0%{background:#a0000066}100%{background:linear-gradient(#000c,#0000)}}
+#san{width:120px;height:7px;background:#2a2420;border-radius:4px;overflow:hidden}#sanfill{height:100%;width:100%}
+.it{border:1px solid #5a4a30;border-radius:10px;padding:0 8px;margin-right:4px;color:#c9a15a}.dim{color:#665}
+#hud .sp{flex:1}.mini{background:#0009;border:1px solid #3a2e22;color:#b9aa8d;border-radius:6px;padding:2px 8px;font:inherit;font-size:12px;cursor:pointer}
+#scare{position:absolute;inset:0;display:none;background:#000;z-index:5}#scare.on{display:block}#scare canvas{width:100%;height:100%;display:block}
+#scare.knock canvas,#scare.lights canvas{opacity:1}
+body.shake #stage{animation:sh .08s infinite}@keyframes sh{0%{transform:translate(4px,3px)}50%{transform:translate(-5px,-2px)}100%{transform:translate(2px,-4px)}}
+#title{color:#c9a15a;letter-spacing:.14em;text-transform:uppercase;font-size:13px;margin:12px 0 2px;min-height:18px}
+#text{white-space:pre-wrap;min-height:150px;cursor:pointer}
+#whisper{color:#a0261c;letter-spacing:.3em;font-size:14px;min-height:22px;animation:fl 1.3s infinite}@keyframes fl{50%{opacity:.35}}
+#notice{color:#8fae7a;font-size:15px;font-style:italic;min-height:22px}
+#choices{display:flex;flex-direction:column;gap:8px;margin:10px 0 20px}
+#choices button,.menu button{background:#14100c;color:#d8cdb8;border:1px solid #3a2e22;border-radius:6px;padding:10px 14px;font:inherit;text-align:left;cursor:pointer}
+#choices button:hover,.menu button:hover{border-color:#c9a15a;background:#221a12}
+#menu{display:none;position:absolute;inset:0;z-index:4;background:#000b;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center}
+#menu.on{display:flex}#menu h1{margin:0;font-weight:normal;letter-spacing:.3em;color:#c9a15a;font-size:34px;text-shadow:0 0 18px #a0261c}.menu button{min-width:230px;text-align:center}
+#end{display:none;position:absolute;inset:0;pointer-events:none;z-index:3}#end.on{display:block;animation:fade 2s forwards}#end.bad{background:#2a000055}#end.good{background:#ffe8b022}@keyframes fade{from{opacity:0}to{opacity:1}}
+body.ending #text{font-size:19px}
+.sub{color:#887;font-size:13px}
+</style></head><body><div id="wrap">
+<div id="stage"><canvas id="cv" width="800" height="450"></canvas>
+<div id="hud"><span>Akıl</span><div id="san"><div id="sanfill"></div></div><div id="inv"></div><span class="sp"></span><button class="mini" id="snd">Ses: Açık</button><button class="mini" id="homebtn">Menü</button></div>
+<div id="scare"><canvas id="scarecv" width="800" height="450"></canvas></div><div id="end"></div>
+<div id="menu"><h1>SESSİZ KONAK</h1><div class="sub">metin tabanlı korku · sesli · seçimli</div><div class="menu"><button id="newbtn">Yeni oyun</button><br><button id="cont">Devam et</button></div><div class="sub" id="endcount2"></div><div class="sub" style="max-width:420px">Kulaklıkla, karanlıkta oyna. Ses ve ani korkutmalar içerir. Klavyede 1-9 ile seçim yapabilirsin.</div></div></div>
+<div id="title"></div><div id="text"></div><div id="whisper"></div><div id="notice"></div><div id="choices"></div><div class="sub" id="endcount"></div>
+</div>
+<script src="story.js"></script><script src="art.js"></script><script src="audio.js"></script><script src="game.js"></script></body></html>

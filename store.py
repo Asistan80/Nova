@@ -56,17 +56,21 @@ def all_projects():
 
 
 def ensure_seed_projects():
-    """Takımada Turu kaydı yoksa bir kez ekler (diğer kayıtlara dokunmaz)."""
+    """Takımada Turu ve Ömür Defteri kayıtları yoksa bir kez ekler (diğer kayıtlara dokunmaz)."""
     import copy
     import datetime
     import seed_data
     projects = _read_json(PROJECTS_FILE, [])
-    if any(p.get("slug") == "takimada-turu" for p in projects):
-        return
-    rec = copy.deepcopy(seed_data.TAKIMADA)
-    rec["created_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
-    projects.append(rec)
-    save_projects(projects)
+    changed = False
+    for seed in seed_data.SEEDS:
+        if any(p.get("slug") == seed["slug"] for p in projects):
+            continue
+        rec = copy.deepcopy(seed)
+        rec["created_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        projects.append(rec)
+        changed = True
+    if changed:
+        save_projects(projects)
 
 
 def save_projects(projects):

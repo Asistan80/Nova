@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Neon Tetris</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 15%, #1a1442 0%, #0a0518 60%, #050310 100%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Orbitron',sans-serif; color:#e8e8ff; padding:20px; gap:12px; }
+  h1 { font-family:'Press Start 2P',monospace; font-size:20px; letter-spacing:2px;
+    background:linear-gradient(90deg,#4dd8ff,#a366ff,#ff4dd8); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(163,102,255,.4); }
+  #topbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .iconbtn { background:#1a1442; border:1px solid #3a2d6e; color:#c8c0f0; border-radius:8px; padding:6px 12px;
+    cursor:pointer; font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; transition:.15s; }
+  .iconbtn:hover { border-color:#a366ff; box-shadow:0 0 12px rgba(163,102,255,.4); }
+  #stageWrap { background:#050310; }
+  #stageWrap:fullscreen { display:flex; align-items:center; justify-content:center; height:100vh; width:100vw; }
+  #stageWrap.expanded { position:fixed; inset:0; z-index:9999; width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center; background:#050310; overflow:auto; }
+  #stageInner { display:flex; flex-direction:column; align-items:center; gap:12px; transform-origin: top center; }
+  #main { display:flex; gap:18px; align-items:flex-start; }
+  .panel { background:#0c0820; border:2px solid #3a2d6e; border-radius:8px; padding:12px;
+    box-shadow:0 0 25px rgba(77,216,255,.15); }
+  .label { font-size:10px; letter-spacing:1.5px; color:#8378c4; margin-bottom:6px; text-align:center; }
+  canvas { display:block; image-rendering:pixelated; }
+  #board { background:#08061a; border-radius:4px; }
+  #side { display:flex; flex-direction:column; gap:12px; width:120px; }
+  #stats div { font-size:11px; color:#9d93d8; margin-bottom:4px; }
+  #stats b { color:#4dd8ff; text-shadow:0 0 6px rgba(77,216,255,.5); }
+  #botWrap { display:none; }
+  #overlay { position:fixed; inset:0; background:rgba(5,3,16,.94); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center; z-index:10; padding:16px; overflow:auto; }
+  #overlay.hidden { display:none; }
+  #overlay h2 { font-family:'Press Start 2P',monospace; font-size:15px; color:#ff4dd8; text-shadow:0 0 18px rgba(255,77,216,.6); }
+  #overlay p { font-size:12px; color:#b8b0e8; max-width:380px; line-height:1.7; }
+  .modes { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:420px; }
+  .modeBtn { font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; background:#1a1442;
+    border:2px solid #3a2d6e; color:#c8c0f0; padding:10px 14px; border-radius:10px; cursor:pointer; transition:.15s; min-width:100px; }
+  .modeBtn:hover, .modeBtn.active { border-color:#a366ff; box-shadow:0 0 16px rgba(163,102,255,.5); color:#fff; }
+  .modeBtn small { display:block; opacity:.6; font-weight:500; margin-top:3px; }
+  button.go { font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; letter-spacing:1px;
+    background:linear-gradient(135deg,#4dd8ff,#a366ff); color:#08051a; border:none; padding:12px 28px;
+    border-radius:30px; cursor:pointer; box-shadow:0 0 20px rgba(163,102,255,.5); }
+  #controls { font-size:10px; color:#6d63a0; text-align:center; max-width:460px; line-height:1.6; }
+  .badge { display:inline-block; background:#1a1442; border:1px solid #3a2d6e; border-radius:4px; padding:2px 7px; margin:0 2px; color:#a366ff; }
+  #nameInput { font-family:'Orbitron',sans-serif; padding:8px 12px; border-radius:8px; border:1px solid #3a2d6e;
+    background:#0c0820; color:#e8e8ff; font-size:13px; text-align:center; width:180px; }
+  table#lbTable { border-collapse:collapse; font-size:11px; color:#c8c0f0; }
+  table#lbTable td, table#lbTable th { padding:4px 10px; border-bottom:1px solid #2a2450; }
+  table#lbTable th { color:#4dd8ff; }
+</style>
+</head>
+<body>
+<h1>▦ NEON TETRIS</h1>
+<div id="topbar">
+  <button class="iconbtn" id="homeBtn">⌂ Oyunlar</button>
+  <button class="iconbtn" id="soundBtn">🔊 Ses</button>
+  <button class="iconbtn" id="fsBtn">⛶ Tam Ekran</button>
+  <button class="iconbtn" id="lbBtn">🏆 Skorlar</button>
+  <button class="iconbtn" id="menuBtn">☰ Mod Seç</button>
+</div>
+<div id="stageWrap"><div id="stageInner">
+<div id="main">
+  <div class="panel" id="botWrap">
+    <div class="label">BOT</div>
+    <canvas id="botBoard" width="150" height="300"></canvas>
+  </div>
+  <div class="panel">
+    <div class="label" id="boardLabel">SEN</div>
+    <canvas id="board" width="240" height="480"></canvas>
+  </div>
+  <div id="side">
+    <div class="panel">
+      <div class="label">SIRADAKİ</div>
+      <canvas id="next" width="96" height="240"></canvas>
+    </div>
+    <div class="panel">
+      <div class="label">SAKLA</div>
+      <canvas id="hold" width="96" height="80"></canvas>
+    </div>
+    <div class="panel" id="stats">
+      <div>SKOR: <b id="score">0</b></div>
+      <div>SATIR: <b id="lines">0</b></div>
+      <div>SEVİYE: <b id="level">1</b></div>
+      <div id="timerRow" style="display:none">SÜRE: <b id="timer">0:00</b></div>
+    </div>
+  </div>
+</div>
+<div id="controls">
+  <span class="badge">◀ ▶</span> hareket (basılı tut = seri) &nbsp; <span class="badge">▲</span> döndür &nbsp;
+  <span class="badge">▼</span> yumuşak düşür &nbsp; <span class="badge">SPACE</span> sert düşür &nbsp;
+  <span class="badge">C</span> sakla &nbsp; <span class="badge">P</span> duraklat
+</div>
+</div></div>
+<div id="overlay">
+  <h2 id="ovTitle">NEON TETRIS</h2>
+  <p id="ovText">Bir mod seç ve başla.</p>
+  <div class="modes" id="modeSelect">
+    <div class="modeBtn active" data-mode="marathon">MARATHON<small>Klasik, sonsuz</small></div>
+    <div class="modeBtn" data-mode="sprint">SPRINT<small>40 satır, süreye karşı</small></div>
+    <div class="modeBtn" data-mode="ultra">ULTRA<small>2 dk skor yarışı</small></div>
+    <div class="modeBtn" data-mode="battle">BATTLE<small>Bota karşı</small></div>
+    <div class="modeBtn" data-mode="cheese">PEYNİR<small>Delikli satırları temizle</small></div>
+    <div class="modeBtn" data-mode="zen">ZEN<small>Bitmeyen antrenman</small></div>
+    <div class="modeBtn" data-mode="blackout">KARANLIK<small>Sadece parçanın etrafı görünür</small></div>
+    <div class="modeBtn" data-mode="puzzle">BULMACA<small>Sabit düzenler, sınırlı parça</small></div>
+  </div>
+  <div id="ovExtra"></div>
+  <button class="go" id="ovBtn">BAŞLA</button>
+</div>
+
+<script>
+/* ============ SES MOTORU ============ */
+let audioCtx=null, soundOn=true;
+function ensureAudio(){ if(!audioCtx){ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); } }
+function tone(freq,dur,type,vol,delay){
+  if(!soundOn) return; ensureAudio();
+  const t0 = audioCtx.currentTime+(delay||0);
+  const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  osc.type=type||'square'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(vol||0.07,t0); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(audioCtx.destination); osc.start(t0); osc.stop(t0+dur);
+}
+const sfx = {
+  move(){ tone(300,0.03,'square',0.03); },
+  rotate(){ tone(420,0.05,'square',0.04); },
+  lock(){ tone(180,0.06,'square',0.05); },
+  hold(){ tone(500,0.08,'triangle',0.05); },
+  clear(n){ const base=[0,523,659,784,1046][n]||1046; tone(base,0.15,'square',0.08); if(n>=4) tone(1568,0.2,'square',0.08,0.1); },
+  drop(){ tone(150,0.08,'sawtooth',0.06); },
+  gameOver(){ [400,350,300,250,200].forEach((f,i)=>tone(f,0.3,'sawtooth',0.08,i*0.2)); },
+  win(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.18,'triangle',0.08,i*0.11)); },
+};
+document.getElementById('soundBtn').addEventListener('click', ()=>{
+  soundOn=!soundOn;
+  document.getElementById('soundBtn').textContent = soundOn?'🔊 Ses':'🔇 Ses';
+});
+
+/* ============ TAM EKRAN ============ */
+const stageWrap = document.getElementById('stageWrap');
+const stageInner = document.getElementById('stageInner');
+let expanded = false;
+document.getElementById('fsBtn').addEventListener('click', ()=>{
+  expanded = !expanded;
+  stageWrap.classList.toggle('expanded', expanded);
+  if(expanded){
+    document.getElementById('fsBtn').textContent = '↙ Küçült';
+    if(stageWrap.requestFullscreen) stageWrap.requestFullscreen().catch(()=>{});
+  } else {
+    document.getElementById('fsBtn').textContent = '⛶ Tam Ekran';
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }
+  resizeStage();
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && expanded){ expanded=false; stageWrap.classList.remove('expanded'); document.getElementById('fsBtn').textContent='⛶ Tam Ekran'; resizeStage(); }
+});
+function resizeStage(){
+  if(expanded || document.fullscreenElement){
+    const scale = Math.min(window.innerWidth/560, window.innerHeight/560) * 0.95;
+    stageInner.style.transform = `scale(${scale})`;
+  } else { stageInner.style.transform='none'; }
+}
+window.addEventListener('resize', resizeStage);
+
+/* ============ ANA SAYFA / MOD SEÇ ============ */
+const HOME_URL = null; // sitenize entegre ederken buraya oyunlar sayfanızın linkini yazın
+document.getElementById('homeBtn').addEventListener('click', ()=>{ if(HOME_URL) window.location.href=HOME_URL; else history.back(); });
+document.getElementById('menuBtn').addEventListener('click', ()=>{ state='menu'; showOverlay('NEON TETRIS','Bir mod seç ve başla.','BAŞLA'); document.getElementById('modeSelect').style.display='flex'; });
+
+/* ============ SKOR TABLOSU / BACKEND ENTEGRASYON NOKTASI ============ */
+// NOT: Flask+SQLite tarafında tanımlanacak endpoint'ler:
+//   GET  /api/scores/tetris   -> [{name, score, mode}, ...]
+//   POST /api/scores/tetris   -> body: {name, score, mode} kaydeder
+// Endpoint yoksa oyun otomatik olarak sadece oturum-içi bellekte tutar.
+const SCORE_ENDPOINT = '/api/scores/tetris';
+let leaderboard = [];
+async function fetchLeaderboard(){
+  try{ const res = await fetch(SCORE_ENDPOINT); if(res.ok){ leaderboard = await res.json(); return; } } catch(e){}
+}
+async function submitScore(name, score, modeName){
+  const entry = {name: name||'???', score, mode:modeName};
+  try{
+    const res = await fetch(SCORE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry)});
+    if(res.ok){ await fetchLeaderboard(); return; }
+  } catch(e){}
+  leaderboard.push(entry); leaderboard.sort((a,b)=>b.score-a.score); leaderboard=leaderboard.slice(0,10);
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderLeaderboardHTML(){
+  if(leaderboard.length===0) return '<p style="font-size:11px;color:#6d63a0">Henüz skor yok. İlk sen ol!</p>';
+  let rows = leaderboard.slice(0,10).map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.name)}</td><td>${e.score}</td><td>${e.mode||'-'}</td></tr>`).join('');
+  return `<table id="lbTable"><tr><th>#</th><th>İsim</th><th>Skor</th><th>Mod</th></tr>${rows}</table>`;
+}
+document.getElementById('lbBtn').addEventListener('click', async ()=>{
+  await fetchLeaderboard();
+  showOverlay('SKOR TABLOSU','','KAPAT');
+  document.getElementById('modeSelect').style.display='none';
+  document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+  ovBtn.dataset.mode='closeLb'; state='menu-lb';
+});
+
+/* ============ TETRIS ÇEKİRDEĞİ ============ */
+const COLS=10, ROWS=20, CELL=24;
+const boardCv = document.getElementById('board'), bctx = boardCv.getContext('2d');
+const nextCv = document.getElementById('next'), nctx = nextCv.getContext('2d');
+const holdCv = document.getElementById('hold'), hctx = holdCv.getContext('2d');
+const botCv = document.getElementById('botBoard'), botCtx = botCv.getContext('2d');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle'), ovText = document.getElementById('ovText'), ovBtn = document.getElementById('ovBtn');
+const elScore = document.getElementById('score'), elLines = document.getElementById('lines'), elLevel = document.getElementById('level');
+const elTimer = document.getElementById('timer'), timerRow = document.getElementById('timerRow');
+const botWrap = document.getElementById('botWrap'), boardLabel = document.getElementById('boardLabel');
+
+const COLORS = { I:'#4dd8ff', O:'#ffd166', T:'#a366ff', S:'#5fd97a', Z:'#ff5566', J:'#4d7bff', L:'#ff9a4d' };
+const SHAPES = {
+  I: [[0,1],[1,1],[2,1],[3,1]], O: [[1,0],[2,0],[1,1],[2,1]], T: [[1,0],[0,1],[1,1],[2,1]],
+  S: [[1,0],[2,0],[0,1],[1,1]], Z: [[0,0],[1,0],[1,1],[2,1]], J: [[0,0],[0,1],[1,1],[2,1]], L: [[2,0],[0,1],[1,1],[2,1]],
+};
+const KEYS = Object.keys(SHAPES);
+function rotateCells(cells, times){
+  let c = cells;
+  for(let t=0;t<((times%4)+4)%4;t++) c = c.map(([x,y])=>[y, 3-x]);
+  return c;
+}
+function bag(){
+  const arr = KEYS.slice();
+  for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+  return arr;
+}
+
+class Board {
+  constructor(opts){
+    opts = opts||{};
+    this.grid = Array.from({length:ROWS},()=>Array(COLS).fill(null));
+    this.queue = [...bag(),...bag()];
+    this.hold = null; this.canHold = true;
+    this.cur = null; this.curRot = 0; this.curX=0; this.curY=0;
+    this.dropTimer=0; this.dropInterval=48;
+    this.lockTimer=-1;
+    this.score=0; this.lines=0; this.level=1;
+    this.gameOver=false; this.won=false;
+    this.isBot = !!opts.bot;
+    this.zen = !!opts.zen;
+    this.pendingGarbage=0;
+    this.combo=-1;
+    this.isPuzzle=false; this.fixedMode=false; this.puzzleRemaining=0;
+    if(opts.puzzleGrid){
+      this.grid = opts.puzzleGrid.map(r=>r.slice());
+      this.isPuzzle=true;
+      this.puzzleRemaining = opts.puzzleGrid.flat().filter(c=>c==='PUZ').length;
+    }
+    if(opts.fixedQueue){ this.queue = opts.fixedQueue.slice(); this.fixedMode=true; }
+    if(opts.garbageRows) this.addGarbage(opts.garbageRows, true);
+    this.spawn();
+  }
+  nextPiece(){
+    if(this.fixedMode) return this.queue.length ? this.queue.shift() : null;
+    if(this.queue.length<7) this.queue.push(...bag());
+    return this.queue.shift();
+  }
+  spawn(){
+    const k = this.nextPiece();
+    if(k===null){ this.gameOver = true; return; }
+    this.cur=k; this.curRot=0; this.curX=3; this.curY=-1; this.canHold=true;
+    if(this.isBot) this.planBotMove();
+    if(this.collides(this.curX,this.curY,this.curRot)){
+      if(this.zen){ this.grid = Array.from({length:ROWS},()=>Array(COLS).fill(null)); }
+      else this.gameOver = true;
+    }
+  }
+  cells(rot,k){ return rotateCells(SHAPES[k||this.cur], rot); }
+  collides(px,py,rot,k){
+    const cells = this.cells(rot,k);
+    for(const [cx,cy] of cells){
+      const x=px+cx, y=py+cy;
+      if(x<0||x>=COLS||y>=ROWS) return true;
+      if(y>=0 && this.grid[y][x]) return true;
+    }
+    return false;
+  }
+  tryMove(dx,dy){ if(!this.collides(this.curX+dx,this.curY+dy,this.curRot)){ this.curX+=dx; this.curY+=dy; return true; } return false; }
+  tryRotate(dir){
+    const newRot = this.curRot+dir;
+    for(const k of [0,-1,1,-2,2]){
+      if(!this.collides(this.curX+k,this.curY,newRot)){ this.curX+=k; this.curRot=newRot; return true; }
+    }
+    return false;
+  }
+  hardDrop(){
+    let d=0;
+    while(!this.collides(this.curX,this.curY+d+1,this.curRot)) d++;
+    this.curY+=d; this.score += d*2; this.lock();
+  }
+  ghostY(){ let d=0; while(!this.collides(this.curX,this.curY+d+1,this.curRot)) d++; return this.curY+d; }
+  lock(){
+    const cells = this.cells(this.curRot);
+    for(const [cx,cy] of cells){ const x=this.curX+cx, y=this.curY+cy; if(y>=0) this.grid[y][x]=this.cur; }
+    const cleared = this.clearLines();
+    if(this.pendingGarbage>0){ this.addGarbage(this.pendingGarbage); this.pendingGarbage=0; }
+    if(this.isPuzzle && this.puzzleRemaining<=0){ this.won=true; return cleared; }
+    this.spawn();
+    return cleared;
+  }
+  clearLines(){
+    let cleared=0;
+    for(let y=ROWS-1;y>=0;y--){
+      if(this.grid[y].every(c=>c)){
+        if(this.isPuzzle) this.puzzleRemaining -= this.grid[y].filter(c=>c==='PUZ').length;
+        this.grid.splice(y,1); this.grid.unshift(Array(COLS).fill(null)); cleared++; y++;
+      }
+    }
+    if(cleared>0){
+      const base=[0,100,300,500,800][cleared]||800;
+      this.combo = this.combo<0?0:this.combo+1;
+      this.score += base*this.level + this.combo*50;
+      this.lines += cleared;
+      this.level = 1+Math.floor(this.lines/10);
+      this.dropInterval = Math.max(6, 48 - (this.level-1)*4);
+      if(this.opponent && cleared>=2) this.opponent.pendingGarbage += (cleared===2?1:cleared===3?2:4);
+      onLinesCleared && onLinesCleared(this, cleared);
+    } else { this.combo=-1; }
+    return cleared;
+  }
+  addGarbage(n, noHoleVariety){
+    for(let i=0;i<n;i++){
+      this.grid.shift();
+      const hole = Math.floor(Math.random()*COLS);
+      const row = Array(COLS).fill('GARB'); row[hole]=null;
+      this.grid.push(row);
+    }
+  }
+  swapHold(){
+    if(!this.canHold) return;
+    this.canHold=false;
+    if(this.hold===null){ this.hold=this.cur; this.spawn(); }
+    else { const tmp=this.hold; this.hold=this.cur; this.cur=tmp; this.curRot=0; this.curX=3; this.curY=-1; }
+  }
+  step(dt){
+    if(this.gameOver) return;
+    this.dropTimer += dt;
+    if(this.dropTimer >= this.dropInterval){
+      this.dropTimer=0;
+      if(!this.tryMove(0,1)){ this.lockTimer += 1; if(this.lockTimer>2){ this.lock(); this.lockTimer=-1; } }
+      else this.lockTimer=-1;
+    }
+  }
+  hasGarbage(){ return this.grid.some(row=>row.some(c=>c==='GARB')); }
+  planBotMove(){
+    let best=null;
+    for(let rot=0;rot<4;rot++){
+      const cells0 = this.cells(rot,this.cur);
+      const minX = -Math.min(...cells0.map(c=>c[0]));
+      const maxX = COLS-1-Math.max(...cells0.map(c=>c[0]));
+      for(let x=minX; x<=maxX; x++){
+        if(this.collides(x,-1,rot)) continue;
+        let y=-1; while(!this.collides(x,y+1,rot)) y++;
+        const score = this.evalPlacement(x,y,rot);
+        if(!best || score>best.score) best={x,rot,score};
+      }
+    }
+    this.botTarget = best;
+  }
+  evalPlacement(px,py,rot){
+    const cells = this.cells(rot,this.cur);
+    const g = this.grid.map(r=>r.slice());
+    for(const [cx,cy] of cells){ const x=px+cx,y=py+cy; if(y>=0&&y<ROWS) g[y][x]='X'; }
+    let holes=0, bump=0, lines=0;
+    const heights = Array(COLS).fill(0);
+    for(let x=0;x<COLS;x++){
+      let found=false;
+      for(let y=0;y<ROWS;y++){ if(g[y][x]){ if(!found){ heights[x]=ROWS-y; found=true; } } else if(found) holes++; }
+    }
+    for(let y=0;y<ROWS;y++){ if(g[y].every(c=>c)) lines++; }
+    const height = heights.reduce((a,b)=>a+b,0);
+    for(let x=0;x<COLS-1;x++) bump += Math.abs(heights[x]-heights[x+1]);
+    return lines*5 - holes*3 - height*0.4 - bump*0.3;
+  }
+  botStep(){
+    if(!this.botTarget) return;
+    if(this.curRot !== this.botTarget.rot){ this.tryRotate(1); return; }
+    if(this.curX < this.botTarget.x){ this.tryMove(1,0); return; }
+    if(this.curX > this.botTarget.x){ this.tryMove(-1,0); return; }
+    this.hardDrop();
+  }
+}
+
+// Bulmaca modu: sabit düzen + sınırlı parça. '#' dolu (temizlenmesi gereken), '.' boş.
+const PUZZLE_LEVELS = [
+  { rows: ['########..','########..','########..','########..'], queue:['O','O'] },
+  { rows: ['###....###'], queue:['I'] },
+];
+function buildPuzzleGrid(rowStrings){
+  const g = Array.from({length:ROWS},()=>Array(COLS).fill(null));
+  const n = rowStrings.length;
+  for(let i=0;i<n;i++){
+    const y = ROWS-n+i;
+    const rowStr = rowStrings[i];
+    for(let x=0;x<COLS;x++){ if(rowStr[x]==='#') g[y][x]='PUZ'; }
+  }
+  return g;
+}
+let puzzleLevelIndex = 0;
+
+let onLinesCleared = null;
+let mode='marathon';
+let player, bot=null;
+let state='menu';
+let modeTimer=0;
+let last=performance.now();
+let botTimer=0;
+
+document.querySelectorAll('.modeBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.modeBtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); mode = btn.dataset.mode;
+  });
+});
+
+function startGame(){
+  const opts = {};
+  if(mode==='battle') {} // handled below
+  if(mode==='cheese') opts.garbageRows = 8;
+  if(mode==='zen') opts.zen = true;
+  if(mode==='puzzle'){
+    puzzleLevelIndex = 0;
+    opts.puzzleGrid = buildPuzzleGrid(PUZZLE_LEVELS[0].rows);
+    opts.fixedQueue = PUZZLE_LEVELS[0].queue.slice();
+  }
+  player = new Board(opts);
+  bot=null; botWrap.style.display='none'; boardLabel.textContent='SEN';
+  timerRow.style.display='none';
+  modeTimer=0;
+
+  if(mode==='sprint'){ timerRow.style.display='block'; }
+  else if(mode==='ultra'){ timerRow.style.display='block'; modeTimer = 120*60; }
+  else if(mode==='battle'){
+    bot = new Board({bot:true});
+    player.opponent = bot; bot.opponent = player;
+    botWrap.style.display='block'; boardLabel.textContent='SEN vs BOT';
+  }
+  onLinesCleared = (b, cleared)=>{
+    if(mode==='sprint' && b===player && player.lines>=40){
+      state='gameover'; sfx.win();
+      showOverlay('SPRINT TAMAMLANDI!', `40 satır ${formatTime(modeTimer)} sürede temizlendi.`, 'SKORU KAYDET');
+      askName();
+    }
+    if(mode==='cheese' && b===player && !player.hasGarbage()){
+      state='gameover'; sfx.win();
+      showOverlay('PEYNİR TEMİZLENDİ!', `Skor: ${player.score}`, 'SKORU KAYDET');
+      askName();
+    }
+    sfx.clear(cleared);
+  };
+  state='playing';
+  hideOverlay();
+}
+
+function askName(){
+  document.getElementById('ovExtra').innerHTML = '<input id="nameInput" maxlength="12" placeholder="İsmini yaz">';
+  ovBtn.dataset.mode='saveScore';
+}
+
+function formatTime(f){
+  const s = Math.floor(f/60);
+  return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+}
+
+function showOverlay(title,text,btnLabel){
+  ovTitle.textContent=title; ovText.textContent=text; ovBtn.textContent=btnLabel;
+  document.getElementById('ovExtra').innerHTML='';
+  overlay.classList.remove('hidden');
+}
+function hideOverlay(){ overlay.classList.add('hidden'); }
+
+ovBtn.addEventListener('click', async ()=>{
+  ensureAudio();
+  if(ovBtn.dataset.mode==='closeLb'){
+    ovBtn.dataset.mode='';
+    if(player && !player.gameOver && state!=='menu'){ state='playing'; hideOverlay(); }
+    else { state='menu'; document.getElementById('modeSelect').style.display='flex'; showOverlay('NEON TETRIS','Bir mod seç ve başla.','BAŞLA'); }
+    return;
+  }
+  if(ovBtn.dataset.mode==='saveScore'){
+    const nameEl = document.getElementById('nameInput');
+    const name = (nameEl && nameEl.value.trim()) || 'OYUNCU';
+    await submitScore(name, player.score, mode);
+    ovBtn.dataset.mode='';
+    showOverlay('SKOR TABLOSU','', 'TEKRAR OYNA');
+    document.getElementById('modeSelect').style.display='none';
+    document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+    return;
+  }
+  if(state==='paused'){ state='playing'; hideOverlay(); return; }
+  document.getElementById('modeSelect').style.display='flex';
+  startGame();
+});
+
+let keys={};
+let das = { left:{down:false,timer:0}, right:{down:false,timer:0} };
+const DAS=10, ARR=2;
+window.addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  if(state!=='playing'){
+    if(k==='p' && state==='paused'){ state='playing'; hideOverlay(); }
+    return;
+  }
+  if(k==='p'){ state='paused'; showOverlay('DURAKLATILDI','',' DEVAM ET'); document.getElementById('modeSelect').style.display='none'; return; }
+  if(k==='arrowleft' && !das.left.down){ das.left.down=true; das.left.timer=0; player.tryMove(-1,0); sfx.move(); }
+  if(k==='arrowright' && !das.right.down){ das.right.down=true; das.right.timer=0; player.tryMove(1,0); sfx.move(); }
+  if(keys[k]) return;
+  keys[k]=true;
+  if(k==='arrowup'){ player.tryRotate(1); sfx.rotate(); }
+  else if(k===' '){ player.hardDrop(); sfx.drop(); }
+  else if(k==='c'){ player.swapHold(); sfx.hold(); }
+});
+window.addEventListener('keyup', e=>{
+  const k = e.key.toLowerCase();
+  keys[k]=false;
+  if(k==='arrowleft') das.left.down=false;
+  if(k==='arrowright') das.right.down=false;
+});
+
+function handleDAS(dt){
+  if(das.left.down){
+    das.left.timer += dt;
+    if(das.left.timer>DAS){ das.left.timer -= ARR; if(player.tryMove(-1,0)) sfx.move(); }
+  }
+  if(das.right.down){
+    das.right.timer += dt;
+    if(das.right.timer>DAS){ das.right.timer -= ARR; if(player.tryMove(1,0)) sfx.move(); }
+  }
+}
+
+function drawCell(ctx,x,y,color,size,ghost){
+  ctx.fillStyle = ghost ? 'rgba(255,255,255,0.08)' : color;
+  ctx.fillRect(x*size+1,y*size+1,size-2,size-2);
+  if(!ghost){ ctx.fillStyle='rgba(255,255,255,0.25)'; ctx.fillRect(x*size+1,y*size+1,size-2,3); }
+}
+
+function renderBoard(ctx, cv, b, size, blackout){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#08061a'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='rgba(163,102,255,.05)';
+  for(let x=0;x<=COLS;x++){ ctx.beginPath();ctx.moveTo(x*size,0);ctx.lineTo(x*size,ROWS*size);ctx.stroke(); }
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    const c = b.grid[y][x];
+    if(c==='GARB'){ ctx.fillStyle='#3a3a4a'; ctx.fillRect(x*size+1,y*size+1,size-2,size-2); }
+    else if(c==='PUZ'){ ctx.fillStyle='#8a8398'; ctx.fillRect(x*size+1,y*size+1,size-2,size-2); }
+    else if(c) drawCell(ctx,x,y,COLORS[c],size);
+  }
+  if(!b.gameOver && b.cur){
+    const gy = b.ghostY();
+    for(const [cx,cy] of b.cells(b.curRot)){ const y=gy+cy; if(y>=0) drawCell(ctx,b.curX+cx,y,COLORS[b.cur],size,true); }
+    for(const [cx,cy] of b.cells(b.curRot)){ const y=b.curY+cy; if(y>=0) drawCell(ctx,b.curX+cx,y,COLORS[b.cur],size); }
+  }
+  if(blackout && !b.gameOver && b.cur){
+    const visTop = b.curY-2, visBottom = b.curY+6;
+    ctx.fillStyle = 'rgba(5,3,16,0.94)';
+    for(let y=0;y<ROWS;y++){ if(y<visTop || y>visBottom) ctx.fillRect(0,y*size,cv.width,size); }
+  }
+  if(b.gameOver){
+    ctx.fillStyle='rgba(5,3,16,.75)'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#ff4dd8'; ctx.font='bold 14px Orbitron,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('BİTTİ', cv.width/2, cv.height/2);
+  }
+}
+
+function renderNext(){
+  nctx.clearRect(0,0,nextCv.width,nextCv.height);
+  nctx.fillStyle='#08061a'; nctx.fillRect(0,0,nextCv.width,nextCv.height);
+  const upcoming = player.queue.slice(0,3);
+  const s=16, slot=76;
+  upcoming.forEach((k,i)=>{
+    const cells = SHAPES[k];
+    const offsetRows = i*(slot/s) + 1;
+    for(const [cx,cy] of cells) drawCell(nctx, cx+1, cy+offsetRows, COLORS[k], s);
+  });
+}
+function renderHold(){
+  hctx.clearRect(0,0,holdCv.width,holdCv.height);
+  hctx.fillStyle='#08061a'; hctx.fillRect(0,0,holdCv.width,holdCv.height);
+  if(player.hold){
+    const cells = SHAPES[player.hold]; const s=16;
+    for(const [cx,cy] of cells) drawCell(hctx,cx+1,cy+1,COLORS[player.hold],s, !player.canHold);
+  }
+}
+
+function loop(now){
+  const dt = Math.min(3,(now-last)/16.67);
+  last = now;
+  if(state==='playing'){
+    if(mode==='sprint') modeTimer += dt;
+    if(mode==='ultra'){
+      modeTimer -= dt;
+      if(modeTimer<=0 && state==='playing'){
+        modeTimer=0; state='gameover'; sfx.win();
+        showOverlay('ULTRA BİTTİ!', `Skor: ${player.score}`, 'SKORU KAYDET'); askName();
+      }
+    }
+    handleDAS(dt);
+    if(keys['arrowdown']){ if(player.tryMove(0,1)) player.score+=1; }
+    player.step(dt);
+    if(player.won && mode==='puzzle' && state==='playing'){
+      puzzleLevelIndex++;
+      if(puzzleLevelIndex < PUZZLE_LEVELS.length){
+        sfx.clear(4);
+        const lvl = PUZZLE_LEVELS[puzzleLevelIndex];
+        player = new Board({puzzleGrid: buildPuzzleGrid(lvl.rows), fixedQueue: lvl.queue.slice()});
+      } else {
+        state='gameover'; sfx.win();
+        showOverlay('TÜM BULMACALAR ÇÖZÜLDÜ!', `Skor: ${player.score}`, 'SKORU KAYDET'); askName();
+      }
+    }
+    if(player.gameOver && state==='playing'){
+      state='gameover'; sfx.gameOver();
+      const msg = mode==='puzzle' ? 'Parçalar bitti, bulmaca çözülemedi.' : `Skor: ${player.score} • Satır: ${player.lines}`;
+      showOverlay(mode==='puzzle' ? 'BULMACA BAŞARISIZ' : 'OYUN BİTTİ', msg, 'SKORU KAYDET'); askName();
+    }
+    if(bot){
+      botTimer += dt;
+      if(botTimer>7){ botTimer=0; bot.botStep(); }
+      if(bot.gameOver && state==='playing'){
+        state='gameover'; sfx.win();
+        showOverlay('KAZANDIN!', 'Bot tıkandı, sen kazandın!', 'SKORU KAYDET'); askName();
+      }
+    }
+    elScore.textContent = player.score;
+    elLines.textContent = player.lines;
+    elLevel.textContent = player.level;
+    if(mode==='sprint') elTimer.textContent = formatTime(modeTimer);
+    if(mode==='ultra') elTimer.textContent = formatTime(modeTimer);
+  }
+  if(player){ renderBoard(bctx, boardCv, player, CELL, mode==='blackout'); renderNext(); renderHold(); }
+  if(bot){ renderBoard(botCtx, botCv, bot, 15); }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

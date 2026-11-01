@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Enerji Çekirdeği</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 15%, #1a1442 0%, #0a0518 60%, #050310 100%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Orbitron',sans-serif; color:#e8e8ff; padding:16px; gap:10px; }
+  h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:2px;
+    background:linear-gradient(90deg,#4dd8ff,#a366ff,#ff4dd8); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(163,102,255,.4); }
+  #topbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .iconbtn { background:#1a1442; border:1px solid #3a2d6e; color:#c8c0f0; border-radius:8px; padding:6px 12px;
+    cursor:pointer; font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; transition:.15s; }
+  .iconbtn:hover { border-color:#a366ff; box-shadow:0 0 12px rgba(163,102,255,.4); }
+  #stageWrap { background:#050310; }
+  #stageWrap.expanded { position:fixed; inset:0; z-index:9999; width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center; background:#050310; overflow:auto; }
+  #stageInner { display:flex; flex-direction:column; align-items:center; gap:12px; transform-origin: top center; width:100%; max-width:760px; }
+  #statBar { display:flex; gap:20px; font-size:12px; letter-spacing:1px; color:#9d93d8; flex-wrap:wrap; justify-content:center; }
+  #statBar b { color:#4dd8ff; text-shadow:0 0 8px rgba(77,216,255,.6); }
+  #main { display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; justify-content:center; width:100%; }
+  #coreWrap { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  #coreBtn { width:180px; height:180px; border-radius:50%; border:4px solid #4dd8ff; cursor:pointer;
+    background:radial-gradient(circle at 40% 35%, #6ee8ff, #2a6fd6 60%, #0a1c40 100%);
+    box-shadow:0 0 40px rgba(77,216,255,.5), inset 0 0 30px rgba(255,255,255,.2);
+    font-size:40px; color:#fff; transition:transform .08s; }
+  #coreBtn:active { transform:scale(0.93); }
+  #perClick, #perSec { font-size:11px; color:#8378c4; text-align:center; }
+  #shop { background:#0c0820; border:2px solid #3a2d6e; border-radius:10px; padding:12px; width:320px; max-height:480px; overflow-y:auto; }
+  .genRow { display:flex; align-items:center; justify-content:space-between; gap:8px; background:#1a1442; border:1px solid #3a2d6e;
+    border-radius:8px; padding:9px 10px; margin-bottom:8px; cursor:pointer; transition:.15s; }
+  .genRow:hover { border-color:#a366ff; }
+  .genRow.disabled { opacity:.45; cursor:default; }
+  .genRow .gi { display:flex; flex-direction:column; }
+  .genRow .gi b { color:#e8e8ff; font-size:12px; }
+  .genRow .gi small { color:#8378c4; font-size:10px; }
+  .genRow .gc { text-align:right; font-size:11px; color:#ffd166; font-weight:700; }
+  #prestigeBox { background:#0c0820; border:2px solid #ff4dd8; border-radius:10px; padding:12px; width:320px; text-align:center; }
+  #prestigeBox button { margin-top:8px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:12px; border:none; border-radius:8px;
+    padding:9px 14px; cursor:pointer; background:linear-gradient(135deg,#ff4dd8,#a366ff); color:#08051a; }
+  #overlay { position:fixed; inset:0; background:rgba(5,3,16,.94); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center; z-index:20; padding:16px; overflow:auto; }
+  #overlay.hidden { display:none; }
+  #overlay h2 { font-family:'Press Start 2P',monospace; font-size:15px; color:#ff4dd8; text-shadow:0 0 18px rgba(255,77,216,.6); }
+  #overlay p { font-size:12px; color:#b8b0e8; max-width:360px; line-height:1.7; }
+  button.go { font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; letter-spacing:1px;
+    background:linear-gradient(135deg,#4dd8ff,#a366ff); color:#08051a; border:none; padding:12px 28px;
+    border-radius:30px; cursor:pointer; box-shadow:0 0 20px rgba(163,102,255,.5); }
+  #nameInput { font-family:'Orbitron',sans-serif; padding:8px 12px; border-radius:8px; border:1px solid #3a2d6e;
+    background:#0c0820; color:#e8e8ff; font-size:13px; text-align:center; width:180px; }
+  table#lbTable { border-collapse:collapse; font-size:11px; color:#c8c0f0; }
+  table#lbTable td, table#lbTable th { padding:4px 10px; border-bottom:1px solid #2a2450; }
+  table#lbTable th { color:#4dd8ff; }
+  #floaters { position:relative; height:0; }
+  .floater { position:absolute; color:#4dd8ff; font-size:14px; font-weight:700; pointer-events:none; animation:floatUp 0.8s ease-out forwards; }
+  @keyframes floatUp { from{opacity:1; transform:translateY(0);} to{opacity:0; transform:translateY(-40px);} }
+</style>
+</head>
+<body>
+<h1>⚡ ENERJİ ÇEKİRDEĞİ</h1>
+<div id="topbar">
+  <button class="iconbtn" id="homeBtn">⌂ Oyunlar</button>
+  <button class="iconbtn" id="soundBtn">🔊 Ses</button>
+  <button class="iconbtn" id="fsBtn">⛶ Tam Ekran</button>
+  <button class="iconbtn" id="lbBtn">🏆 Skorlar</button>
+  <button class="iconbtn" id="saveBtn">💾 Kaydet</button>
+</div>
+<div id="stageWrap"><div id="stageInner">
+<div id="statBar">
+  <div>ENERJİ: <b id="energy">0</b></div>
+  <div>SANİYE BAŞINA: <b id="perSecEl">0</b></div>
+  <div>PRESTİJ: <b id="prestigeLevel">0</b></div>
+  <div>ÇARPAN: <b id="prestigeMul">x1</b></div>
+</div>
+<div id="main">
+  <div id="coreWrap">
+    <div id="floaters"></div>
+    <button id="coreBtn">⚡</button>
+    <div id="perClick">Tıklama başına: <b id="perClickVal">1</b></div>
+</div>
+<div id="main">
+  <div id="coreWrap">
+    <div id="floaters"></div>
+    <button id="coreBtn">⚡</button>
+    <div id="perClick">Tıklama başına: <b id="perClickVal">1</b></div>
+    <button id="overloadBtn" class="iconbtn" style="margin-top:4px">⚡ AŞIRI YÜKLEME (hazır)</button>
+  </div>
+  <div id="shop"></div>
+  <div id="achBox" class="card" style="background:#0c0820;border:2px solid #3a2d6e;border-radius:10px;padding:12px;width:320px;">
+    <div style="font-size:11px;color:#8378c4;margin-bottom:6px">🏅 BAŞARIMLAR (<span id="achCount">0</span>/<span id="achTotal">0</span>)</div>
+    <div id="achList" style="display:flex;flex-direction:column;gap:5px;"></div>
+  </div>
+</div>
+<div id="prestigeBox">
+  <div style="font-size:11px;color:#c8c0f0">Prestij yaparsan enerjin sıfırlanır ama kalıcı bir çarpan kazanırsın.</div>
+  <div style="font-size:11px;color:#8378c4;margin-top:4px">Şu an kazanılacak: <b id="prestigeGain" style="color:#ff4dd8">+0</b></div>
+  <button id="prestigeBtn">🔄 PRESTİJ YAP</button>
+</div>
+</div></div>
+<div id="overlay">
+  <h2 id="ovTitle">ENERJİ ÇEKİRDEĞİ</h2>
+  <p id="ovText">Çekirdeğe tıklayarak enerji üret, üreteçler satın alarak otomatik enerji kazan. Zamanla prestij yaparak kalıcı çarpanlar biriktir.</p>
+  <div id="ovExtra"></div>
+  <button class="go" id="ovBtn">BAŞLA</button>
+</div>
+
+<script>
+/* ============ SES ============ */
+let audioCtx=null, soundOn=true;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ soundOn=false; } } }
+function tone(freq,dur,type,vol,delay){
+  if(!soundOn) return; ensureAudio();
+  try{
+  const t0 = audioCtx.currentTime+(delay||0);
+  const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  osc.type=type||'square'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(vol||0.06,t0); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(audioCtx.destination); osc.start(t0); osc.stop(t0+dur);
+  }catch(e){}
+}
+const sfx = {
+  click(){ tone(700+Math.random()*100,0.05,'square',0.04); },
+  buy(){ tone(500,0.08,'triangle',0.06); tone(700,0.08,'triangle',0.05,0.05); },
+  prestige(){ [400,600,800,1000,1300].forEach((f,i)=>tone(f,0.2,'triangle',0.08,i*0.1)); },
+};
+document.getElementById('soundBtn').addEventListener('click', ()=>{
+  soundOn=!soundOn;
+  document.getElementById('soundBtn').textContent = soundOn?'🔊 Ses':'🔇 Ses';
+});
+
+/* ============ TAM EKRAN ============ */
+const stageWrap = document.getElementById('stageWrap');
+const stageInner = document.getElementById('stageInner');
+let expanded = false;
+document.getElementById('fsBtn').addEventListener('click', ()=>{
+  expanded = !expanded;
+  stageWrap.classList.toggle('expanded', expanded);
+  if(expanded){
+    document.getElementById('fsBtn').textContent = '↙ Küçült';
+    if(stageWrap.requestFullscreen) stageWrap.requestFullscreen().catch(()=>{});
+  } else {
+    document.getElementById('fsBtn').textContent = '⛶ Tam Ekran';
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }
+  resizeStage();
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && expanded){ expanded=false; stageWrap.classList.remove('expanded'); document.getElementById('fsBtn').textContent='⛶ Tam Ekran'; resizeStage(); }
+});
+function resizeStage(){
+  if(expanded || document.fullscreenElement){
+    const scale = Math.min(window.innerWidth/800, window.innerHeight/620) * 0.95;
+    stageInner.style.transform = `scale(${scale})`;
+  } else { stageInner.style.transform='none'; }
+}
+window.addEventListener('resize', resizeStage);
+
+/* ============ ANA SAYFA ============ */
+const HOME_URL = null;
+document.getElementById('homeBtn').addEventListener('click', ()=>{ if(HOME_URL) window.location.href=HOME_URL; else history.back(); });
+
+/* ============ SKOR TABLOSU & KAYIT / BACKEND ENTEGRASYON NOKTASI ============ */
+// NOT: Flask+SQLite tarafında tanımlanacak endpoint'ler:
+//   GET  /api/scores/core   -> [{name, score}, ...]   (score = toplam ömür boyu üretilen enerji)
+//   POST /api/scores/core   -> body: {name, score}
+//   GET  /api/save/core     -> {energy, prestigeLevel, generators:{...}} (giriş yapan kullanıcının kayıtlı durumu)
+//   POST /api/save/core     -> aynı yapıda oyun durumunu kaydeder (çerez tabanlı oturumla eşleştirin)
+// Endpoint'ler yoksa oyun sadece oturum içi bellekte çalışır; "💾 Kaydet" butonu POST /api/save/core dener.
+const SCORE_ENDPOINT = '/api/scores/core';
+const SAVE_ENDPOINT = '/api/save/core';
+let leaderboard = [];
+async function fetchLeaderboard(){
+  try{ const res = await fetch(SCORE_ENDPOINT); if(res.ok){ leaderboard = await res.json(); return; } } catch(e){}
+}
+async function submitScore(name, score){
+  const entry = {name: name||'???', score};
+  try{
+    const res = await fetch(SCORE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry)});
+    if(res.ok){ await fetchLeaderboard(); return; }
+  } catch(e){}
+  leaderboard.push(entry); leaderboard.sort((a,b)=>b.score-a.score); leaderboard=leaderboard.slice(0,10);
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderLeaderboardHTML(){
+  if(leaderboard.length===0) return '<p style="font-size:11px;color:#6d63a0">Henüz skor yok. İlk sen ol!</p>';
+  let rows = leaderboard.slice(0,10).map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.name)}</td><td>${fmt(e.score)}</td></tr>`).join('');
+  return `<table id="lbTable"><tr><th>#</th><th>İsim</th><th>Ömür Boyu Enerji</th></tr>${rows}</table>`;
+}
+document.getElementById('lbBtn').addEventListener('click', async ()=>{
+  await fetchLeaderboard();
+  showOverlay('SKOR TABLOSU','','KAPAT'); ovBtn.dataset.mode='closeLb';
+  document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+});
+async function saveGame(){
+  const payload = { energy, prestigeLevel, lifetimeEnergy, generators: generators.map(g=>({id:g.id,count:g.count})) };
+  try{
+    const res = await fetch(SAVE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    if(res.ok) return true;
+  } catch(e){}
+  return false;
+}
+document.getElementById('saveBtn').addEventListener('click', async ()=>{
+  const ok = await saveGame();
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = ok ? '✔ Kaydedildi (sunucu)' : '💾 Kaydedildi (oturum)';
+  setTimeout(()=>{ btn.textContent='💾 Kaydet'; }, 1800);
+});
+async function tryLoadGame(){
+  try{
+    const res = await fetch(SAVE_ENDPOINT);
+    if(res.ok){
+      const data = await res.json();
+      if(data){
+        energy = data.energy||0; prestigeLevel = data.prestigeLevel||0; lifetimeEnergy = data.lifetimeEnergy||0;
+        if(data.generators) for(const gd of data.generators){ const g=generators.find(x=>x.id===gd.id); if(g) g.count=gd.count||0; }
+        return true;
+      }
+    }
+  } catch(e){}
+  return false;
+}
+
+/* ============ SAYI BİÇİMLENDİRME ============ */
+function fmt(n){
+  if(n<1000) return Math.floor(n).toString();
+  const units=['K','M','B','T','Qa','Qi'];
+  let u=-1;
+  while(n>=1000 && u<units.length-1){ n/=1000; u++; }
+  return n.toFixed(2)+units[u];
+}
+
+/* ============ ÜRETEÇLER ============ */
+const GEN_DEFS = [
+  { id:'solar',   name:'Güneş Paneli',    icon:'☀️', baseCost:15,   baseRate:0.1 },
+  { id:'wind',    name:'Rüzgar Türbini',  icon:'🌀', baseCost:100,  baseRate:1 },
+  { id:'reactor', name:'Mini Reaktör',    icon:'⚛️', baseCost:1100, baseRate:8 },
+  { id:'fusion',  name:'Füzyon Kalbi',    icon:'🔥', baseCost:12000,baseRate:47 },
+  { id:'quantum', name:'Kuantum Çekirdek',icon:'🌌', baseCost:130000,baseRate:260 },
+  { id:'star',    name:'Yıldız Toplayıcı',icon:'✨', baseCost:1400000,baseRate:1400 },
+];
+let generators = GEN_DEFS.map(d=>({...d, count:0}));
+
+let energy=0, lifetimeEnergy=0, perClickBase=1, prestigeLevel=0;
+let state='menu';
+
+function prestigeMul(){ return 1 + prestigeLevel*0.1; }
+function perClick(){ return perClickBase * prestigeMul() * overloadMul(); }
+function perSecond(){
+  let total=0;
+  for(const g of generators) total += g.count*g.baseRate;
+  return total * prestigeMul() * overloadMul();
+}
+function genCost(g){ return Math.round(g.baseCost * Math.pow(1.15, g.count)); }
+
+function buyGenerator(g){
+  const cost = genCost(g);
+  if(energy < cost) return;
+  energy -= cost; g.count++; sfx.buy();
+  renderShop(); updateStats();
+}
+
+function renderShop(){
+  const shop = document.getElementById('shop');
+  shop.innerHTML='';
+  for(const g of generators){
+    const cost = genCost(g);
+    const row = document.createElement('div');
+    row.className = 'genRow' + (energy<cost ? ' disabled':'');
+    row.innerHTML = `<div class="gi"><b>${g.icon} ${g.name}</b><small>+${fmt(g.baseRate)}/sn adet • sahip: ${g.count}</small></div><div class="gc">${fmt(cost)}⚡</div>`;
+    row.addEventListener('click', ()=>buyGenerator(g));
+    shop.appendChild(row);
+  }
+}
+
+function updateStats(){
+  document.getElementById('energy').textContent = fmt(energy);
+  document.getElementById('perSecEl').textContent = fmt(perSecond());
+  document.getElementById('prestigeLevel').textContent = prestigeLevel;
+  document.getElementById('prestigeMul').textContent = 'x'+prestigeMul().toFixed(1) + (overloadTimer>0 ? ' (⚡x2!)' : '');
+  document.getElementById('perClickVal').textContent = fmt(perClick());
+  const gain = Math.floor(Math.sqrt(lifetimeEnergy/100000));
+  document.getElementById('prestigeGain').textContent = '+'+gain;
+}
+
+const CRIT_CHANCE = 0.1, CRIT_MUL = 5;
+document.getElementById('coreBtn').addEventListener('click', (e)=>{
+  ensureAudio();
+  const isCrit = Math.random() < CRIT_CHANCE;
+  if(isCrit) hadCrit=true;
+  const amt = perClick() * (isCrit ? CRIT_MUL : 1);
+  energy += amt; lifetimeEnergy += amt;
+  sfx.click(); spawnFloater((isCrit?'💥 KRİTİK! +':'+')+fmt(amt), isCrit);
+  renderShop(); updateStats(); checkAchievements();
+});
+
+function spawnFloater(text, big){
+  const el = document.createElement('div');
+  el.className='floater'; el.textContent=text;
+  if(big){ el.style.color='#ffd166'; el.style.fontSize='18px'; }
+  el.style.left = (70+Math.random()*40)+'px';
+  el.style.top = '-160px';
+  document.getElementById('floaters').appendChild(el);
+  setTimeout(()=>el.remove(), 800);
+}
+
+/* ============ AŞIRI YÜKLEME (aktif yetenek) ============ */
+let overloadTimer=0, overloadCooldown=0;
+const OVERLOAD_DURATION=15, OVERLOAD_COOLDOWN=60;
+document.getElementById('overloadBtn').addEventListener('click', ()=>{
+  if(overloadCooldown>0 || overloadTimer>0) return;
+  overloadTimer = OVERLOAD_DURATION;
+  sfx.prestige();
+});
+function overloadMul(){ return overloadTimer>0 ? 2 : 1; }
+
+document.getElementById('prestigeBtn').addEventListener('click', ()=>{
+  const gain = Math.floor(Math.sqrt(lifetimeEnergy/100000));
+  if(gain<=0) return;
+  prestigeLevel += gain; energy=0;
+  for(const g of generators) g.count=0;
+  sfx.prestige(); renderShop(); updateStats(); checkAchievements();
+});
+
+/* ============ BAŞARIMLAR ============ */
+const ACHIEVEMENTS = [
+  { id:'e1000', label:'İlk 1.000 enerji', check:()=>lifetimeEnergy>=1000 },
+  { id:'e100k', label:'100.000 enerjiye ulaş', check:()=>lifetimeEnergy>=100000 },
+  { id:'e10m', label:'10 Milyon enerjiye ulaş', check:()=>lifetimeEnergy>=10000000 },
+  { id:'gen10', label:'Herhangi bir üreteçten 10 adet al', check:()=>generators.some(g=>g.count>=10) },
+  { id:'genall', label:'Tüm üreteç türlerinden en az 1 al', check:()=>generators.every(g=>g.count>=1) },
+  { id:'prestige1', label:'İlk prestijini yap', check:()=>prestigeLevel>0 },
+  { id:'prestige10', label:'Prestij seviyesi 10\'a ulaş', check:()=>prestigeLevel>=10 },
+  { id:'crit', label:'Bir kritik tıklama yap', check:()=>hadCrit },
+];
+let hadCrit=false;
+let unlockedAch = new Set();
+function checkAchievements(){
+  let changed=false;
+  for(const a of ACHIEVEMENTS){
+    if(!unlockedAch.has(a.id) && a.check()){ unlockedAch.add(a.id); changed=true; }
+  }
+  if(changed) renderAchievements();
+}
+function renderAchievements(){
+  const list = document.getElementById('achList');
+  list.innerHTML='';
+  for(const a of ACHIEVEMENTS){
+    const unlocked = unlockedAch.has(a.id);
+    const row = document.createElement('div');
+    row.style.cssText = 'font-size:10px; padding:4px 6px; border-radius:5px; background:'+(unlocked?'rgba(77,216,255,0.12)':'#150f36')+'; color:'+(unlocked?'#4dd8ff':'#4a4470');
+    row.textContent = (unlocked?'✔ ':'🔒 ')+a.label;
+    list.appendChild(row);
+  }
+  document.getElementById('achCount').textContent = unlockedAch.size;
+  document.getElementById('achTotal').textContent = ACHIEVEMENTS.length;
+}
+
+let autoTimer=0;
+function gameTick(dt){
+  if(state!=='playing') return;
+  if(overloadTimer>0){ overloadTimer-=dt; if(overloadTimer<=0){ overloadTimer=0; overloadCooldown=OVERLOAD_COOLDOWN; } }
+  if(overloadCooldown>0){ overloadCooldown-=dt; if(overloadCooldown<0) overloadCooldown=0; }
+  const gain = perSecond()*dt;
+  energy += gain; lifetimeEnergy += gain;
+  autoTimer += dt;
+  if(autoTimer>0.5){
+    autoTimer=0; renderShop(); updateStats(); checkAchievements();
+    const btn = document.getElementById('overloadBtn');
+    if(overloadTimer>0) btn.textContent = '⚡ AKTİF! ('+Math.ceil(overloadTimer)+'sn)';
+    else if(overloadCooldown>0) btn.textContent = '⏳ Bekleme: '+Math.ceil(overloadCooldown)+'sn';
+    else btn.textContent = '⚡ AŞIRI YÜKLEME (hazır)';
+  }
+}
+
+function showOverlay(title,text,btnLabel){
+  document.getElementById('ovTitle').textContent=title;
+  document.getElementById('ovText').textContent=text;
+  ovBtn.textContent=btnLabel;
+  document.getElementById('ovExtra').innerHTML='';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function hideOverlay(){ document.getElementById('overlay').classList.add('hidden'); }
+const ovBtn = document.getElementById('ovBtn');
+
+ovBtn.addEventListener('click', async ()=>{
+  ensureAudio();
+  if(ovBtn.dataset.mode==='closeLb'){ ovBtn.dataset.mode=''; hideOverlay(); state='playing'; return; }
+  if(ovBtn.dataset.mode==='saveScore'){
+    const nameEl = document.getElementById('nameInput');
+    const name = (nameEl && nameEl.value.trim()) || 'OYUNCU';
+    await submitScore(name, Math.floor(lifetimeEnergy));
+    ovBtn.dataset.mode='';
+    showOverlay('SKOR TABLOSU','','KAPAT'); ovBtn.dataset.mode='closeLb';
+    document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+    return;
+  }
+  const loaded = await tryLoadGame();
+  renderShop(); updateStats(); renderAchievements(); checkAchievements();
+  state='playing'; hideOverlay();
+});
+
+renderShop(); updateStats(); renderAchievements();
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(1,(now-last)/1000); last = now;
+  gameTick(dt);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

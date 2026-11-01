@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Neon Kale</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@500;700;900&display=swap');
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:radial-gradient(circle at 50% 15%, #1a1442 0%, #0a0518 60%, #050310 100%);
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-family:'Orbitron',sans-serif; color:#e8e8ff; padding:16px; gap:10px; }
+  h1 { font-family:'Press Start 2P',monospace; font-size:18px; letter-spacing:2px;
+    background:linear-gradient(90deg,#4dd8ff,#a366ff,#ff4dd8); -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(163,102,255,.4); }
+  #topbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .iconbtn { background:#1a1442; border:1px solid #3a2d6e; color:#c8c0f0; border-radius:8px; padding:6px 12px;
+    cursor:pointer; font-family:'Orbitron',sans-serif; font-size:12px; font-weight:700; transition:.15s; }
+  .iconbtn:hover { border-color:#a366ff; box-shadow:0 0 12px rgba(163,102,255,.4); }
+  #stageWrap { background:#050310; }
+  #stageWrap.expanded { position:fixed; inset:0; z-index:9999; width:100vw; height:100vh;
+    display:flex; align-items:center; justify-content:center; background:#050310; overflow:auto; }
+  #stageInner { display:flex; flex-direction:column; align-items:center; gap:10px; transform-origin: top center; }
+  #hud { display:flex; gap:20px; font-size:12px; letter-spacing:1px; color:#9d93d8; flex-wrap:wrap; justify-content:center; max-width:760px; }
+  #hud b { color:#4dd8ff; text-shadow:0 0 8px rgba(77,216,255,.6); }
+  #main { display:flex; gap:14px; align-items:flex-start; }
+  #wrap { position:relative; }
+  #game { background:#0c0820; border:3px solid #3a2d6e; border-radius:6px;
+    box-shadow:0 0 40px rgba(77,216,255,.25), inset 0 0 30px rgba(163,102,255,.08); }
+  #panel { width:190px; background:#0c0820; border:2px solid #3a2d6e; border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px; }
+  .towerBtn { display:flex; align-items:center; gap:8px; background:#1a1442; border:1px solid #3a2d6e; border-radius:8px;
+    padding:8px; cursor:pointer; font-size:11px; text-align:left; transition:.15s; }
+  .towerBtn:hover, .towerBtn.selected { border-color:#a366ff; box-shadow:0 0 12px rgba(163,102,255,.4); }
+  .towerBtn .sw { width:22px; height:22px; border-radius:5px; flex-shrink:0; }
+  .towerBtn div.info { display:flex; flex-direction:column; }
+  .towerBtn small { color:#8378c4; }
+  #selInfo { font-size:11px; color:#c8c0f0; border-top:1px solid #2a2450; padding-top:8px; display:none; flex-direction:column; gap:6px; }
+  #selInfo button { font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; border:none; border-radius:6px; padding:7px; cursor:pointer; }
+  #upgBtn { background:linear-gradient(135deg,#4dd8ff,#a366ff); color:#08051a; }
+  #sellBtn { background:#3a2d6e; color:#e8e8ff; }
+  #waveBtn { font-family:'Orbitron',sans-serif; font-weight:700; font-size:12px; letter-spacing:1px;
+    background:linear-gradient(135deg,#ffd166,#ff4dd8); color:#08051a; border:none; padding:10px; border-radius:8px; cursor:pointer; }
+  #overlay { position:absolute; inset:0; background:rgba(5,3,16,.92); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:14px; text-align:center; border-radius:6px; padding:16px; overflow:auto; }
+  #overlay.hidden { display:none; }
+  #overlay h2 { font-family:'Press Start 2P',monospace; font-size:16px; color:#ff4dd8; text-shadow:0 0 20px rgba(255,77,216,.6); }
+  #overlay p { font-size:12px; color:#b8b0e8; max-width:340px; line-height:1.7; }
+  button.go { font-family:'Orbitron',sans-serif; font-weight:700; font-size:13px; letter-spacing:1px;
+    background:linear-gradient(135deg,#4dd8ff,#a366ff); color:#08051a; border:none; padding:12px 26px;
+    border-radius:30px; cursor:pointer; box-shadow:0 0 20px rgba(163,102,255,.5); }
+  #controls { font-size:10px; color:#6d63a0; text-align:center; max-width:420px; line-height:1.6; }
+  .modeBtn { font-family:'Orbitron',sans-serif; font-weight:700; font-size:11px; background:#1a1442;
+    border:2px solid #3a2d6e; color:#c8c0f0; padding:10px 14px; border-radius:10px; cursor:pointer; min-width:100px; }
+  .modeBtn:hover, .modeBtn.active { border-color:#a366ff; box-shadow:0 0 16px rgba(163,102,255,.5); color:#fff; }
+  #nameInput { font-family:'Orbitron',sans-serif; padding:8px 12px; border-radius:8px; border:1px solid #3a2d6e;
+    background:#0c0820; color:#e8e8ff; font-size:13px; text-align:center; width:180px; }
+  table#lbTable { border-collapse:collapse; font-size:11px; color:#c8c0f0; }
+  table#lbTable td, table#lbTable th { padding:4px 10px; border-bottom:1px solid #2a2450; }
+  table#lbTable th { color:#4dd8ff; }
+</style>
+</head>
+<body>
+<h1>🏰 NEON KALE</h1>
+<div id="topbar">
+  <button class="iconbtn" id="homeBtn">⌂ Oyunlar</button>
+  <button class="iconbtn" id="soundBtn">🔊 Ses</button>
+  <button class="iconbtn" id="fsBtn">⛶ Tam Ekran</button>
+  <button class="iconbtn" id="lbBtn">🏆 Skorlar</button>
+</div>
+<div id="stageWrap"><div id="stageInner">
+<div id="hud">
+  <div>CAN: <b id="lives">20</b></div>
+  <div>ALTIN: <b id="gold">150</b></div>
+  <div>DALGA: <b id="wave">0</b></div>
+  <div>SKOR: <b id="score">0</b></div>
+</div>
+<div id="main">
+  <div id="wrap">
+    <canvas id="game" width="720" height="432"></canvas>
+    <div id="overlay">
+      <h2 id="ovTitle">NEON KALE</h2>
+      <p id="ovText">Yolun üzerinden gelen düşmanları kuleler dikip durdur. Kaleyi düşürme! Kule seçip boş alana tıkla, mevcut kuleye tıklayınca yükselt/sat.</p>
+      <div style="font-size:11px;color:#8378c4;margin-top:2px">🗺️ Harita seç:</div>
+      <div class="modes" id="mapSelect" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:360px;"></div>
+      <div id="ovExtra"></div>
+      <button class="go" id="ovBtn">BAŞLA</button>
+    </div>
+  </div>
+  <div id="panel">
+    <div class="towerBtn selected" data-tower="arrow"><div class="sw" style="background:#4dd8ff"></div><div class="info"><span>Ok Kulesi</span><small>50 altın • hızlı</small></div></div>
+    <div class="towerBtn" data-tower="cannon"><div class="sw" style="background:#ff9a4d"></div><div class="info"><span>Top Kulesi</span><small>100 altın • alan hasarı</small></div></div>
+    <div class="towerBtn" data-tower="frost"><div class="sw" style="background:#7fd6ff"></div><div class="info"><span>Buz Kulesi</span><small>90 altın • yavaşlatır</small></div></div>
+    <div class="towerBtn" data-tower="laser"><div class="sw" style="background:#a366ff"></div><div class="info"><span>Lazer Kulesi</span><small>150 altın • zırh delici</small></div></div>
+    <div id="selInfo">
+      <div id="selText"></div>
+      <button id="upgBtn">YÜKSELT</button>
+      <button id="sellBtn">SAT</button>
+    </div>
+    <button id="waveBtn">▶ DALGAYI BAŞLAT</button>
+  </div>
+</div>
+<div id="controls">Kule tipini seç, ızgarada boş bir kareye tıkla. Var olan bir kuleye tıklayarak yükselt veya sat.</div>
+</div></div>
+
+<script>
+/* ============ SES ============ */
+let audioCtx=null, soundOn=true;
+function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ soundOn=false; } } }
+function tone(freq,dur,type,vol,delay){
+  if(!soundOn) return; ensureAudio();
+  try{
+  const t0 = audioCtx.currentTime+(delay||0);
+  const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
+  osc.type=type||'square'; osc.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(vol||0.07,t0); g.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(g); g.connect(audioCtx.destination); osc.start(t0); osc.stop(t0+dur);
+  }catch(e){}
+}
+function noiseBurst(dur,vol){
+  if(!soundOn) return; ensureAudio();
+  try{
+  const bufferSize = audioCtx.sampleRate*dur;
+  const buffer = audioCtx.createBuffer(1,bufferSize,audioCtx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for(let i=0;i<bufferSize;i++) data[i] = (Math.random()*2-1)*(1-i/bufferSize);
+  const src = audioCtx.createBufferSource(); src.buffer=buffer;
+  const g = audioCtx.createGain(); g.gain.value = vol||0.15;
+  src.connect(g); g.connect(audioCtx.destination); src.start();
+  }catch(e){}
+}
+const sfx = {
+  shootArrow(){ tone(900,0.04,'square',0.04); },
+  shootCannon(){ noiseBurst(0.12,0.1); tone(140,0.1,'sawtooth',0.06); },
+  shootFrost(){ tone(500,0.06,'sine',0.05); },
+  shootLaser(){ tone(1200,0.05,'sawtooth',0.04); },
+  hit(){ tone(200,0.04,'square',0.03); },
+  place(){ tone(600,0.08,'triangle',0.06); },
+  upgrade(){ [523,659,784].forEach((f,i)=>tone(f,0.1,'square',0.06,i*0.06)); },
+  sell(){ tone(300,0.15,'sawtooth',0.06); },
+  leak(){ tone(150,0.3,'sawtooth',0.1); },
+  waveClear(){ [523,659,784,1046,1318].forEach((f,i)=>tone(f,0.18,'triangle',0.08,i*0.11)); },
+  gameOver(){ [400,350,300,250,200].forEach((f,i)=>tone(f,0.3,'sawtooth',0.09,i*0.2)); },
+};
+document.getElementById('soundBtn').addEventListener('click', ()=>{
+  soundOn=!soundOn;
+  document.getElementById('soundBtn').textContent = soundOn?'🔊 Ses':'🔇 Ses';
+});
+
+/* ============ TAM EKRAN ============ */
+const stageWrap = document.getElementById('stageWrap');
+const stageInner = document.getElementById('stageInner');
+let expanded = false;
+document.getElementById('fsBtn').addEventListener('click', ()=>{
+  expanded = !expanded;
+  stageWrap.classList.toggle('expanded', expanded);
+  if(expanded){
+    document.getElementById('fsBtn').textContent = '↙ Küçült';
+    if(stageWrap.requestFullscreen) stageWrap.requestFullscreen().catch(()=>{});
+  } else {
+    document.getElementById('fsBtn').textContent = '⛶ Tam Ekran';
+    if(document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  }
+  resizeStage();
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && expanded){ expanded=false; stageWrap.classList.remove('expanded'); document.getElementById('fsBtn').textContent='⛶ Tam Ekran'; resizeStage(); }
+});
+function resizeStage(){
+  if(expanded || document.fullscreenElement){
+    const scale = Math.min(window.innerWidth/960, window.innerHeight/560) * 0.95;
+    stageInner.style.transform = `scale(${scale})`;
+  } else { stageInner.style.transform='none'; }
+}
+window.addEventListener('resize', resizeStage);
+
+/* ============ ANA SAYFA ============ */
+const HOME_URL = null;
+document.getElementById('homeBtn').addEventListener('click', ()=>{ if(HOME_URL) window.location.href=HOME_URL; else history.back(); });
+
+/* ============ SKOR TABLOSU / BACKEND ENTEGRASYON NOKTASI ============ */
+// NOT: Flask+SQLite tarafında tanımlanacak endpoint'ler:
+//   GET  /api/scores/tower   -> [{name, score, wave}, ...]
+//   POST /api/scores/tower   -> body: {name, score, wave} kaydeder
+const SCORE_ENDPOINT = '/api/scores/tower';
+let leaderboard = [];
+async function fetchLeaderboard(){
+  try{ const res = await fetch(SCORE_ENDPOINT); if(res.ok){ leaderboard = await res.json(); return; } } catch(e){}
+}
+async function submitScore(name, score, wave){
+  const entry = {name: name||'???', score, wave};
+  try{
+    const res = await fetch(SCORE_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(entry)});
+    if(res.ok){ await fetchLeaderboard(); return; }
+  } catch(e){}
+  leaderboard.push(entry); leaderboard.sort((a,b)=>b.score-a.score); leaderboard=leaderboard.slice(0,10);
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function renderLeaderboardHTML(){
+  if(leaderboard.length===0) return '<p style="font-size:11px;color:#6d63a0">Henüz skor yok. İlk sen ol!</p>';
+  let rows = leaderboard.slice(0,10).map((e,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(e.name)}</td><td>${e.score}</td><td>${e.wave||'-'}</td></tr>`).join('');
+  return `<table id="lbTable"><tr><th>#</th><th>İsim</th><th>Skor</th><th>Dalga</th></tr>${rows}</table>`;
+}
+document.getElementById('lbBtn').addEventListener('click', async ()=>{
+  await fetchLeaderboard();
+  ovTitle.textContent='SKOR TABLOSU'; ovText.textContent=''; ovBtn.textContent='KAPAT'; ovBtn.dataset.mode='closeLb';
+  document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+  overlay.classList.remove('hidden'); state='menu-lb';
+});
+
+/* ============ IZGARA / YOL / HARİTALAR ============ */
+const CELL=36, COLS=20, ROWS=12;
+const MAPS = [
+  { name:'Orman Vadisi', waypoints:[[0,2],[17,2],[17,5],[2,5],[2,8],[17,8],[17,10],[0,10]],
+    theme:{bg1:'#0f0a28',bg2:'#110c2c',path:'#241c4a',accent:'#4a3d8a'} },
+  { name:'Çöl Geçidi', waypoints:[[3,0],[3,4],[16,4],[16,7],[3,7],[3,11],[19,11]],
+    theme:{bg1:'#241a0c',bg2:'#2a1f10',path:'#4a3520',accent:'#a3793d'} },
+  { name:'Kripto Çekirdek', waypoints:[[0,6],[6,6],[6,1],[13,1],[13,10],[19,10]],
+    theme:{bg1:'#0a1a2a',bg2:'#0c2030',path:'#1a3a5a',accent:'#3dc3d8'} },
+];
+let currentMapIndex = 0;
+let WAYPOINTS, PATH, pixelWaypoints, totalPathLen, segLens;
+
+function loadMap(idx){
+  currentMapIndex = idx;
+  WAYPOINTS = MAPS[idx].waypoints;
+  PATH = new Set();
+  for(let i=0;i<WAYPOINTS.length-1;i++){
+    const [x0,y0]=WAYPOINTS[i], [x1,y1]=WAYPOINTS[i+1];
+    if(y0===y1){ for(let x=Math.min(x0,x1); x<=Math.max(x0,x1); x++) PATH.add(x+','+y0); }
+    else { for(let y=Math.min(y0,y1); y<=Math.max(y0,y1); y++) PATH.add(x0+','+y); }
+  }
+  pixelWaypoints = WAYPOINTS.map(([x,y])=>[x*CELL+CELL/2, y*CELL+CELL/2]);
+  totalPathLen = 0; segLens = [];
+  for(let i=0;i<pixelWaypoints.length-1;i++){
+    const [x0,y0]=pixelWaypoints[i], [x1,y1]=pixelWaypoints[i+1];
+    const d = Math.hypot(x1-x0,y1-y0); segLens.push(d); totalPathLen += d;
+  }
+}
+loadMap(0);
+
+function posAtDistance(dist){
+  let d = Math.max(0, Math.min(dist, totalPathLen));
+  for(let i=0;i<segLens.length;i++){
+    if(d <= segLens[i]){
+      const [x0,y0]=pixelWaypoints[i], [x1,y1]=pixelWaypoints[i+1];
+      const t = segLens[i]===0?0:d/segLens[i];
+      return { x:x0+(x1-x0)*t, y:y0+(y1-y0)*t };
+    }
+    d -= segLens[i];
+  }
+  const last = pixelWaypoints[pixelWaypoints.length-1];
+  return {x:last[0], y:last[1]};
+}
+
+/* ============ KULE TİPLERİ ============ */
+const TOWER_TYPES = {
+  arrow:  { name:'Ok Kulesi',   cost:50,  dmg:8,  range:112, rate:18, color:'#4dd8ff', proj:'#4dd8ff', splash:0, slow:0, pierce:false },
+  cannon: { name:'Top Kulesi',  cost:100, dmg:22, range:96,  rate:55, color:'#ff9a4d', proj:'#ff9a4d', splash:48, slow:0, pierce:false },
+  frost:  { name:'Buz Kulesi',  cost:90,  dmg:4,  range:104, rate:40, color:'#7fd6ff', proj:'#7fd6ff', splash:0, slow:0.5, pierce:false },
+  laser:  { name:'Lazer Kulesi',cost:150, dmg:15, range:130, rate:14, color:'#a366ff', proj:'#a366ff', splash:0, slow:0, pierce:true },
+};
+
+/* ============ DURUM ============ */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle'), ovText = document.getElementById('ovText'), ovBtn = document.getElementById('ovBtn');
+const elLives = document.getElementById('lives'), elGold = document.getElementById('gold'), elWave = document.getElementById('wave'), elScore = document.getElementById('score');
+const waveBtn = document.getElementById('waveBtn');
+const selInfo = document.getElementById('selInfo'), selText = document.getElementById('selText');
+
+let state='menu'; // menu, placing/playing, paused, gameover, menu-lb
+let gold=150, lives=20, wave=0, score=0;
+let towers = []; // {gx,gy,type,level,cooldown}
+let enemies = []; // {dist,speed,hp,maxHp,type,slowTimer,slowMul}
+let projectiles = []; // {x,y,vx,vy,target,dmg,splash,slow,pierce,color,hitset}
+let particles = [];
+let selectedTowerType = 'arrow';
+let selectedTower = null;
+let waveActive = false;
+let enemiesToSpawn = 0, spawnTimer=0, isBossWave=false;
+let waveDefeated = 0, waveTotal = 0;
+
+function buildable(gx,gy){
+  if(gx<0||gy<0||gx>=COLS||gy>=ROWS) return false;
+  if(PATH.has(gx+','+gy)) return false;
+  for(const t of towers) if(t.gx===gx && t.gy===gy) return false;
+  return true;
+}
+
+function resetGame(){
+  loadMap(currentMapIndex);
+  gold=150; lives=20; wave=0; score=0; towers=[]; enemies=[]; projectiles=[]; particles=[];
+  waveActive=false; selectedTower=null; updateHUD(); updateSelPanel();
+}
+
+function renderMapSelect(){
+  const box = document.getElementById('mapSelect');
+  box.innerHTML='';
+  MAPS.forEach((m,i)=>{
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'modeBtn' + (i===currentMapIndex?' active':'');
+    b.textContent = (i===currentMapIndex?'✓ ':'') + m.name;
+    b.addEventListener('click', ()=>{
+      currentMapIndex = i;
+      renderMapSelect();
+    });
+    box.appendChild(b);
+  });
+}
+renderMapSelect();
+
+function updateHUD(){
+  elLives.textContent=lives; elGold.textContent=gold; elWave.textContent=wave; elScore.textContent=score;
+  waveBtn.disabled = waveActive;
+  waveBtn.textContent = waveActive ? ('DALGA '+wave+' SÜRÜYOR...') : ('▶ DALGA '+(wave+1)+' BAŞLAT');
+}
+
+function showOverlay(title, text, btnText){
+  ovTitle.textContent=title; ovText.textContent=text; ovBtn.textContent=btnText;
+  document.getElementById('ovExtra').innerHTML='';
+  overlay.classList.remove('hidden');
+}
+function hideOverlay(){ overlay.classList.add('hidden'); }
+
+ovBtn.addEventListener('click', async ()=>{
+  ensureAudio();
+  if(ovBtn.dataset.mode==='closeLb'){ ovBtn.dataset.mode=''; hideOverlay(); state = towers.length||wave>0 ? 'playing':'menu'; return; }
+  if(ovBtn.dataset.mode==='saveScore'){
+    const nameEl = document.getElementById('nameInput');
+    const name = (nameEl && nameEl.value.trim()) || 'OYUNCU';
+    await submitScore(name, score, wave);
+    ovBtn.dataset.mode='';
+    ovTitle.textContent='SKOR TABLOSU'; ovText.textContent='';
+    document.getElementById('ovExtra').innerHTML = renderLeaderboardHTML();
+    ovBtn.textContent='TEKRAR OYNA'; ovBtn.dataset.mode='restart';
+    document.getElementById('mapSelect').style.display='flex';
+    return;
+  }
+  if(ovBtn.dataset.mode==='restart' || state==='menu' || state==='gameover'){
+    ovBtn.dataset.mode=''; resetGame(); state='playing'; hideOverlay();
+    document.getElementById('mapSelect').style.display='none';
+  } else if(state==='paused'){ state='playing'; hideOverlay(); }
+});
+
+document.querySelectorAll('.towerBtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.towerBtn').forEach(b=>b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedTowerType = btn.dataset.tower;
+    selectedTower = null; updateSelPanel();
+  });
+});
+
+waveBtn.addEventListener('click', ()=>{ ensureAudio(); if(!waveActive && state==='playing') startWave(); });
+
+function difficultyForWave(w){
+  return {
+    count: 8+w*2,
+    hpMul: 1+w*0.22,
+    speedMul: 1+Math.min(0.55,w*0.02),
+    gapFrames: Math.max(12, 42-w*1.3),
+    armorBonus: Math.min(0.25, Math.floor(w/6)*0.05),
+    eliteChance: w>=8 ? Math.min(0.3,(w-7)*0.03) : 0,
+  };
+}
+
+function startWave(){
+  wave++;
+  isBossWave = (wave%5===0);
+  const diff = difficultyForWave(wave);
+  enemiesToSpawn = isBossWave ? 1 : diff.count;
+  waveTotal = enemiesToSpawn; waveDefeated = 0;
+  spawnTimer = 0; waveActive = true;
+  updateHUD();
+}
+
+function spawnEnemy(){
+  const diff = difficultyForWave(wave);
+  let type='basic', hp=18, speed=1.1, armor=0, color='#ff6b6b', bounty=8;
+  if(isBossWave){
+    type='boss'; hp=260+wave*20; speed=0.55; armor=0.35; color='#ff2e88'; bounty=120;
+  } else {
+    const roll = Math.random();
+    if(roll<0.2){ type='fast'; hp=10; speed=2.1; color='#ffd166'; bounty=10; }
+    else if(roll<0.38){ type='tank'; hp=46; speed=0.75; armor=0.4; color='#4dd8ff'; bounty=16; }
+  }
+  let elite = false;
+  if(!isBossWave && Math.random()<diff.eliteChance){
+    elite = true; hp*=1.8; speed*=1.15; bounty*=2; color='#ffffff';
+  }
+  armor = Math.min(0.7, armor + diff.armorBonus);
+  hp = Math.round(hp*diff.hpMul); speed *= diff.speedMul;
+  enemies.push({dist:0, speed, hp, maxHp:hp, type, armor, color, bounty, elite, slowTimer:0, slowMul:1, reachedEnd:false});
+}
+
+function updateEnemies(dt){
+  for(let i=enemies.length-1;i>=0;i--){
+    const e = enemies[i];
+    if(e.slowTimer>0){ e.slowTimer-=dt; }
+    const mul = e.slowTimer>0 ? 0.5 : 1;
+    e.dist += e.speed*mul*dt*1.4;
+    if(e.dist >= totalPathLen){
+      lives -= (e.type==='boss'?5:1); sfx.leak();
+      enemies.splice(i,1); waveDefeated++; updateHUD();
+      if(lives<=0){ triggerGameOver('KALE DÜŞTÜ!'); return; }
+      continue;
+    }
+  }
+}
+
+function towerCenter(t){ return {x:t.gx*CELL+CELL/2, y:t.gy*CELL+CELL/2}; }
+
+function updateTowers(dt){
+  for(const t of towers){
+    t.cooldown -= dt;
+    if(t.cooldown>0) continue;
+    const def = TOWER_TYPES[t.type];
+    const range = def.range + (t.level-1)*22;
+    const dmg = def.dmg + (t.level-1)*def.dmg*0.6;
+    const c = towerCenter(t);
+    let target=null;
+    let bestProgress=-1;
+    for(const e of enemies){
+      const p = posAtDistance(e.dist);
+      const d = Math.hypot(p.x-c.x, p.y-c.y);
+      if(d<=range && e.dist>bestProgress){ bestProgress=e.dist; target=e; }
+    }
+    if(target){
+      const p = posAtDistance(target.dist);
+      const ang = Math.atan2(p.y-c.y, p.x-c.x);
+      const speed = 7;
+      projectiles.push({x:c.x,y:c.y,vx:Math.cos(ang)*speed,vy:Math.sin(ang)*speed,target,dmg,splash:def.splash,slow:def.slow,pierce:def.pierce,color:def.proj,ttl:60});
+      t.cooldown = def.rate;
+      if(t.type==='arrow') sfx.shootArrow(); else if(t.type==='cannon') sfx.shootCannon(); else if(t.type==='frost') sfx.shootFrost(); else sfx.shootLaser();
+    }
+  }
+}
+
+function applyDamage(e, dmg, pierceArmor){
+  const reduce = (!pierceArmor && e.armor) ? (1-e.armor) : 1;
+  e.hp -= dmg*reduce;
+}
+
+function updateProjectiles(dt){
+  for(let i=projectiles.length-1;i>=0;i--){
+    const p = projectiles[i];
+    p.ttl -= dt;
+    if(!enemies.includes(p.target) || p.ttl<=0){ projectiles.splice(i,1); continue; }
+    const tp = posAtDistance(p.target.dist);
+    const dx=tp.x-p.x, dy=tp.y-p.y, dist=Math.hypot(dx,dy);
+    if(dist < 10){
+      applyDamage(p.target, p.dmg, p.pierce);
+      if(p.slow>0){ p.target.slowTimer=60; }
+      explode(p.x,p.y);
+      if(p.splash>0){
+        for(const e2 of enemies){
+          if(e2===p.target) continue;
+          const ep = posAtDistance(e2.dist);
+          if(Math.hypot(ep.x-p.x, ep.y-p.y) <= p.splash) applyDamage(e2, p.dmg*0.6, p.pierce);
+        }
+      }
+      projectiles.splice(i,1);
+      continue;
+    }
+    const ang = Math.atan2(dy,dx);
+    p.x += Math.cos(ang)*7*dt; p.y += Math.sin(ang)*7*dt;
+  }
+  for(let i=enemies.length-1;i>=0;i--){
+    if(enemies[i].hp<=0){
+      score += enemies[i].bounty*4; gold += enemies[i].bounty;
+      explode(posAtDistance(enemies[i].dist).x, posAtDistance(enemies[i].dist).y, enemies[i].type==='boss');
+      enemies.splice(i,1); waveDefeated++;
+    }
+  }
+}
+
+function explode(x,y,big){ particles.push({x,y,life:big?20:10,big}); }
+
+function triggerGameOver(msg){
+  state='gameover'; sfx.gameOver();
+  showOverlay('OYUN BİTTİ', msg+`  •  Skor: ${score}  •  Dalga: ${wave}`, 'SKORU KAYDET');
+  document.getElementById('ovExtra').innerHTML = '<input id="nameInput" maxlength="12" placeholder="İsmini yaz">';
+  ovBtn.dataset.mode='saveScore';
+}
+
+function update(dt){
+  if(state!=='playing') return;
+  if(waveActive){
+    if(enemiesToSpawn>0){
+      spawnTimer -= dt;
+      if(spawnTimer<=0){ spawnEnemy(); enemiesToSpawn--; spawnTimer = difficultyForWave(wave).gapFrames; }
+    }
+    updateEnemies(dt);
+    if(lives<=0) return;
+    updateTowers(dt);
+    updateProjectiles(dt);
+    if(enemiesToSpawn<=0 && enemies.length===0){
+      waveActive=false; sfx.waveClear();
+      const bonus = 30 + wave*4; gold += bonus; score += 200;
+    }
+  }
+  for(let i=particles.length-1;i>=0;i--){ particles[i].life-=dt; if(particles[i].life<=0) particles.splice(i,1); }
+  updateHUD();
+}
+
+/* ============ TIKLAMA / YERLEŞTİRME ============ */
+canvas.addEventListener('click', (e)=>{
+  if(state!=='playing') return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+  const mx = (e.clientX-rect.left)*scaleX, my=(e.clientY-rect.top)*scaleY;
+  const gx = Math.floor(mx/CELL), gy = Math.floor(my/CELL);
+  const existing = towers.find(t=>t.gx===gx && t.gy===gy);
+  if(existing){ selectedTower = existing; updateSelPanel(); return; }
+  if(!buildable(gx,gy)){ selectedTower=null; updateSelPanel(); return; }
+  const def = TOWER_TYPES[selectedTowerType];
+  if(gold < def.cost){ selectedTower=null; updateSelPanel(); return; }
+  gold -= def.cost;
+  const t = {gx,gy,type:selectedTowerType,level:1,cooldown:0,spent:def.cost};
+  towers.push(t); sfx.place(); selectedTower=t; updateHUD(); updateSelPanel();
+});
+
+document.getElementById('upgBtn').addEventListener('click', ()=>{
+  if(!selectedTower) return;
+  const def = TOWER_TYPES[selectedTower.type];
+  const cost = Math.round(def.cost*0.8*selectedTower.level);
+  if(selectedTower.level>=3 || gold<cost) return;
+  gold -= cost; selectedTower.level++; selectedTower.spent += cost;
+  sfx.upgrade(); updateHUD(); updateSelPanel();
+});
+document.getElementById('sellBtn').addEventListener('click', ()=>{
+  if(!selectedTower) return;
+  gold += Math.round(selectedTower.spent*0.6);
+  towers = towers.filter(t=>t!==selectedTower);
+  sfx.sell(); selectedTower=null; updateHUD(); updateSelPanel();
+});
+
+function updateSelPanel(){
+  if(!selectedTower){ selInfo.style.display='none'; return; }
+  selInfo.style.display='flex';
+  const def = TOWER_TYPES[selectedTower.type];
+  const upCost = Math.round(def.cost*0.8*selectedTower.level);
+  selText.innerHTML = `<b style="color:#4dd8ff">${def.name}</b><br>Seviye: ${selectedTower.level}/3<br>` +
+    (selectedTower.level<3 ? `Yükseltme: ${upCost} altın` : 'Maksimum seviye');
+  document.getElementById('upgBtn').style.display = selectedTower.level<3 ? 'block':'none';
+}
+
+/* ============ ÇİZİM ============ */
+function drawGrid(){
+  const th = MAPS[currentMapIndex].theme;
+  ctx.fillStyle=th.bg1; ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    const isPath = PATH.has(x+','+y);
+    ctx.fillStyle = isPath ? th.path : (((x+y)%2===0)?th.bg1:th.bg2);
+    ctx.fillRect(x*CELL,y*CELL,CELL,CELL);
+  }
+  ctx.strokeStyle=th.accent; ctx.lineWidth=2;
+  ctx.beginPath();
+  pixelWaypoints.forEach(([x,y],i)=>{ if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.setLineDash([10,6]); ctx.stroke(); ctx.setLineDash([]);
+  // giriş/çıkış işaretleri
+  ctx.font='18px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('🚩', pixelWaypoints[0][0], pixelWaypoints[0][1]);
+  ctx.fillText('🏰', pixelWaypoints[pixelWaypoints.length-1][0], pixelWaypoints[pixelWaypoints.length-1][1]);
+}
+
+function drawTowerShape(type, c, radius, color){
+  ctx.fillStyle = color;
+  if(type==='arrow'){
+    // üçgen türet (hızlı, sivri)
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y-radius);
+    ctx.lineTo(c.x+radius*0.9, c.y+radius*0.7);
+    ctx.lineTo(c.x-radius*0.9, c.y+radius*0.7);
+    ctx.closePath(); ctx.fill();
+  } else if(type==='cannon'){
+    // kalın kare gövde + namlu
+    ctx.fillRect(c.x-radius*0.8, c.y-radius*0.8, radius*1.6, radius*1.6);
+    ctx.fillStyle='#3a2510';
+    ctx.fillRect(c.x-radius*0.25, c.y-radius*1.3, radius*0.5, radius*0.8);
+  } else if(type==='frost'){
+    // altıgen kristal
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const ang = Math.PI/3*i - Math.PI/2;
+      const px = c.x+Math.cos(ang)*radius, py=c.y+Math.sin(ang)*radius;
+      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.closePath(); ctx.fill();
+  } else if(type==='laser'){
+    // elmas (baklava) şekli
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y-radius*1.2);
+    ctx.lineTo(c.x+radius*0.85, c.y);
+    ctx.lineTo(c.x, c.y+radius*1.2);
+    ctx.lineTo(c.x-radius*0.85, c.y);
+    ctx.closePath(); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.arc(c.x,c.y,radius,0,Math.PI*2); ctx.fill();
+  }
+}
+
+function drawTowers(){
+  for(const t of towers){
+    const def = TOWER_TYPES[t.type];
+    const c = towerCenter(t);
+    if(t===selectedTower){
+      ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.beginPath();
+      ctx.arc(c.x,c.y, def.range+(t.level-1)*22, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.fillStyle='#1a1442'; ctx.fillRect(t.gx*CELL+3,t.gy*CELL+3,CELL-6,CELL-6);
+    drawTowerShape(t.type, c, 10+t.level*1.5, def.color);
+    for(let i=0;i<t.level;i++){ ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(c.x-6+i*6, c.y-16, 2,0,Math.PI*2); ctx.fill(); }
+  }
+}
+
+function drawEnemies(){
+  for(const e of enemies){
+    const p = posAtDistance(e.dist);
+    const r = e.type==='boss'?16:e.type==='tank'?10:e.type==='fast'?6:8;
+    ctx.fillStyle = e.color;
+    if(e.slowTimer>0){ ctx.globalAlpha=0.6; }
+    ctx.beginPath(); ctx.arc(p.x,p.y,r,0,Math.PI*2); ctx.fill();
+    if(e.elite){
+      ctx.strokeStyle='#ffd166'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.arc(p.x,p.y,r+4,0,Math.PI*2); ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+    const w = r*2;
+    ctx.fillStyle='#000'; ctx.fillRect(p.x-w/2,p.y-r-8,w,4);
+    ctx.fillStyle = e.type==='boss'?'#ff2e88':'#5fd97a';
+    ctx.fillRect(p.x-w/2,p.y-r-8,w*Math.max(0,e.hp/e.maxHp),4);
+  }
+}
+
+function render(){
+  drawGrid();
+  drawTowers();
+  ctx.fillStyle='#ffd166';
+  for(const p of projectiles){ ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); }
+  drawEnemies();
+  for(const pt of particles){
+    ctx.globalAlpha = pt.life/(pt.big?20:10);
+    ctx.fillStyle = pt.big?'#ff2e88':'#ffd166';
+    ctx.beginPath(); ctx.arc(pt.x,pt.y, pt.big?14:6,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+  if(isBossWave && waveActive){
+    ctx.fillStyle='#ff2e88'; ctx.font='bold 13px Orbitron,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('⚠ BOSS DALGASI', canvas.width/2, 20);
+  }
+}
+
+let last = performance.now();
+function loop(now){
+  const dt = Math.min(3,(now-last)/16.67);
+  last = now;
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+updateHUD();
+</script>
+</body>
+</html>
