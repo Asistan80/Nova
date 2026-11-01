@@ -126,6 +126,8 @@ canvas.chart{width:100%;height:150px;display:block}
       <p style="font-size:16px" data-t="lead"></p>
       <div id="challenge" class="challenge" style="display:none"></div>
       <div class="home-row"><button class="btn" id="h-start">Hayata başla</button><button class="btn g" id="h-fresh" style="display:none"></button></div>
+      <div class="home-row"><button class="btn g" id="h-daily"></button></div><div id="daily-res" class="mut" style="text-align:center;font-size:14px;color:var(--mut);margin-top:4px"></div>
+      <div class="home-row"><input class="sel" id="h-nick" maxlength="16" style="text-align:center"></div>
       <div class="home-row"><select class="sel" id="h-prac"></select></div>
       <div class="mut" style="color:var(--mut);font-size:13px" data-t="practiceNote"></div>
     </div>
@@ -171,10 +173,11 @@ canvas.chart{width:100%;height:150px;display:block}
       <div class="card"><h3 style="margin-bottom:6px" data-t="chart"></h3><canvas class="chart" id="end-chart" style="height:190px"></canvas><div class="legend" id="end-legend"></div>
         <h3 style="margin:16px 0 6px" data-t="hls"></h3><div id="end-hl"></div></div>
       <div class="card"><h3 style="margin-bottom:6px" data-t="avg"></h3><div class="meters" id="end-avg"></div>
+        <div id="end-vs"></div>
         <h3 style="margin:16px 0 6px" data-t="summary"></h3><div id="end-sum"></div>
         <h3 style="margin:16px 0 8px" data-t="earned"></h3><div class="badges" id="end-badges"></div></div>
     </div>
-    <div class="home-row" style="margin-top:18px"><button class="btn" id="e-share" data-t="share"></button><button class="btn g" id="e-copy" data-t="copy"></button><button class="btn g" id="e-link" data-t="link"></button></div>
+    <div class="home-row" style="margin-top:18px"><button class="btn" id="e-share" data-t="share"></button><button class="btn g" id="e-copy" data-t="copy"></button><button class="btn g" id="e-link" data-t="link"></button><button class="btn g" id="e-vs" data-t="vsCard" style="display:none"></button></div>
     <div class="home-row"><button class="btn g" id="e-new" data-t="again2"></button><button class="btn g" id="e-same" data-t="same"></button><button class="btn g" id="e-book" data-t="book"></button></div>
   </section>
 </div>
@@ -454,7 +457,7 @@ const OD = {};
   // ---------------------------------------------------------------- adım
   OD.step = function (L) {
     if (L.dead || L.pending) return { pending: !!L.pending, dead: L.dead };
-    if (!L._planned) { planYear(L); L._planned = true; L._events = 0; }
+    if (!L._planned) { L.rnd = OD.rng(OD.hashSeed(L.seed + "|" + L.age)); planYear(L); L._planned = true; L._events = 0; }
     return runQueue(L);
   };
 
@@ -1656,6 +1659,8 @@ if (typeof module !== "undefined") module.exports = OD;
       f2t: "Dört gösterge", f2: "Sağlık, Mutluluk, Zihin, Bağlar. Birini ihmal edersen diğerleri de zamanla etkilenir. Ayrıca bir Refah durumu var.",
       f3t: "Yıl yıl", f3: "Her yıl bir şey olur ya da olmaz. Dönüm noktalarında karar sana ait; ya da otomatik moda bırakabilirsin.",
       f4t: "Meydan oku", f4: "Aynı doğum koduyla arkadaşına meydan oku: aynı ülke, aynı aile, farklı yollar.",
+      challenge2: "{n} bu doğumla {a} yıl yaşadı (not {g}, puan {s}). Onu geçebilir misin?", dailyBtn: "Günün doğumu", dailyDone: "Bugünkü hayatın: {a} yıl · {g}", dailyNew: "Bugün herkes aynı doğumla başlıyor: {d}", nick: "Takma adın (meydan okumalarda görünür)",
+      vsTitle: "Meydan okuma sonucu", vsYou: "Sen", vsLongerYou: "Daha uzun yaşadın: +{d} yıl", vsLongerThem: "Rakibin {d} yıl daha uzun yaşadı", vsTie: "Aynı yaşta veda ettiniz", vsScore: "Puan", vsGrade: "Not", vsAge: "Ömür", vsWin: "Sen kazandın!", vsLose: "Bu sefer rakip kazandı", vsDraw: "Berabere", vsCard: "Karşılaştırma kartı", vsFate: "Aynı kader: zarlar ikinizde de aynı, farkı kararlar yarattı.", friend: "Arkadaşın", daily: "Günün doğumu",
       challenge: "Bir arkadaşın seni aynı doğum koduyla hayata davet ediyor:", fresh: "Yeni, rastgele hayat",
       lang: "Dil", sound: "Ses", rolling: "Doğacağın yer çekiliyor...", certTitle: "DOĞUM BELGESİ", name: "Ad", year: "Doğum yılı", place: "Doğum yeri", family: "Aile durumu",
       famL: ["Yoksul", "Orta halli", "Rahat"], odds: "1 / {n}", oddsSub: "bu ülkede doğma şansın", ex: "Beklenen ömür", yrs: "yıl",
@@ -1685,6 +1690,8 @@ if (typeof module !== "undefined") module.exports = OD;
       f2t: "Four meters", f2: "Health, Happiness, Mind, Bonds. Neglect one and the others suffer in time. There is also a Wealth level.",
       f3t: "Year by year", f3: "Each year something happens, or doesn't. At turning points the decision is yours; or leave it to auto mode.",
       f4t: "Challenge", f4: "Challenge a friend with the same birth code: same country, same family, different paths.",
+      challenge2: "{n} lived {a} years with this birth (grade {g}, score {s}). Can you beat that?", dailyBtn: "Birth of the day", dailyDone: "Today's life: {a} years · {g}", dailyNew: "Everyone starts with the same birth today: {d}", nick: "Your nickname (shown in challenges)",
+      vsTitle: "Challenge result", vsYou: "You", vsLongerYou: "You lived longer: +{d} years", vsLongerThem: "Your rival lived {d} years longer", vsTie: "You passed away at the same age", vsScore: "Score", vsGrade: "Grade", vsAge: "Lifespan", vsWin: "You win!", vsLose: "Your rival wins this time", vsDraw: "A draw", vsCard: "Comparison card", vsFate: "Same fate: the dice are identical for both of you; decisions made the difference.", friend: "Your friend", daily: "Birth of the day",
       challenge: "A friend invites you to live from the same birth code:", fresh: "New random life",
       lang: "Language", sound: "Sound", rolling: "Drawing your birthplace...", certTitle: "BIRTH CERTIFICATE", name: "Name", year: "Birth year", place: "Birthplace", family: "Family situation",
       famL: ["Poor", "Middle", "Comfortable"], odds: "1 in {n}", oddsSub: "your odds of being born here", ex: "Life expectancy", yrs: "yrs",
@@ -1783,13 +1790,34 @@ if (typeof module !== "undefined") module.exports = OD;
   const G = { L: null, speed: 2, paused: false, auto: store.get("od_auto", false), timer: null, shown: 0, last: null, practice: false, tipShown: false, ending: false };
   const SPEED_MS = { 1: 5200, 2: 3000, 3: 1200 };
 
+
+  // ------------------------------------------------------------ bağlantı / meydan okuma / günlük
+  function parseHash() {
+    const h = location.hash || "";
+    const m = h.match(/s=([A-Za-z0-9]{4,12})/);
+    const r = h.match(/[&#]r=(\d+)_(\d+)_([A-Z])_(\d+)_(\d+)_(\d+)_(\d+)_(\d+)/);
+    const n = h.match(/[&#]n=([^&]*)/);
+    let nick = ""; try { nick = n ? decodeURIComponent(n[1]) : ""; } catch (e) { }
+    return { seed: m ? m[1].toUpperCase() : null, rival: r ? { age: +r[1], score: +r[2], grade: r[3], avg: { h: +r[4], m: +r[5], z: +r[6], b: +r[7], p: +r[8] }, nick: nick.slice(0, 16) } : null };
+  }
+  const dailyCode = () => { const d = new Date(); return "D" + d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0"); };
+  const myNick = () => (store.get("od_nick", "") || "").slice(0, 16);
+
   // ------------------------------------------------------------ ana ekran
   function renderHome() {
-    const m = location.hash.match(/s=([A-Za-z0-9]{4,12})/);
-    const seed = m ? m[1].toUpperCase() : null;
-    $("#challenge").innerHTML = seed ? `<div>${t("challenge")}</div><div style="font-size:22px;font-weight:800;margin:4px 0;color:var(--gold);letter-spacing:3px">${seed}</div>` : "";
+    const P = parseHash(), seed = P.seed;
+    let ch = "";
+    if (seed) {
+      ch = `<div>${t("challenge")}</div><div style="font-size:22px;font-weight:800;margin:4px 0;color:var(--gold);letter-spacing:3px">${seed}</div>`;
+      if (P.rival) ch += `<div style="margin-top:6px">${esc(fillT("challenge2", { n: P.rival.nick || t("friend"), a: P.rival.age, g: P.rival.grade, s: P.rival.score }))}</div>`;
+    }
+    $("#challenge").innerHTML = ch;
     $("#h-start").textContent = seed ? t("start") + " (" + seed + ")" : t("start");
     const fr = $("#h-fresh"); fr.style.display = seed ? "" : "none"; fr.textContent = t("fresh");
+    $("#h-daily").textContent = "★ " + t("dailyBtn");
+    const dc = dailyCode(), dres = store.get("od_daily", {})[dc];
+    $("#daily-res").textContent = dres ? fillT("dailyDone", { a: dres.a, g: dres.g }) : fillT("dailyNew", { d: dc.slice(7) + "." + dc.slice(5, 7) + "." + dc.slice(1, 5) });
+    const ni = $("#h-nick"); ni.placeholder = t("nick"); ni.value = myNick();
     const sel = $("#h-prac"); sel.innerHTML = `<option value="">${t("practice")}</option>` + OD.COUNTRIES.slice().sort((a, b) => cname(a).localeCompare(cname(b), lang)).map(c => `<option value="${c.code}">${esc(cname(c))}</option>`).join("");
   }
   function i18nStatic() {
@@ -2013,6 +2041,7 @@ if (typeof module !== "undefined") module.exports = OD;
       store.set("od_lives", book.slice(0, 60));
     }
     G.fresh = fresh;
+    if (G.daily && !G.practice) { const d = store.get("od_daily", {}); const k = dailyCode(); if (!d[k] || d[k].s < L.score) { d[k] = { a: L.deathAge, g: L.grade, s: L.score }; const keys = Object.keys(d).sort().slice(-30); const o = {}; keys.forEach(x => o[x] = d[x]); store.set("od_daily", o); } }
     renderEnd();
     show("s-end"); sfx.good();
   }
@@ -2023,6 +2052,7 @@ if (typeof module !== "undefined") module.exports = OD;
       <div class="cause">${esc(tx(OD.fmt(L, L.cause)))}</div><div class="ep">${esc(tx(L.epitaph.main))}${L.epitaph.extra.map(x => " " + esc(tx(x))).join("")}</div>
       <div><span class="grade">${L.grade}</span></div><div style="color:var(--mut);margin-top:6px;font-size:14px">${t("score")}: ${L.score}</div>${G.practice ? `<div class="chip" style="margin-top:8px">${t("practiceDone")}</div>` : `<div class="chip up" style="margin-top:8px">${t("saved")}</div>`}</div>`;
     drawChart($("#end-chart"), L.series, L); $("#end-legend").innerHTML = legend();
+    renderVs();
     const A = L.avg;
     $("#end-avg").innerHTML = MET.map(([k, key, col]) => `<div class="m"><div class="lb"><span>${t(key)}</span><b>${Math.round(A[k])}</b></div><div class="bar"><i style="background:${col};width:${Math.round(A[k])}%"></i></div></div>`).join("");
     $("#end-sum").innerHTML = [
@@ -2033,7 +2063,65 @@ if (typeof module !== "undefined") module.exports = OD;
     $("#end-badges").innerHTML = L.badges.length ? L.badges.map(id => { const b = OD.BADGES.find(x => x.id === id); return `<div class="bdg ${fresh.includes(id) ? "new" : ""}">${fresh.includes(id) ? `<small style="color:var(--gold)">${t("newb")}</small>` : ""}<b>${lang === "tr" ? b.tr : b.en}</b><small>${lang === "tr" ? b.dtr : b.den}</small></div>`; }).join("") : `<div class="mut" style="color:var(--mut)">${t("none")}</div>`;
   }
   const shareText = () => { const L = G.L; return fillT("shareText", { n: L.name, c: cname(L.birthCountry), o: L.odds, a: L.deathAge, g: L.grade }) + " " + shareLink(); };
-  const shareLink = () => location.href.split("#")[0] + "#s=" + G.L.seed;
+  const shareLink = () => {
+    const L = G.L, A = L.avg || {};
+    let h = "#s=" + L.seed;
+    if (!G.practice && L.dead) { h += "&r=" + [L.deathAge, L.score, L.grade, ...["h", "m", "z", "b", "p"].map(k => Math.round(A[k] || 0))].join("_"); const n = myNick(); if (n) h += "&n=" + encodeURIComponent(n); }
+    return location.href.split("#")[0] + h;
+  };
+
+
+  // ------------------------------------------------------------ meydan okuma karşılaştırması
+  function vsData() {
+    const L = G.L, R = G.rival;
+    if (!R || G.practice || !L.dead) return null;
+    const d = L.deathAge - R.age, ds = L.score - R.score;
+    const win = ds > 0 || (ds === 0 && d > 0) ? 1 : (ds === 0 && d === 0 ? 0 : -1);
+    return { L, R, d, ds, win, rn: R.nick || t("friend"), mn: myNick() || t("vsYou") };
+  }
+  function renderVs() {
+    const v = vsData(), box = $("#end-vs"), btn = $("#e-vs");
+    if (!v) { box.innerHTML = ""; btn.style.display = "none"; return; }
+    btn.style.display = "";
+    const row = (lb, a, b) => `<div class="stat"><span>${lb}</span><b>${esc(a)} &nbsp;|&nbsp; ${esc(b)}</b></div>`;
+    const msg = v.win > 0 ? t("vsWin") : v.win < 0 ? t("vsLose") : t("vsDraw");
+    const sub = v.d > 0 ? fillT("vsLongerYou", { d: v.d }) : v.d < 0 ? fillT("vsLongerThem", { d: -v.d }) : t("vsTie");
+    box.innerHTML = `<div class="cert" style="margin:14px 0"><h2>${t("vsTitle")}</h2><div style="text-align:center;font-size:20px;font-weight:800;color:var(--gold)">${msg}</div><div style="text-align:center;color:var(--mut);font-size:14px;margin-bottom:8px">${esc(sub)}</div>
+      <div class="stat"><span></span><b>${esc(v.mn)} &nbsp;|&nbsp; ${esc(v.rn)}</b></div>
+      ${row(t("vsAge"), v.L.deathAge + " " + t("years"), v.R.age + " " + t("years"))}${row(t("vsScore"), v.L.score, v.R.score)}${row(t("vsGrade"), v.L.grade, v.R.grade)}
+      ${MET.map(([k, key]) => row(t(key), Math.round(v.L.avg[k]), v.R.avg[k])).join("")}
+      <div style="color:var(--mut);font-size:13px;margin-top:8px">${t("vsFate")}</div></div>`;
+  }
+  function vsCanvas() {
+    const v = vsData(); if (!v) return null;
+    const W = 1080, H = 1350, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d");
+    const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, "#1c2150"); g.addColorStop(.55, "#2a1d4d"); g.addColorStop(1, "#0e1020"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.textAlign = "center"; c.fillStyle = "#ffcf66"; c.font = "700 34px sans-serif"; c.fillText(t("cardTitle") + " · " + t("vsTitle").toUpperCase(), W / 2, 90);
+    c.fillStyle = "#eef0ff"; c.font = "800 70px sans-serif"; c.fillText(v.win > 0 ? t("vsWin") : v.win < 0 ? t("vsLose") : t("vsDraw"), W / 2, 190);
+    c.fillStyle = "#9aa3cc"; c.font = "400 36px sans-serif"; c.fillText(`${v.L.name} · ${v.L.birth} · ${cname(v.L.birthCountry)}`, W / 2, 250);
+    const col = (x, name, age, score, grade, avg, hi) => {
+      c.fillStyle = hi ? "#ffffff14" : "#ffffff08"; roundRect(c, x - 230, 300, 460, 760, 28); c.fill();
+      c.fillStyle = hi ? "#ffcf66" : "#c8cdef"; c.font = "800 44px sans-serif"; c.fillText(name.slice(0, 14), x, 370);
+      c.fillStyle = "#ffcf66"; c.font = "900 170px sans-serif"; c.fillText(age, x, 560);
+      c.fillStyle = "#9aa3cc"; c.font = "400 34px sans-serif"; c.fillText(t("years"), x, 605);
+      c.fillStyle = "#eef0ff"; c.font = "800 60px sans-serif"; c.fillText(grade + "  ·  " + score, x, 700);
+      MET.forEach(([k, key, colr], i) => { const y = 760 + i * 56; c.textAlign = "left"; c.fillStyle = "#c8cdef"; c.font = "26px sans-serif"; c.fillText(t(key), x - 200, y); c.fillStyle = "#ffffff18"; c.fillRect(x - 60, y - 20, 240, 14); c.fillStyle = colr; c.fillRect(x - 60, y - 20, 2.4 * Math.round(avg[k]), 14); c.textAlign = "center"; });
+    };
+    col(300, v.mn, v.L.deathAge, v.L.score, v.L.grade, v.L.avg, v.win >= 0);
+    col(780, v.rn, v.R.age, v.R.score, v.R.grade, v.R.avg, v.win <= 0);
+    c.fillStyle = "#5eead4"; c.font = "italic 34px sans-serif"; c.fillText(v.d > 0 ? fillT("vsLongerYou", { d: v.d }) : v.d < 0 ? fillT("vsLongerThem", { d: -v.d }) : t("vsTie"), W / 2, 1130);
+    c.fillStyle = "#ffcf66"; c.font = "700 36px sans-serif"; c.fillText(`${t("seedTxt")}: ${v.L.seed}`, W / 2, 1220);
+    c.fillStyle = "#6b739f"; c.font = "26px sans-serif"; c.fillText(location.host || "omur-defteri", W / 2, 1300);
+    return cv;
+  }
+  function shareVs() {
+    const cv = vsCanvas(); if (!cv) return;
+    cv.toBlob(async blob => {
+      const file = new File([blob], "omur-defteri-karsilastirma.png", { type: "image/png" });
+      try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: shareText() }); return; } } catch (e) { }
+      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "omur-defteri-karsilastirma.png"; a.click(); toast(t("saved"));
+    });
+  }
 
   // ------------------------------------------------------------ paylaşım kartı
   function cardCanvas() {
@@ -2103,9 +2191,11 @@ if (typeof module !== "undefined") module.exports = OD;
   }
 
   // ------------------------------------------------------------ olaylar
-  function newGame(seedFromHash, practice) {
+  function newGame(seedFromHash, practice, keepRival) {
     const seed = seedFromHash || OD.newSeedCode();
-    if (!practice) history.replaceState(null, "", "#s=" + seed);
+    G.rival = (keepRival && !practice && parseHash().seed === seed) ? parseHash().rival : null;
+    G.daily = seed === dailyCode();
+    if (!practice) history.replaceState(null, "", "#s=" + seed + (G.rival ? location.hash.replace(/^[^&]*/, "") : ""));
     startBirth(seed, practice || null);
   }
   function init() {
@@ -2116,10 +2206,12 @@ if (typeof module !== "undefined") module.exports = OD;
     $(".brand").onclick = () => { clearTimeout(G.timer); G.L = null; renderHome(); show("s-home"); };
     $("#h-start").onclick = () => {
       const pr = $("#h-prac").value;
-      const m = location.hash.match(/s=([A-Za-z0-9]{4,12})/);
-      newGame(m ? m[1].toUpperCase() : null, pr || null);
+      newGame(parseHash().seed, pr || null, true);
     };
     $("#h-fresh").onclick = () => { history.replaceState(null, "", location.pathname); renderHome(); newGame(null, $("#h-prac").value || null); };
+    $("#h-daily").onclick = () => { history.replaceState(null, "", location.pathname + "#s=" + dailyCode()); renderHome(); newGame(dailyCode(), null, false); };
+    $("#h-nick").oninput = e => store.set("od_nick", e.target.value.slice(0, 16));
+    $("#e-vs").onclick = shareVs;
     $("#birth-begin").onclick = beginLife;
     $("#birth-redo").onclick = () => newGame(G.practice ? OD.newSeedCode() : null, G.practice ? G.L.c.code : null);
     $("#c-pause").onclick = () => setPaused(!G.paused);
@@ -2130,7 +2222,7 @@ if (typeof module !== "undefined") module.exports = OD;
     $("#e-copy").onclick = () => copyText(shareText());
     $("#e-link").onclick = () => copyText(shareLink());
     $("#e-new").onclick = () => { history.replaceState(null, "", location.pathname); newGame(null, G.practice ? G.L.c.code : null); };
-    $("#e-same").onclick = () => newGame(G.L.seed, G.practice ? G.L.c.code : null);
+    $("#e-same").onclick = () => newGame(G.L.seed, G.practice ? G.L.c.code : null, false);
     $("#e-book").onclick = openBook;
     document.addEventListener("keydown", e => {
       if (e.target.closest && e.target.closest("input,select,textarea")) return;
