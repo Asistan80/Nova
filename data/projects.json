@@ -810,17 +810,26 @@
   {
     "name": "Barbaros",
     "kind": "oyun",
-    "status": "download",
-    "tagline": "Oyun",
+    "status": "playable",
+    "tagline": "Akdeniz'in Efendisi: deniz savaşı ve sefer stratejisi",
     "desc": "Yapay zeka ile yaptığım eğlenceli oyun.",
-    "tags": [],
-    "features": [],
+    "tags": [
+      "Godot",
+      "Strateji",
+      "Deniz savaşı",
+      "Tarih"
+    ],
+    "features": [
+      "1504-1546 arası sefer modu",
+      "Sonsuz mod",
+      "Başarımlar ve şeref mağazası"
+    ],
     "changelog": [],
     "version": "1.0",
     "published": true,
     "youtube_url": "",
     "publish_at": null,
-    "cover": "barbaros-auto.png",
+    "cover": "barbaros-oyun.png",
     "gallery": [],
     "play_url": "/oyna/barbaros",
     "download_url": null,
@@ -1081,17 +1090,27 @@
   {
     "name": "Strike_Arena",
     "kind": "oyun",
-    "status": "download",
-    "tagline": "",
+    "status": "playable",
+    "tagline": "3 boyutlu bowling: 3 mekân, yapay zekâ rakipler",
     "desc": "Yapay zeka ile bowling oyunu yaptım. Keyifli oyunlar",
-    "tags": [],
-    "features": [],
+    "tags": [
+      "Godot",
+      "3B",
+      "Bowling",
+      "Çevrimiçi"
+    ],
+    "features": [
+      "3 farklı mekân ve top mağazası",
+      "Yapay zekâ rakiplerle maç",
+      "Arkadaşlarla çevrimiçi oynama",
+      "Başarımlar ve skor tablosu"
+    ],
     "changelog": [],
     "version": "1.0",
     "published": true,
     "youtube_url": "",
     "publish_at": null,
-    "cover": "strike-arena-auto.png",
+    "cover": "strike-arena-oyun.png",
     "gallery": [],
     "play_url": "/oyna/strike-arena",
     "download_url": null,
@@ -1103,17 +1122,25 @@
   {
     "name": "Karabasan",
     "kind": "oyun",
-    "status": "download",
-    "tagline": "",
+    "status": "playable",
+    "tagline": "Konağın gölgesinde 3 boyutlu korku",
     "desc": "Karabasan korku oyunu yapmaya çalıştım yapay zeka ile. Arada sıkıntılar eşyalarda kaymalar var ama idare eder.",
-    "tags": [],
-    "features": [],
+    "tags": [
+      "Godot",
+      "3B",
+      "Korku"
+    ],
+    "features": [
+      "Bölümlere ayrılmış konak",
+      "Zorluk seçimi",
+      "Kulaklıkla oynamanız önerilir"
+    ],
     "changelog": [],
     "version": "1.0",
     "published": true,
     "youtube_url": "",
     "publish_at": null,
-    "cover": "karabasan-auto.png",
+    "cover": "karabasan-oyun.png",
     "gallery": [],
     "play_url": "/oyna/karabasan",
     "download_url": null,
@@ -1169,17 +1196,27 @@
   {
     "name": "Pazarcı",
     "kind": "oyun",
-    "status": "download",
-    "tagline": "",
+    "status": "playable",
+    "tagline": "Eskici dükkânı: pazarlık yap, ucuza al, pahalıya sat",
     "desc": "İkinci el eşya alım satım oyunu.",
-    "tags": [],
-    "features": [],
+    "tags": [
+      "Godot",
+      "3B",
+      "Ticaret",
+      "Pazarlık"
+    ],
+    "features": [
+      "30 eşya ve 8 farklı müşteri tipi",
+      "Pazarlık ve açık artırma",
+      "Koleksiyon ve 14 başarım",
+      "Büyüyen dükkân"
+    ],
     "changelog": [],
     "version": "1.0",
     "published": true,
     "youtube_url": "",
     "publish_at": null,
-    "cover": "pazarci-auto.png",
+    "cover": "pazarci-oyun.png",
     "gallery": [],
     "play_url": "/oyna/pazarci",
     "download_url": null,
@@ -1188,5 +1225,74 @@
     "slug": "pazarci",
     "has_game_files": true,
     "created_at": "2026-10-29T09:42:27.899564+00:00"
+  },
+  {
+    "slug": "takimada-turu",
+    "name": "Takımada Turu",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "3 boyutlu adalar ticaret oyunu: al, geliştir, takas et, kazan",
+    "desc": "Business Tour tarzı, kendi haritalı 3 boyutlu tahta oyunu. Adaları satın al, kulübeden anıta kadar geliştir, açık artırma ve takasla rakiplerini köşeye sıkıştır. Bilgisayara karşı, arkadaşlarla aynı ağda ya da çevrimiçi oyna.",
+    "tags": [
+      "Godot",
+      "3B",
+      "Tahta oyunu",
+      "Çok oyunculu"
+    ],
+    "features": [
+      "4 harita: Takımada, Karadeniz, Ege, Fantezi",
+      "8 çizgi film karakteri, karakter seçimi",
+      "Açık artırma, takas ve karşı teklif, ipotek",
+      "Çevrimiçi çok oyunculu, sohbet, bot devri",
+      "Eğitim modu, oyun özeti ve tekrar izleme",
+      "Dört zorlukta bilgisayar rakipler, takım (2'ye 2) modu"
+    ],
+    "changelog": [
+      {
+        "version": "0.3",
+        "date": "2026-10-29",
+        "text": "Yeni haritalar, müzik, eğitim modu, özet ve tekrar, çevrimiçi mod ve sohbet."
+      }
+    ],
+    "version": "0.3",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "takimada-turu-oyun.png",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg",
+      "ekran-6.jpg"
+    ],
+    "play_url": "/oyna/takimada-turu",
+    "download_url": null,
+    "download_file": "TakimadaTuru_Windows.zip",
+    "updated_at": "",
+    "created_at": "2026-11-01T08:00:46.437204+00:00"
+  },
+  {
+    "name": "Ömür Defteri",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "omur-defteri-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/omur-defteri",
+    "download_url": null,
+    "download_file": "OmurDefteri_1.zip",
+    "updated_at": "",
+    "slug": "omur-defteri",
+    "created_at": "2026-11-01T08:04:18.227658+00:00"
   }
 ]
