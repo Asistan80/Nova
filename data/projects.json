@@ -1470,9 +1470,31 @@
     "gallery": [],
     "play_url": "/oyna/kadim-deste",
     "download_url": null,
-    "download_file": "KadimDeste_Windows_2.zip",
+    "download_file": "KadimDeste_Windows.zip",
     "updated_at": "",
     "slug": "kadim-deste",
     "created_at": "2026-11-02T11:46:22.187072+00:00"
+  },
+  {
+    "name": "Gece Bekçisi",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Farklı oyun deneyin.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "gece-bekcisi-2-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/gece-bekcisi-2",
+    "download_url": null,
+    "download_file": "GeceBekcisi.zip",
+    "updated_at": "",
+    "slug": "gece-bekcisi-2",
+    "created_at": "2026-11-02T11:49:23.586276+00:00"
   }
 ]
