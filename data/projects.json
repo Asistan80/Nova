@@ -1316,5 +1316,27 @@
     "updated_at": "",
     "slug": "evrim-havuzu",
     "created_at": "2026-11-01T09:00:54.649698+00:00"
+  },
+  {
+    "name": "Telsiz",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Yapay zeka ile yaptığım farklı bir oyun.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "telsiz-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/telsiz",
+    "download_url": null,
+    "download_file": "Telsiz.zip",
+    "updated_at": "",
+    "slug": "telsiz",
+    "created_at": "2026-11-02T11:41:52.552035+00:00"
   }
 ]
