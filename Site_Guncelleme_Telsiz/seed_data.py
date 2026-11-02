@@ -1,0 +1,230 @@
+"""Godot oyunları için otomatik tamamlamalar.
+Sadece BOŞ alanları doldurur (kullanıcının yazdığı hiçbir şeyin üzerine yazmaz) ve Takımada Turu kaydını yoksa ekler."""
+
+PATCHES = {
+    "strike-arena": {
+        "cover": "strike-arena-oyun.png",
+        "tagline": "3 boyutlu bowling: 3 mekân, yapay zekâ rakipler",
+        "tags": ["Godot", "3B", "Bowling", "Çevrimiçi"],
+        "features": ["3 farklı mekân ve top mağazası", "Yapay zekâ rakiplerle maç", "Arkadaşlarla çevrimiçi oynama", "Başarımlar ve skor tablosu"],
+    },
+    "pazarci": {
+        "cover": "pazarci-oyun.png",
+        "tagline": "Eskici dükkânı: pazarlık yap, ucuza al, pahalıya sat",
+        "desc": "Dükkânını kur, farklı karakterdeki müşterilerle pazarlık et, açık artırmalara katıl, koleksiyonunu tamamla ve dükkânını büyüt.",
+        "tags": ["Godot", "3B", "Ticaret", "Pazarlık"],
+        "features": ["30 eşya ve 8 farklı müşteri tipi", "Pazarlık ve açık artırma", "Koleksiyon ve 14 başarım", "Büyüyen dükkân"],
+    },
+    "karabasan": {
+        "cover": "karabasan-oyun.png",
+        "tagline": "Konağın gölgesinde 3 boyutlu korku",
+        "tags": ["Godot", "3B", "Korku"],
+        "features": ["Bölümlere ayrılmış konak", "Zorluk seçimi", "Kulaklıkla oynamanız önerilir"],
+    },
+    "barbaros": {
+        "cover": "barbaros-oyun.png",
+        "tagline": "Akdeniz'in Efendisi: deniz savaşı ve sefer stratejisi",
+        "tags": ["Godot", "Strateji", "Deniz savaşı", "Tarih"],
+        "features": ["1504-1546 arası sefer modu", "Sonsuz mod", "Başarımlar ve şeref mağazası"],
+    },
+}
+
+TAKIMADA = {
+    "slug": "takimada-turu",
+    "name": "Takımada Turu",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "3 boyutlu adalar ticaret oyunu: al, geliştir, takas et, kazan",
+    "desc": "Business Tour tarzı, kendi haritalı 3 boyutlu tahta oyunu. Adaları satın al, kulübeden anıta kadar geliştir, açık artırma ve takasla rakiplerini köşeye sıkıştır. Bilgisayara karşı, arkadaşlarla aynı ağda ya da çevrimiçi oyna.",
+    "tags": ["Godot", "3B", "Tahta oyunu", "Çok oyunculu"],
+    "features": [
+        "4 harita: Takımada, Karadeniz, Ege, Fantezi",
+        "8 çizgi film karakteri, karakter seçimi",
+        "Açık artırma, takas ve karşı teklif, ipotek",
+        "Çevrimiçi çok oyunculu, sohbet, bot devri",
+        "Eğitim modu, oyun özeti ve tekrar izleme",
+        "Dört zorlukta bilgisayar rakipler, takım (2'ye 2) modu",
+    ],
+    "changelog": [{"version": "0.3", "date": "2026-10-29", "text": "Yeni haritalar, müzik, eğitim modu, özet ve tekrar, çevrimiçi mod ve sohbet."}],
+    "version": "0.3",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "cover": "takimada-turu-oyun.png",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg", "ekran-6.jpg"],
+    "play_url": "/oyna/takimada-turu",
+    "download_url": None,
+    "download_file": "TakimadaTuru_Windows.zip",
+    "updated_at": "",
+}
+
+OMUR = {
+    "slug": "omur-defteri",
+    "name": "Ömür Defteri",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Rastgele bir ülkede doğ, yıl yıl yaşa, bir ömür yaz",
+    "desc": "Doğum çekilişiyle dünyanın bir yerinde, rastgele bir ailede doğarsın. Her yıl bir şey olur: okul, aşk, iş, sağlık, kriz, fırsat. Dört gösterge (Sağlık, Mutluluk, Zihin, Bağlar) ve Refah arasında denge kur, kararlarını ver, anılarını yıldızla. Sonunda hayatın tek kartta: paylaş, arkadaşına aynı doğumla meydan oku.",
+    "tags": ["Tarayıcı", "Hayat simülasyonu", "Seçimli", "Türkçe/English"],
+    "features": [
+        "50 ülkeden doğum çekilişi ve doğum belgesi (1/N şansı)",
+        "Yıl yıl 170'ten fazla olay, dönüm noktalarında kararlar",
+        "Sağlık, Mutluluk, Zihin, Bağlar ve Refah göstergeleri",
+        "Hayatlar Defteri, rozetler ve paylaşılabilir hayat kartı",
+        "Meydan okuma linki, aynı kader modu ve günün doğumu",
+        "İki hayatı yan yana gösteren karşılaştırma kartı",
+        "Türkçe ve İngilizce, kurulum gerektirmez",
+    ],
+    "changelog": [{"version": "1.2", "date": "2026-11-01", "text": "Olay sayısı 179'a çıktı: ülke, dönem, yetenek ve meslek olayları."}, {"version": "1.0", "date": "2026-10-31", "text": "İlk sürüm."}],
+    "version": "1.1",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "cover": "omur-defteri-oyun.png",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg", "ekran-6.jpg"],
+    "play_url": "/oyna/omur-defteri",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+}
+
+GECE = {
+    "slug": "gece-bekcisi",
+    "name": "Gece Bekçisi",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Terk edilmiş kervansarayda 5 gece: fener, kepenk, kamera ve nefes",
+    "desc": "Müzenin gece bekçisisin. 22:00'den sabah 06:00'ya kadar sol pencereye gelen Gölge'yi fenerle kov, sağ kapıya gelen Cadı'ya kepenk indir, kameralarda yerinden oynayan Heykel'e gözünü ayırma ve fısıltıları duyunca nefesini tut. Gaz yağın sınırlı. Kulaklık ve karanlık oda önerilir; ani korkutmalar içerir.",
+    "tags": ["Tarayıcı", "Korku", "Hayatta kalma", "Kamera"],
+    "features": [
+        "5 gece + açılan Özel Gece (seviyeleri kendin ayarla)",
+        "4 farklı tehdit, her birinin kendine özgü çaresi",
+        "Gaz yağı yönetimi: fener, kepenk ve kamera yağ harcar",
+        "Kodla üretilmiş ses: ayak sesi, fısıltı, vuruş, ani korkutmalar",
+        "Korkutma şiddeti, ses ve ışık titremesi ayarları",
+        "Klavye ve dokunmatik destek, otomatik kayıt",
+    ],
+    "changelog": [{"version": "1.0", "date": "2026-11-02", "text": "İlk sürüm."}],
+    "version": "1.0",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "cover": "gece-bekcisi-oyun.png",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+    "play_url": "/oyna/gece-bekcisi",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+}
+
+FENER = {
+    "slug": "fener-isigi",
+    "name": "Fener Işığı",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/fener-isigi",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "fener-isigi-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Karanlık ormanda altı kandil: ışığa tutunca donan gölgelerden kaç",
+    "desc": "Sisli bir ormanda yalnızsın. Fenerinin ışığı ve yanan kandillerin çevresi dışında her yer karanlık. Altı kandili bul, yanında basılı tutarak yak ve kuzeydeki kapıya ulaş. Gölge Adamlar karanlıkta hızlıdır ama ışığa tutunca donar; yanan kandil güvenli alan açar ve pilini doldurur. Her orman bir koddan üretilir: aynı kodla arkadaşların aynı ormanı oynar ve süreni geçmeye çalışır.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "2B",
+        "Kodlu harita"
+    ],
+    "features": [
+        "Kodla üretilen orman: aynı kod, aynı harita, paylaşılabilir meydan okuma",
+        "Fener, pil ve dayanıklılık yönetimi",
+        "Işıkta donan, karanlıkta hızlanan Gölge Adamlar",
+        "Yanan kandil güvenli alan açar",
+        "3 zorluk, kod başına rekor kaydı",
+        "Kodla üretilmiş ses, klavye/fare ve dokunmatik destek"
+    ]
+}
+
+TELSIZ = {
+    "slug": "telsiz",
+    "name": "Telsiz",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/telsiz",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "telsiz-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Gece vardiyası, tek telsiz: hattaki ses gerçek kafile mi, yoksa taklitçi mi?",
+    "desc": "Dağ başındaki telsiz istasyonunda gece nöbetindesin. Karda kaybolan bir kafile seni arıyor, ama hatta başkaları da var. Frekansı ayarla, sesi dinle, parola ve yanındakileri sor; gerçekse güvenli yola yönlendir, taklitçiyse hattı kes. Pencerede çizik sesi duyarsan kepengi kapat, kapıya adım sesleri gelirse lambayı söndür ve nefesini tut. Şafağa kadar dayan. Her vardiya bir koddan üretilir: aynı kodla arkadaşların aynı gece nöbetini tutar.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "Ses odaklı",
+        "Kodlu vardiya"
+    ],
+    "features": [
+        "Ses odaklı oynanış: sesin yönü ve tınısıyla tehdidi ayırt et",
+        "Radyo kadranı ile frekans ayarı, gerçek ve taklit çağrılar",
+        "Parola, kimler, elinde ne var sorgusu; taklitçiler yavaş yavaş hata yapar",
+        "Pencere, kapı ve nefes yönetimi",
+        "Kodla üretilen vardiya, paylaşılabilir meydan okuma, kod başına rekor",
+        "Türkçe sesli konuşma desteği (tarayıcı sesleri), yoksa kodla üretilmiş mırıltı"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ]
+
+
+def _empty(v):
+    return v in (None, "", [], {}) or v == "Oyun"
+
+
+def apply_patches(projects):
+    for p in projects:
+        patch = PATCHES.get(p.get("slug"))
+        if not patch:
+            continue
+        for k, v in patch.items():
+            if k == "cover":
+                if _empty(p.get("cover")) or str(p.get("cover")).endswith("-auto.png"):
+                    p["cover"] = v
+            elif _empty(p.get(k)):
+                p[k] = v
+    return projects
