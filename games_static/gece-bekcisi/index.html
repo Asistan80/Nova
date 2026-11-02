@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Gece Bekçisi</title>
+<style>
+html,body{margin:0;height:100%;background:#050507;color:#d8d2c4;font-family:system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+canvas{background:#000;max-width:100vw;max-height:100vh;box-shadow:0 0 60px #000}
+</style></head><body><div id="wrap"><canvas id="c" width="1280" height="720"></canvas></div>
+<script>
+"use strict";
+/* ============================================================ GECE BEKÇİSİ
+   Terk edilmiş kervansaray müzesinde 5 gece. Fener, kepenk, kameralar ve nefes. */
+const W = 1280, H = 720, cv = document.getElementById("c"), g = cv.getContext("2d");
+const $ = {};
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } } };
+const rnd = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const SET = Object.assign({ vol: 0.8, scare: 1, flicker: true }, store.get("gb_set", {}));
+const SAVE = Object.assign({ night: 1, done: 0, best: 0 }, store.get("gb_save", {}));
+
+/* ------------------------------------------------------------ ses */
+const A = { ctx: null, master: null, amb: null };
+function audioInit() {
+  if (A.ctx) { if (A.ctx.state === "suspended") A.ctx.resume(); return; }
+  try {
+    const C = window.AudioContext || window.webkitAudioContext; A.ctx = new C();
+    A.master = A.ctx.createGain(); A.master.gain.value = SET.vol; A.master.connect(A.ctx.destination);
+    const len = A.ctx.sampleRate * 2, buf = A.ctx.createBuffer(1, len, A.ctx.sampleRate), d = buf.getChannelData(0);
+    let b0 = 0; for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; b0 = 0.97 * b0 + 0.03 * w; d[i] = b0 * 3; }
+    A.noise = buf;
+    const white = A.ctx.createBuffer(1, len, A.ctx.sampleRate), wd = white.getChannelData(0); for (let i = 0; i < len; i++) wd[i] = Math.random() * 2 - 1;
+    A.white = white;
+    // rüzgâr
+    const s = A.ctx.createBufferSource(); s.buffer = A.noise; s.loop = true;
+    const f = A.ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 380;
+    const gn = A.ctx.createGain(); gn.gain.value = 0.18; s.connect(f); f.connect(gn); gn.connect(A.master); s.start();
+    A.amb = { f, gn };
+    const lfo = A.ctx.createOscillator(), lg = A.ctx.createGain(); lfo.frequency.value = 0.12; lg.gain.value = 140; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+    // elektrik uğultusu
+    const o = A.ctx.createOscillator(), og = A.ctx.createGain(); o.type = "sawtooth"; o.frequency.value = 50; og.gain.value = 0.012; o.connect(og); og.connect(A.master); o.start();
+    A.hum = og;
+  } catch (e) { A.ctx = null; }
+}
+function setVol() { if (A.master) A.master.gain.value = SET.vol; }
+function tone(freq, dur, type = "sine", vol = 0.2, pan = 0, slide = 0, delay = 0) {
+  if (!A.ctx) return; const t0 = A.ctx.currentTime + delay, o = A.ctx.createOscillator(), gn = A.ctx.createGain(), p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null;
+  o.type = type; o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t0 + dur);
+  gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(vol, t0 + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(gn); if (p) { p.pan.value = pan; gn.connect(p); p.connect(A.master); } else gn.connect(A.master); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function noiseBurst(dur, vol = 0.3, f0 = 800, f1 = 800, type = "bandpass", pan = 0, delay = 0, q = 1) {
+  if (!A.ctx) return; const t0 = A.ctx.currentTime + delay, s = A.ctx.createBufferSource(); s.buffer = A.white;
+  const f = A.ctx.createBiquadFilter(); f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t0); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur);
+  const gn = A.ctx.createGain(); gn.gain.setValueAtTime(vol, t0); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  const p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null; s.connect(f); f.connect(gn); if (p) { p.pan.value = pan; gn.connect(p); p.connect(A.master); } else gn.connect(A.master);
+  s.start(t0, Math.random()); s.stop(t0 + dur + 0.05);
+}
+const SFX = {
+  click() { tone(900, 0.04, "square", 0.05); },
+  knock(pan = 0) { for (let i = 0; i < 3; i++) { noiseBurst(0.09, 0.5, 220, 90, "lowpass", pan, i * 0.22); tone(110, 0.1, "sine", 0.3, pan, -50, i * 0.22); } },
+  step(pan = 0, n = 5) { for (let i = 0; i < n; i++) { noiseBurst(0.12, 0.22 + i * 0.04, 300, 120, "lowpass", pan * (1 - i / n), i * 0.45); } },
+  whisper(pan = 0) { for (let i = 0; i < 3; i++) noiseBurst(0.9, 0.16, 1800 + i * 300, 900, "bandpass", pan, i * 0.35, 6); },
+  shutter() { noiseBurst(0.35, 0.3, 500, 120, "bandpass", 0.6, 0, 3); tone(80, 0.3, "square", 0.08, 0.6, -30); },
+  lantern() { tone(420, 0.05, "square", 0.05, -0.6); noiseBurst(0.08, 0.08, 2000, 1000, "highpass", -0.6); },
+  cam() { tone(1400, 0.06, "square", 0.04); noiseBurst(0.18, 0.1, 3000, 800, "bandpass"); },
+  ring() { for (let i = 0; i < 4; i++) { tone(1450, 0.18, "sine", 0.12, 0, 0, i * 0.42); tone(1250, 0.18, "sine", 0.1, 0, 0, i * 0.42 + 0.2); } },
+  chime() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 1.6, "sine", 0.13, 0, 0, i * 0.35)); },
+  scare(kind) {
+    const v = [0.55, 0.9, 1.0][SET.scare];
+    noiseBurst(1.4, 0.9 * v, 4000, 200, "bandpass", 0, 0, 0.7); noiseBurst(1.2, 0.7 * v, 200, 60, "lowpass");
+    tone(180, 1.2, "sawtooth", 0.35 * v, 0, -140); tone(540, 1.0, "sawtooth", 0.25 * v, 0, -380); tone(900, 0.8, "square", 0.12 * v, 0, -500);
+  },
+  blind() { noiseBurst(0.5, 0.5, 3000, 300, "bandpass"); tone(300, 0.5, "sawtooth", 0.2, -0.6, -200); },
+  low() { tone(60, 2, "sine", 0.3, 0, -20); },
+  tick() { tone(1800, 0.02, "square", 0.02); },
+};
+
+/* ------------------------------------------------------------ oyun durumu */
+const NIGHTS = [
+  null,
+  { lv: [3, 0, 0, 0], msg: 0, name: "1. Gece", note: "Sadece Gölge." },
+  { lv: [4, 3, 0, 0], msg: 1, name: "2. Gece", note: "Cadı kapıya geliyor." },
+  { lv: [5, 4, 4, 0], msg: 2, name: "3. Gece", note: "Heykel yerinde durmaz." },
+  { lv: [6, 5, 5, 4], msg: 3, name: "4. Gece", note: "Fısıltılar başlıyor." },
+  { lv: [7, 6, 5, 5], msg: 4, name: "5. Gece", note: "Hepsi uyanık." },
+];
+const MSG = [
+  ["Alo? Ben Haşim, senden önceki bekçi.", "Kervansaray müzesi gece 22:00'de kapanır. Sabah 06:00'ya kadar buradasın.", "Sol pencerede bir gölge görürsen fenerini tut (A). Gözünü alırsan çekilir.", "Gaz yağı sınırlı. Gereksiz yakma. Allah yardımcın olsun."],
+  ["Dün gece iyi geçti, ha? Bu gece başka biri gelecek.", "Sağ kapıdan gelen ayak seslerini duyarsan kepenği indir (D). Cadı görünce çok geç.", "Kepenk yağ yer. Gittiğini anlayınca kaldır."],
+  ["Eski bir heykel var depoda. Kimse kıpırdadığını görmemiş. Çünkü bakan olmuş.", "Kameralara bak (Boşluk). Gözünü ayırmadığın sürece ilerleyemez.", "Ofis kapısına geldiyse bir süre bakıp geri çevir."],
+  ["Geceleri fısıltılar duyulur. Duyunca nefesini tut (Boşluk basılı).", "Tutmazsan sana kulak verir. Üç kere tutmazsan... Bilmiyorum, kimse anlatamadı.", "Dayan. Sabaha az kaldı."],
+  ["Son gece. Hepsi uyanık.", "Eğer sabaha çıkarsan müze müdürü sana açıklama yapacak.", "Sen iyi bir bekçisin. Hep öyleydin."],
+];
+const G = {
+  screen: "menu", night: 1, t: 0, oil: 100, view: "office", cam: 0, lan: false, shut: false, breath: false, breathBar: 100,
+  paused: false, shake: 0, flash: 0, blackout: 0, msgIdx: 0, msgT: 0, msgs: [], dead: null, deadT: 0, out: false, fails: 0, custom: [5, 5, 5, 5],
+  gol: { st: 0, cd: 10, t: 0, blind: 0 }, cad: { st: 0, cd: 20, t: 0 }, hey: { stage: 0, cd: 12, look: 0 }, fis: { cd: 25, win: 0, held: 0, pan: 0 },
+  hour: 0, lastHour: -1, ring: 0, noise: 0, mx: 0, my: 0,
+};
+const HOUR = 45; // saniye/saat
+function lvls() { return G.night === 6 ? G.custom : NIGHTS[G.night].lv; }
+const par = lvl => ({ gap: lerp(46, 13, lvl / 10), dl: lerp(7.2, 3.3, lvl / 10) });
+
+function startNight(n) {
+  G.night = n; G.screen = "intro"; G.t = 0; G.oil = 100; G.view = "office"; G.cam = 0; G.lan = false; G.shut = false; G.breath = false; G.breathBar = 100; G.out = false; G.fails = 0; G.dead = null; G.blackout = 0; G.flash = 0; G.shake = 0;
+  const L = lvls(), P = i => par(L[i]);
+  G.gol = { st: 0, cd: L[0] ? rnd(P(0).gap * 0.5, P(0).gap) : 1e9, t: 0, blind: 0 };
+  G.cad = { st: 0, cd: L[1] ? rnd(P(1).gap * 0.6, P(1).gap * 1.2) : 1e9, t: 0, wait: 0 };
+  G.hey = { stage: 0, cd: L[2] ? rnd(8, 14) : 1e9, look: 0, at: 0 };
+  G.fis = { cd: L[3] ? rnd(18, 28) : 1e9, win: 0, held: 0, pan: 0 };
+  G.hour = 0; G.lastHour = -1; G.msgIdx = 0; G.msgT = 0;
+  G.msgs = n <= 5 ? MSG[NIGHTS[n].msg] : ["Özel gece: ayarladığın seviyeyle ağır bir gece."];
+  G.deadT = 0; G.paused = false;
+  audioInit(); SFX.ring();
+}
+function die(by) {
+  if (G.dead) return; G.dead = by; G.deadT = 0; G.screen = "dead"; G.view = "office"; G.lan = false; G.shake = 1; SFX.scare(by);
+}
+function win() {
+  G.screen = "win"; G.deadT = 0; SFX.chime();
+  if (G.night <= 5) { SAVE.done = Math.max(SAVE.done, G.night); SAVE.night = Math.min(6, Math.max(SAVE.night, G.night + 1)); }
+  store.set("gb_save", SAVE);
+}
+
+/* ------------------------------------------------------------ mantık */
+function oilDrain(dt) {
+  let r = 0.13;
+  if (G.lan) r += 0.9; if (G.shut) r += 0.45; if (G.view === "cam") r += 0.2;
+  G.oil = Math.max(0, G.oil - r * dt);
+  if (G.oil <= 0 && !G.out) { G.out = true; SFX.low(); G.blackout = 1; G.lan = false; G.shut = false; G.view = "office"; }
+}
+function update(dt) {
+  if (G.screen === "intro") { G.msgT += dt; return; }
+  if (G.screen === "dead" || G.screen === "win") { G.deadT += dt; return; }
+  if (G.screen !== "play" || G.paused) return;
+  G.t += dt; G.hour = Math.floor(G.t / HOUR);
+  if (G.hour !== G.lastHour) { G.lastHour = G.hour; if (G.hour > 0 && G.hour < 6) SFX.tick(); }
+  if (G.hour >= 6) { win(); return; }
+  oilDrain(dt);
+  G.shake = Math.max(0, G.shake - dt * 2); G.flash = Math.max(0, G.flash - dt * 3);
+  const L = lvls(), out = G.out;
+  // nefes
+  if (G.breath) { G.breathBar = Math.max(0, G.breathBar - dt * 22); if (G.breathBar <= 0) G.breath = false; } else G.breathBar = Math.min(100, G.breathBar + dt * 16);
+  // ---------- Gölge (sol pencere)
+  const go = G.gol, gp = par(L[0]);
+  if (L[0] > 0) {
+    if (go.st === 0) { go.cd -= dt; if (go.cd <= 0) { go.st = 1; go.t = 0; go.blind = 0; SFX.knock(-0.8); } }
+    else if (go.st === 1) {
+      go.t += dt;
+      if (G.lan && !out) { go.blind += dt; if (go.blind >= 1.2) { go.st = 0; go.cd = rnd(gp.gap * 0.7, gp.gap * 1.2); SFX.blind(); G.flash = 0.6; } }
+      else go.blind = Math.max(0, go.blind - dt * 0.5);
+      if (go.t > (out ? 3.5 : gp.dl)) die("gol");
+    }
+  }
+  // ---------- Cadı (sağ kapı)
+  const ca = G.cad, cp = par(L[1]);
+  if (L[1] > 0) {
+    if (ca.st === 0) { ca.cd -= dt; if (ca.cd <= 0) { ca.st = 1; ca.t = 0; SFX.step(0.8, 5); } }
+    else if (ca.st === 1) { ca.t += dt; if (ca.t > 2.4) { ca.st = 2; ca.t = 0; ca.wait = rnd(5, 9) - L[1] * 0.2; if (G.shut) SFX.knock(0.8); } }
+    else if (ca.st === 2) {
+      ca.t += dt;
+      if (!G.shut) { if (ca.t > 1.1 && !ca.seen) { ca.seen = true; } if (ca.t > 1.25) die("cad"); }
+      else { ca.seen = false; if (ca.t > ca.wait) { ca.st = 0; ca.cd = rnd(cp.gap * 0.7, cp.gap * 1.2); ca.t = 0; SFX.step(0.8, 3); } else if (Math.floor(ca.t * 2) !== Math.floor((ca.t - dt) * 2) && Math.random() < 0.3) noiseBurst(0.08, 0.3, 200, 90, "lowpass", 0.8); }
+    }
+  }
+  // ---------- Heykel (kameralar)
+  const he = G.hey, ROOM = [2, 1, 3, 4]; // aşama 0:Depo(2) 1:Avlu(1) 2:Koridor(3) 3:Kapı önü(4)
+  if (L[2] > 0 && he.stage < 4) {
+    const watched = G.view === "cam" && G.cam === ROOM[he.stage] && !out;
+    if (watched) { he.look += dt; if (he.stage === 3 && he.look > 2) { he.stage = 1; he.look = 0; he.cd = rnd(8, 14); SFX.cam(); } }
+    else {
+      he.look = Math.max(0, he.look - dt);
+      he.cd -= dt * (1 + L[2] * 0.08);
+      if (he.cd <= 0) { he.stage++; he.cd = he.stage === 3 ? lerp(15, 9, L[2] / 10) : rnd(8, 14) * lerp(1.3, 0.8, L[2] / 10); if (he.stage === 4) die("hey"); else if (Math.random() < 0.6) SFX.low(); }
+    }
+  }
+  // ---------- Fısıltı
+  const fi = G.fis;
+  if (L[3] > 0) {
+    if (fi.win <= 0) { fi.cd -= dt; if (fi.cd <= 0) { fi.win = 3.8; fi.held = 0; fi.pan = Math.random() < 0.5 ? -0.8 : 0.8; SFX.whisper(fi.pan); fi.cd = rnd(22, 34) - L[3] * 1.2; } }
+    else {
+      fi.win -= dt; if (G.breath) fi.held += dt;
+      if (fi.held >= 1.8) { fi.win = 0; fi.held = 0; SFX.cam(); }
+      else if (fi.win <= 0) { G.fails++; G.flash = 0.5; G.blackout = 0.7; SFX.low(); if (G.fails >= 3) die("fis"); }
+    }
+  }
+  if (G.blackout > 0) G.blackout = Math.max(0, G.blackout - dt * (G.out ? 0 : 0.8));
+}
+// kullanıcı eylemleri
+function toggleCam() { if (G.screen !== "play" || G.out || G.paused) return; G.view = G.view === "cam" ? "office" : "cam"; G.lan = false; SFX.cam(); }
+function toggleShut() { if (G.screen !== "play" || G.out || G.paused) return; G.shut = !G.shut; G.view = "office"; SFX.shutter(); }
+function setLan(v) { if (G.screen !== "play" || G.paused) return; if (v && (G.out || G.view === "cam")) return; if (v && !G.lan) SFX.lantern(); G.lan = v; }
+function setBreath(v) { if (G.screen !== "play" || G.paused) return; G.breath = v && G.breathBar > 8; }
+
+/* ------------------------------------------------------------ çizim: yardımcılar */
+function bgOffice() {
+  const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  let gr = x.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#1a1410"); gr.addColorStop(1, "#0b0907"); x.fillStyle = gr; x.fillRect(0, 0, W, H);
+  // taş duvar
+  for (let r = 0; r < 14; r++) for (let q = 0; q < 24; q++) { const o = (r % 2) * 28, px = q * 56 - o, py = r * 36, l = 20 + ((q * 7 + r * 13) % 9); x.fillStyle = `rgb(${l + 14},${l + 9},${l + 4})`; x.fillRect(px + 2, py + 2, 52, 32); }
+  x.fillStyle = "rgba(0,0,0,.35)"; x.fillRect(0, 0, W, H);
+  // zemin
+  gr = x.createLinearGradient(0, 520, 0, H); gr.addColorStop(0, "#241a12"); gr.addColorStop(1, "#0a0705"); x.fillStyle = gr; x.fillRect(0, 520, W, 200);
+  // tavan kirişi
+  x.fillStyle = "#0e0a07"; x.fillRect(0, 0, W, 60); for (let i = 0; i < 6; i++) x.fillRect(i * 230 + 40, 0, 40, 90);
+  // masa
+  x.fillStyle = "#2a1c10"; x.fillRect(390, 520, 500, 40); x.fillStyle = "#1a110a"; x.fillRect(400, 560, 480, 160);
+  x.fillStyle = "#3b2915"; x.fillRect(390, 516, 500, 10);
+  // kandil
+  x.fillStyle = "#3a2b1a"; x.fillRect(612, 478, 56, 40); x.fillStyle = "#c58a3a"; x.fillRect(624, 456, 32, 26);
+  // sol pencere çerçevesi
+  x.fillStyle = "#000"; x.fillRect(80, 150, 240, 320); x.strokeStyle = "#3a2a1a"; x.lineWidth = 14; x.strokeRect(80, 150, 240, 320); x.lineWidth = 6; x.beginPath(); x.moveTo(200, 150); x.lineTo(200, 470); x.moveTo(80, 310); x.lineTo(320, 310); x.stroke();
+  // sağ kapı çerçevesi
+  x.fillStyle = "#000"; x.fillRect(960, 120, 240, 400); x.strokeStyle = "#3a2a1a"; x.lineWidth = 16; x.strokeRect(960, 120, 240, 400);
+  return c;
+}
+let OFFICE = null;
+function drawEyes(x, y, s, a = 1, col = "#fff") { g.save(); g.globalAlpha = a; g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 18 * s; g.beginPath(); g.ellipse(x - 14 * s, y, 6 * s, 9 * s, 0, 0, 7); g.ellipse(x + 14 * s, y, 6 * s, 9 * s, 0, 0, 7); g.fill(); g.restore(); }
+function figGol(cx, cy, s, a = 1) { // uzun siyah gölge
+  g.save(); g.globalAlpha = a; g.fillStyle = "#020202"; g.beginPath(); g.moveTo(cx - 50 * s, cy + 260 * s); g.quadraticCurveTo(cx - 60 * s, cy + 40 * s, cx - 26 * s, cy - 20 * s); g.arc(cx, cy - 50 * s, 40 * s, Math.PI * 0.85, Math.PI * 2.15); g.quadraticCurveTo(cx + 60 * s, cy + 40 * s, cx + 50 * s, cy + 260 * s); g.fill();
+  g.restore(); drawEyes(cx, cy - 52 * s, s, a);
+}
+function figCad(cx, cy, s, a = 1) { // kambur cadı
+  g.save(); g.globalAlpha = a; g.fillStyle = "#0a0707"; g.beginPath(); g.moveTo(cx - 90 * s, cy + 340 * s); g.quadraticCurveTo(cx - 120 * s, cy + 60 * s, cx - 40 * s, cy - 10 * s); g.arc(cx, cy - 50 * s, 46 * s, Math.PI * 0.8, Math.PI * 2.2); g.quadraticCurveTo(cx + 120 * s, cy + 60 * s, cx + 90 * s, cy + 340 * s); g.fill();
+  g.strokeStyle = "#1a1414"; g.lineWidth = 3 * s; for (let i = 0; i < 18; i++) { g.beginPath(); g.moveTo(cx + (i - 9) * 5 * s, cy - 80 * s); g.quadraticCurveTo(cx + (i - 9) * 9 * s, cy + 20 * s, cx + (i - 9) * 11 * s + Math.sin(i) * 8 * s, cy + 150 * s); g.stroke(); }
+  g.fillStyle = "#c9c2b2"; g.beginPath(); g.ellipse(cx, cy - 44 * s, 24 * s, 32 * s, 0, 0, 7); g.fill(); g.fillStyle = "#000"; g.beginPath(); g.ellipse(cx - 9 * s, cy - 48 * s, 5 * s, 8 * s, 0, 0, 7); g.ellipse(cx + 9 * s, cy - 48 * s, 5 * s, 8 * s, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(cx, cy - 22 * s, 8 * s, 14 * s, 0, 0, 7); g.fill(); g.restore();
+}
+function figHey(cx, cy, s, a = 1) { // soluk heykel/manken
+  g.save(); g.globalAlpha = a; g.fillStyle = "#b9b2a0"; g.beginPath(); g.ellipse(cx, cy - 60 * s, 28 * s, 36 * s, 0, 0, 7); g.fill(); g.fillRect(cx - 12 * s, cy - 26 * s, 24 * s, 28 * s);
+  g.fillStyle = "#9d9684"; g.beginPath(); g.moveTo(cx - 60 * s, cy + 30 * s); g.lineTo(cx - 20 * s, cy); g.lineTo(cx + 20 * s, cy); g.lineTo(cx + 60 * s, cy + 30 * s); g.lineTo(cx + 46 * s, cy + 260 * s); g.lineTo(cx - 46 * s, cy + 260 * s); g.fill();
+  g.fillStyle = "#1a1612"; g.beginPath(); g.ellipse(cx - 11 * s, cy - 64 * s, 5 * s, 7 * s, 0, 0, 7); g.ellipse(cx + 11 * s, cy - 64 * s, 5 * s, 7 * s, 0, 0, 7); g.fill(); g.fillRect(cx - 8 * s, cy - 42 * s, 16 * s, 3 * s); g.restore();
+}
+function noiseOverlay(a = 0.12) { g.save(); g.globalAlpha = a; for (let i = 0; i < 160; i++) { const v = (Math.random() * 255) | 0; g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(Math.random() * W, Math.random() * H, rnd(2, 40), 2); } g.restore(); }
+function vignette(a = 0.85) { const gr = g.createRadialGradient(W / 2, H / 2, H * 0.25, W / 2, H / 2, H * 0.85); gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, `rgba(0,0,0,${a})`); g.fillStyle = gr; g.fillRect(0, 0, W, H); }
+
+/* ------------------------------------------------------------ çizim: ofis */
+function drawOffice(tm) {
+  if (!OFFICE) OFFICE = bgOffice();
+  const L = lvls();
+  g.drawImage(OFFICE, 0, 0);
+  const out = G.out;
+  // sol pencere içi
+  g.save(); g.beginPath(); g.rect(88, 158, 224, 304); g.clip();
+  g.fillStyle = "#04060c"; g.fillRect(80, 150, 240, 320); g.fillStyle = "#e8e4cc"; g.globalAlpha = 0.5; g.beginPath(); g.arc(250, 220, 18, 0, 7); g.fill(); g.globalAlpha = 1;
+  if (G.lan && !out) { const gr = g.createRadialGradient(200, 300, 10, 200, 300, 220); gr.addColorStop(0, "rgba(255,244,200,.9)"); gr.addColorStop(1, "rgba(255,230,150,.15)"); g.fillStyle = gr; g.fillRect(80, 150, 240, 320); }
+  if (G.gol.st === 1) { const vis = (G.lan && !out) ? 1 : 0.0; const near = clamp(G.gol.t / par(L[0]).dl, 0, 1); if (vis) figGol(200, 190, 0.9 - G.gol.blind * 0.2, 1 - G.gol.blind / 1.4); else drawEyes(200, 240, 0.8 + near * 0.6, 0.15 + near * 0.45, "#c8d8ff"); }
+  g.restore();
+  // sağ kapı
+  g.save(); g.beginPath(); g.rect(968, 128, 224, 384); g.clip(); g.fillStyle = "#050404"; g.fillRect(960, 120, 240, 400);
+  if (G.cad.st === 2 && !G.shut) { const vis = 0.4 + 0.6 * Math.min(1, G.cad.t / 0.5); figCad(1080, 230, 0.85 + G.cad.t * 0.15, vis); }
+  else if (G.cad.st === 1) { g.fillStyle = `rgba(90,60,40,${0.08 + Math.sin(tm * 8) * 0.05})`; g.fillRect(960, 120, 240, 400); }
+  if (G.shut || out === false && G.shut) { g.fillStyle = "#2c2824"; g.fillRect(968, 128, 224, 384); g.fillStyle = "#1a1714"; for (let i = 0; i < 13; i++) g.fillRect(968, 128 + i * 30, 224, 3); }
+  g.restore();
+  if (G.cad.st === 2 && G.shut) { g.fillStyle = "rgba(255,255,255,.05)"; for (let i = 0; i < 3; i++) g.fillRect(1010 + i * 40, 180, 6, 300); }
+  // Heykel kapıda (kapı önü aşaması) ışık hinti
+  // kandil ışığı
+  const lg = g.createRadialGradient(640, 470, 10, 640, 470, 520); const fl = SET.flicker ? 0.04 * Math.sin(tm * 9) * Math.sin(tm * 3.3) : 0; lg.addColorStop(0, `rgba(255,190,100,${0.35 + fl})`); lg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = lg; g.fillRect(0, 0, W, H);
+  // karanlık (yağ bitti)
+  if (out) { g.fillStyle = "rgba(0,0,0,.93)"; g.fillRect(0, 0, W, H); if (G.gol.st === 1 || G.cad.st === 2) drawEyes(rnd(400, 880), 300, 1.2, 0.5, "#f55"); }
+  vignette(0.8);
+}
+/* ------------------------------------------------------------ çizim: kameralar */
+const CAMS = ["Giriş Hanı", "Avlu", "Depo", "Koridor", "Ofis Kapısı"];
+function drawCamScene(i, tm) {
+  g.fillStyle = "#0a0f0c"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "#111812"; g.fillRect(0, 440, W, 280); g.fillStyle = "#0c120d"; g.fillRect(0, 0, W, 440);
+  g.strokeStyle = "rgba(120,160,130,.15)"; g.lineWidth = 2;
+  if (i === 0) { for (let k = 0; k < 6; k++) { g.fillStyle = "#18221b"; g.fillRect(100 + k * 200, 120, 60, 320); } g.fillStyle = "#1d281f"; g.fillRect(500, 300, 280, 140); g.fillStyle = "#26352a"; g.fillRect(520, 320, 240, 10); }
+  if (i === 1) { g.fillStyle = "#16201a"; g.beginPath(); g.arc(640, 560, 150, 0, 7); g.fill(); g.fillStyle = "#0c130e"; g.beginPath(); g.arc(640, 560, 110, 0, 7); g.fill(); for (let k = 0; k < 4; k++) { g.fillStyle = "#19231c"; g.fillRect(60 + k * 340, 100, 40, 340); } }
+  if (i === 2) { for (let k = 0; k < 7; k++) { g.fillStyle = "#1b261e"; g.fillRect(80 + k * 170, 360 - (k % 3) * 50, 120, 80 + (k % 3) * 50); } g.fillStyle = "#202e24"; g.fillRect(900, 200, 200, 240); }
+  if (i === 3) { g.fillStyle = "#18241b"; g.beginPath(); g.moveTo(400, 200); g.lineTo(880, 200); g.lineTo(1280, 720); g.lineTo(0, 720); g.fill(); g.fillStyle = "#0a0f0c"; g.fillRect(560, 200, 160, 240); }
+  if (i === 4) { g.fillStyle = "#1a251d"; g.fillRect(420, 120, 440, 420); g.fillStyle = "#0b100c"; g.fillRect(450, 150, 380, 390); g.fillStyle = "#26352a"; g.fillRect(450, 150, 380, 8); }
+  const he = G.hey, ROOM = [2, 1, 3, 4];
+  if (he.stage < 4 && ROOM[he.stage] === i && lvls()[2] > 0) { const x = [1000, 640, 640, 640][he.stage], y = [250, 300, 270, 200][he.stage], s = [0.7, 0.9, 1.0, 1.4][he.stage]; figHey(x, y, s, 0.95); }
+  if (i === 0 && Math.sin(tm * 0.7) > 0.97) figGol(300 + Math.sin(tm) * 40, 220, 0.5, 0.35);
+}
+function drawCam(tm) {
+  drawCamScene(G.cam, tm);
+  noiseOverlay(0.22); vignette(0.9);
+  g.fillStyle = "rgba(0,0,0,.18)"; for (let y = 0; y < H; y += 4) g.fillRect(0, y, W, 1);
+  g.fillStyle = "#cfe8d4"; g.font = "700 26px monospace"; g.fillText(CAMS[G.cam].toUpperCase(), 34, 134); g.fillStyle = Math.floor(tm * 2) % 2 ? "#d33" : "#611"; g.beginPath(); g.arc(44, 170, 9, 0, 7); g.fill(); g.fillStyle = "#cfe8d4"; g.font = "700 20px monospace"; g.fillText("KAYIT", 62, 177);
+  // harita
+  for (let i = 0; i < 5; i++) { const x = 40 + i * 120, y = H - 140; g.fillStyle = i === G.cam ? "#cfe8d4" : "rgba(207,232,212,.15)"; g.fillRect(x, y, 104, 56); g.fillStyle = i === G.cam ? "#06100a" : "#cfe8d4"; g.font = "600 15px sans-serif"; g.fillText((i + 1) + " " + CAMS[i], x + 8, y + 33); }
+}
+/* ------------------------------------------------------------ çizim: arayüz */
+const BTN = {
+  lan: { x: 20, y: 640, w: 190, h: 64, t: "Fener (A)" }, shut: { x: 226, y: 640, w: 190, h: 64, t: "Kepenk (D)" }, cam: { x: 432, y: 640, w: 190, h: 64, t: "Kamera (Boşluk)" }, br: { x: 638, y: 640, w: 190, h: 64, t: "Nefes (Shift)" },
+};
+function drawHud(tm) {
+  const hh = ["22:00", "23:00", "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00"], idx = Math.min(6, G.hour);
+  const sec = G.t - G.hour * HOUR; const lbl = ["22:00", "23:00", "00:00", "01:00", "02:00", "03:00"][idx] || "03:00"; const real = [22, 23, 0, 1, 2, 3][idx]; // 3 saat kısa: 6 dilim=22→04
+  const times = ["22:00", "23:00", "00:00", "01:00", "02:00", "03:00"]; const m = Math.floor(sec / HOUR * 60);
+  g.fillStyle = "#e8dcc0"; g.font = "700 38px monospace"; const hr = (22 + idx) % 24; g.fillText(String(hr).padStart(2, "0") + ":" + String(m).padStart(2, "0"), 30, 56);
+  g.font = "600 18px sans-serif"; g.fillStyle = "#9d927c"; g.fillText(G.night === 6 ? "Özel Gece" : NIGHTS[G.night].name, 34, 84);
+  // yağ
+  g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(W - 270, 30, 240, 24); g.fillStyle = G.oil < 20 ? "#d04030" : "#d9a441"; g.fillRect(W - 268, 32, 236 * G.oil / 100, 20); g.fillStyle = "#e8dcc0"; g.font = "600 15px sans-serif"; g.fillText("Gaz yağı %" + Math.ceil(G.oil), W - 266, 72);
+  g.fillStyle = "rgba(0,0,0,.5)"; g.fillRect(W - 270, 84, 240, 10); g.fillStyle = G.breath ? "#7ab8ff" : "#4a6b8a"; g.fillRect(W - 268, 85, 236 * G.breathBar / 100, 8); g.fillStyle = "#9d927c"; g.fillText("Nefes", W - 270, 112);
+  // uyarı noktaları
+  for (let i = 0; i < 3; i++) { g.fillStyle = i < G.fails ? "#c23" : "rgba(255,255,255,.12)"; g.beginPath(); g.arc(W - 262 + i * 22, 136, 7, 0, 7); g.fill(); }
+  const act = { lan: G.lan, shut: G.shut, cam: G.view === "cam", br: G.breath };
+  for (const k in BTN) { const b = BTN[k]; g.fillStyle = act[k] ? "rgba(217,164,65,.85)" : "rgba(20,16,12,.8)"; g.fillRect(b.x, b.y, b.w, b.h); g.strokeStyle = "#5a4a30"; g.lineWidth = 2; g.strokeRect(b.x, b.y, b.w, b.h); g.fillStyle = act[k] ? "#150e04" : "#e8dcc0"; g.font = "700 20px sans-serif"; g.textAlign = "center"; g.fillText(b.t, b.x + b.w / 2, b.y + 40); g.textAlign = "left"; }
+  g.fillStyle = "#6d6452"; g.font = "600 14px sans-serif"; g.fillText("P: duraklat · 1-5: kamera seç", 850, 678);
+  // fısıltı uyarısı
+  if (G.fis.win > 0) { g.fillStyle = `rgba(160,200,255,${0.5 + 0.3 * Math.sin(tm * 14)})`; g.font = "700 30px sans-serif"; g.textAlign = "center"; g.fillText("~ Fısıltı… nefesini tut ~", W / 2, 120); g.textAlign = "left"; }
+  if (G.cad.st === 1) { g.fillStyle = "rgba(220,180,140,.7)"; g.font = "700 26px sans-serif"; g.textAlign = "center"; g.fillText("Ayak sesleri… sağ kapı", W / 2, 160); g.textAlign = "left"; }
+}
+function drawMenu(tm) {
+  if (!OFFICE) OFFICE = bgOffice(); g.drawImage(OFFICE, 0, 0); g.fillStyle = "rgba(0,0,0,.65)"; g.fillRect(0, 0, W, H); vignette(0.9);
+  g.textAlign = "center"; g.fillStyle = "#d9a441"; g.font = "800 92px serif"; g.fillText("GECE BEKÇİSİ", W / 2, 190); g.fillStyle = "#9d927c"; g.font = "600 24px sans-serif"; g.fillText("Kervansaray Müzesi · 22:00 – 06:00", W / 2, 232);
+  const items = menuItems(); items.forEach((it, i) => { const b = it.b; g.fillStyle = "rgba(20,16,12,.85)"; g.fillRect(b.x, b.y, b.w, b.h); g.strokeStyle = it.dis ? "#3a3326" : "#8a6d38"; g.lineWidth = 2; g.strokeRect(b.x, b.y, b.w, b.h); g.fillStyle = it.dis ? "#5a5242" : "#e8dcc0"; g.font = "700 24px sans-serif"; g.fillText(it.t, b.x + b.w / 2, b.y + 40); });
+  g.fillStyle = "#6d6452"; g.font = "500 16px sans-serif"; g.fillText("Kulaklık önerilir. Karanlık bir odada oyna. Ani korkutmalar içerir.", W / 2, H - 28); g.textAlign = "left";
+  if (G.sub === "set") drawSettings();
+  if (G.sub === "custom") drawCustom();
+  if (G.sub === "help") drawHelp();
+}
+function menuItems() {
+  const bx = W / 2 - 170, out = []; let y = 290;
+  const add = (id, t, dis) => { out.push({ id, t, dis, b: { x: bx, y, w: 340, h: 58 } }); y += 70; };
+  add("new", "Yeni Oyun (1. Gece)"); add("cont", SAVE.night > 1 && SAVE.night <= 5 ? "Devam: " + SAVE.night + ". Gece" : SAVE.night > 5 ? "Devam: 5. Geceyi tekrar" : "Devam", SAVE.night <= 1);
+  add("cust", "Özel Gece", SAVE.done < 5); add("set", "Ayarlar"); add("help", "Nasıl Oynanır?");
+  return out;
+}
+function drawSettings() {
+  g.fillStyle = "rgba(0,0,0,.88)"; g.fillRect(340, 200, 600, 360); g.strokeStyle = "#8a6d38"; g.strokeRect(340, 200, 600, 360); g.textAlign = "center"; g.fillStyle = "#e8dcc0"; g.font = "700 30px sans-serif"; g.fillText("Ayarlar", W / 2, 248);
+  g.font = "600 22px sans-serif"; g.fillText("Ses: %" + Math.round(SET.vol * 100) + "   [- / +]", W / 2, 320); g.fillText("Korkutma: " + ["Hafif", "Normal", "Yoğun"][SET.scare] + "   [K]", W / 2, 380); g.fillText("Işık titremesi: " + (SET.flicker ? "Açık" : "Kapalı") + "   [T]", W / 2, 440);
+  g.fillStyle = "#9d927c"; g.font = "500 17px sans-serif"; g.fillText("Kapatmak için tıkla ya da Esc", W / 2, 520); g.textAlign = "left";
+}
+function drawHelp() {
+  g.fillStyle = "rgba(0,0,0,.92)"; g.fillRect(240, 120, 800, 480); g.strokeStyle = "#8a6d38"; g.strokeRect(240, 120, 800, 480); g.fillStyle = "#e8dcc0"; g.font = "700 30px sans-serif"; g.textAlign = "center"; g.fillText("Nasıl Oynanır?", W / 2, 170); g.textAlign = "left"; g.font = "500 19px sans-serif";
+  const L = ["Sabah 06:00'ya kadar (her gece 4,5 dakika) dayan.", "GÖLGE sol pencerede görünür: Fener'i (A, basılı) 1-2 sn tut, gözünü al.", "CADI sağ kapıya gelir: ayak seslerini duyunca Kepenk'i (D) indir, gidince kaldır.", "HEYKEL kameralarda ilerler: gözünü ayırdığında yaklaşır. Kapıya gelirse bakarak geri çevir.", "FISILTI duyunca Nefes'i (Shift/Boşluk basılı) tut. 3 kere kaçırırsan biter.", "Gaz yağı sınırlı: fener, kepenk ve kamera yağ yer. Yağ biterse karanlıkta kalırsın.", "Kameralar: Boşluk / Tab, 1-5 ile oda seç. P duraklatır.", "Dokunmatik: ekrandaki düğmeler (Fener ve Nefes basılı tutulur)."];
+  L.forEach((t, i) => g.fillText("• " + t, 280, 224 + i * 46)); g.fillStyle = "#9d927c"; g.textAlign = "center"; g.fillText("Kapatmak için tıkla ya da Esc", W / 2, 580); g.textAlign = "left";
+}
+function drawCustom() {
+  g.fillStyle = "rgba(0,0,0,.92)"; g.fillRect(300, 160, 680, 400); g.strokeStyle = "#8a6d38"; g.strokeRect(300, 160, 680, 400); g.textAlign = "center"; g.fillStyle = "#e8dcc0"; g.font = "700 30px sans-serif"; g.fillText("Özel Gece", W / 2, 208); g.font = "600 22px sans-serif";
+  ["Gölge", "Cadı", "Heykel", "Fısıltı"].forEach((n, i) => { const y = 270 + i * 54; g.textAlign = "left"; g.fillStyle = "#e8dcc0"; g.fillText(n, 340, y); g.fillStyle = "#3a3326"; g.fillRect(500, y - 22, 300, 26); g.fillStyle = "#d9a441"; g.fillRect(500, y - 22, 300 * G.custom[i] / 10, 26); g.fillStyle = "#e8dcc0"; g.fillText(String(G.custom[i]), 830, y); g.fillText("◀   ▶", 880, y); });
+  g.textAlign = "center"; g.fillStyle = "#d9a441"; g.fillText("BAŞLAT", W / 2, 520); g.textAlign = "left";
+}
+function drawIntro(tm) {
+  g.fillStyle = "#000"; g.fillRect(0, 0, W, H); noiseOverlay(0.05); g.textAlign = "center"; g.fillStyle = "#d9a441"; g.font = "800 64px serif"; g.fillText(G.night === 6 ? "Özel Gece" : NIGHTS[G.night].name, W / 2, 200);
+  g.fillStyle = "#9d927c"; g.font = "600 22px sans-serif"; g.fillText(G.night === 6 ? "" : NIGHTS[G.night].note, W / 2, 240);
+  const i = Math.min(G.msgs.length - 1, Math.floor(G.msgT / 4.5)); g.fillStyle = "#e8dcc0"; g.font = "500 24px sans-serif"; const txt = G.msgs[i]; wrap(txt.slice(0, Math.floor(((G.msgT % 4.5) * 40))), W / 2, 340, 800, 36);
+  g.fillStyle = "#6d6452"; g.font = "500 17px sans-serif"; g.fillText("Telefon mesajı " + (i + 1) + "/" + G.msgs.length + " · Atlamak için tıkla / Enter", W / 2, 640); g.textAlign = "left";
+  if (G.msgT > G.msgs.length * 4.5) startPlay();
+}
+function wrap(t, x, y, mw, lh) { const w = t.split(" "); let l = ""; for (const a of w) { const tt = l + a + " "; if (g.measureText(tt).width > mw && l) { g.fillText(l.trim(), x, y); l = a + " "; y += lh; } else l = tt; } g.fillText(l.trim(), x, y); }
+function startPlay() { G.screen = "play"; G.msgT = 0; }
+function drawDead(tm) {
+  const t = G.deadT, by = G.dead; g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+  const k = Math.min(1, t / 0.25), s = lerp(0.5, by === "hey" ? 2.4 : 2.0, k);
+  const jx = (Math.random() - 0.5) * 40 * G.shake * SET.scare, jy = (Math.random() - 0.5) * 40 * G.shake * SET.scare;
+  if (t < 1.6) { g.save(); g.translate(jx, jy); const x = W / 2, y = H / 2 - 80; if (by === "gol") figGol(x, y, s * 1.2, 1); else if (by === "cad") figCad(x, y, s * 1.1, 1); else if (by === "hey") figHey(x, y, s * 1.1, 1); else { figGol(x - 220, y, s * 0.9, 1); figCad(x + 220, y, s * 0.9, 1); figHey(x, y + 40, s, 1); } g.restore(); if (SET.scare > 0 && Math.floor(t * 30) % 3 === 0) { g.fillStyle = "rgba(255,255,255,.35)"; g.fillRect(0, 0, W, H); } noiseOverlay(0.3); G.shake = Math.max(0, G.shake - 0.015); }
+  else { noiseOverlay(0.1); g.textAlign = "center"; g.fillStyle = "#b02020"; g.font = "800 72px serif"; g.fillText("SABAH OLMADI", W / 2, 300); g.fillStyle = "#9d927c"; g.font = "600 24px sans-serif"; const T = { gol: "Gölge seni buldu.", cad: "Cadı kapıdan girdi.", hey: "Heykel yanına geldi.", fis: "Fısıltılar seni teslim aldı." }; g.fillText(T[by] || "", W / 2, 350); g.fillStyle = "#e8dcc0"; g.fillText("Tıkla / Enter: Aynı geceyi tekrar dene · Esc: Menü", W / 2, 450); g.textAlign = "left"; }
+}
+function drawWin(tm) {
+  g.fillStyle = "#050403"; g.fillRect(0, 0, W, H); const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#1b2840"); gr.addColorStop(1, "#d9a441"); g.globalAlpha = Math.min(1, G.deadT / 2); g.fillStyle = gr; g.fillRect(0, 0, W, H); g.globalAlpha = 1;
+  g.textAlign = "center"; g.fillStyle = "#fff6dc"; g.font = "800 120px serif"; g.fillText("06:00", W / 2, 260); g.font = "700 38px sans-serif"; const last = G.night === 5;
+  g.fillText(G.night === 6 ? "Özel gece bitti." : (last ? "Beş gece de sağ çıktın." : G.night + ". gece geçti."), W / 2, 330); g.font = "500 22px sans-serif"; g.fillStyle = "#fff"; g.fillText(last ? "Müdür sabah geldiğinde senden hiçbir şey sormadı. Müze o gün kapandı." : "Gün doğdu. Biraz uyu; akşam yine nöbettesin.", W / 2, 380);
+  if (G.deadT > 2) { g.fillStyle = "#1a1208"; g.font = "700 26px sans-serif"; g.fillText(last ? "Tıkla: Menü (Özel Gece açıldı)" : "Tıkla / Enter: " + (G.night + 1) + ". Geceye geç", W / 2, 520); } g.textAlign = "left";
+}
+/* ------------------------------------------------------------ ana çizim döngüsü */
+function render(tm) {
+  g.save(); g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+  if (G.screen === "menu") drawMenu(tm);
+  else if (G.screen === "intro") drawIntro(tm);
+  else if (G.screen === "dead") drawDead(tm);
+  else if (G.screen === "win") drawWin(tm);
+  else {
+    g.save(); if (G.shake > 0 && SET.scare > 0) g.translate((Math.random() - 0.5) * 20 * G.shake, (Math.random() - 0.5) * 20 * G.shake);
+    if (G.view === "cam") drawCam(tm); else drawOffice(tm);
+    g.restore(); noiseOverlay(G.view === "cam" ? 0.05 : 0.025);
+    if (G.blackout > 0) { g.fillStyle = `rgba(0,0,0,${Math.min(0.95, G.blackout)})`; g.fillRect(0, 0, W, H); }
+    if (G.flash > 0 && SET.flicker) { g.fillStyle = `rgba(255,255,255,${G.flash * 0.5})`; g.fillRect(0, 0, W, H); }
+    drawHud(tm);
+    if (G.paused) { g.fillStyle = "rgba(0,0,0,.7)"; g.fillRect(0, 0, W, H); g.fillStyle = "#e8dcc0"; g.font = "800 60px serif"; g.textAlign = "center"; g.fillText("DURAKLATILDI", W / 2, 330); g.font = "600 22px sans-serif"; g.fillText("P / tıkla: devam · Esc: menü", W / 2, 380); g.textAlign = "left"; }
+  }
+  g.restore();
+}
+let last = performance.now(), TM = 0;
+function loop(now) { const dt = Math.min(0.1, (now - last) / 1000); last = now; TM += dt; try { update(dt); render(TM); } catch (e) { console.error(e); } requestAnimationFrame(loop); }
+
+/* ------------------------------------------------------------ girdi */
+function pos(e) { const r = cv.getBoundingClientRect(), t = e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0] || e; return { x: (t.clientX - r.left) * W / r.width, y: (t.clientY - r.top) * H / r.height }; }
+const inb = (p, b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+function menuClick(p) {
+  if (G.sub === "set") { G.sub = null; return; } if (G.sub === "help") { G.sub = null; return; }
+  if (G.sub === "custom") {
+    [0, 1, 2, 3].forEach(i => { const y = 270 + i * 54; if (p.y > y - 26 && p.y < y + 10) { if (p.x > 860 && p.x < 900) G.custom[i] = Math.max(0, G.custom[i] - 1); else if (p.x >= 900 && p.x < 960) G.custom[i] = Math.min(10, G.custom[i] + 1); else if (p.x > 500 && p.x < 800) G.custom[i] = Math.round((p.x - 500) / 30); } });
+    if (p.y > 490 && p.y < 540 && p.x > 520 && p.x < 760) { G.sub = null; startNight(6); } else if (p.x < 300 || p.x > 980 || p.y < 160 || p.y > 560) G.sub = null; return;
+  }
+  for (const it of menuItems()) if (inb(p, it.b) && !it.dis) {
+    audioInit(); SFX.click();
+    if (it.id === "new") startNight(1); else if (it.id === "cont") startNight(Math.min(5, SAVE.night)); else if (it.id === "cust") G.sub = "custom"; else if (it.id === "set") G.sub = "set"; else if (it.id === "help") G.sub = "help";
+  }
+}
+function down(e) {
+  const p = pos(e); G.mx = p.x; G.my = p.y; audioInit();
+  if (G.screen === "menu") { menuClick(p); return; }
+  if (G.screen === "intro") { G.msgT = (Math.floor(G.msgT / 4.5) + 1) * 4.5 + 0.01; return; }
+  if (G.screen === "dead") { if (G.deadT > 1.8) startNight(G.night); return; }
+  if (G.screen === "win") { if (G.deadT > 2) { if (G.night >= 5) { G.screen = "menu"; G.sub = null; } else startNight(G.night + 1); } return; }
+  if (G.screen === "play") {
+    if (G.paused) { G.paused = false; return; }
+    if (inb(p, BTN.lan)) setLan(true); else if (inb(p, BTN.shut)) toggleShut(); else if (inb(p, BTN.cam)) toggleCam(); else if (inb(p, BTN.br)) setBreath(true);
+    else if (G.view === "cam") for (let i = 0; i < 5; i++) if (inb(p, { x: 40 + i * 120, y: H - 140, w: 104, h: 56 })) { G.cam = i; SFX.cam(); }
+  }
+}
+function up() { if (G.screen === "play") { setLan(false); setBreath(false); } }
+cv.addEventListener("mousedown", down); window.addEventListener("mouseup", up);
+cv.addEventListener("touchstart", e => { e.preventDefault(); const ts = e.touches; for (const t of ts) down({ clientX: t.clientX, clientY: t.clientY }); }, { passive: false });
+cv.addEventListener("touchend", e => { e.preventDefault(); if (!e.touches.length) up(); }, { passive: false });
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase(); audioInit();
+  if (G.screen === "menu") { if (k === "escape") G.sub = null; if (G.sub === "set") { if (k === "-" || k === "_") { SET.vol = Math.max(0, +(SET.vol - 0.1).toFixed(1)); setVol(); } if (k === "+" || k === "=") { SET.vol = Math.min(1, +(SET.vol + 0.1).toFixed(1)); setVol(); } if (k === "k") SET.scare = (SET.scare + 1) % 3; if (k === "t") SET.flicker = !SET.flicker; store.set("gb_set", SET); } return; }
+  if (G.screen === "intro" && (k === "enter" || k === " ")) { G.msgT = (Math.floor(G.msgT / 4.5) + 1) * 4.5 + 0.01; return; }
+  if (G.screen === "dead" && (k === "enter" || k === " ") && G.deadT > 1.8) { startNight(G.night); return; }
+  if ((G.screen === "dead" || G.screen === "win" || G.screen === "intro") && k === "escape") { G.screen = "menu"; G.sub = null; return; }
+  if (G.screen === "win" && k === "enter" && G.deadT > 2) { if (G.night >= 5) G.screen = "menu"; else startNight(G.night + 1); return; }
+  if (G.screen !== "play") return;
+  if (k === "p") { G.paused = !G.paused; return; } if (k === "escape") { if (G.paused) { G.screen = "menu"; G.sub = null; G.paused = false; } else G.paused = true; return; }
+  if (G.paused) return;
+  if (e.repeat) { e.preventDefault(); return; }
+  if (k === "a" || k === "arrowleft") setLan(true); else if (k === "d" || k === "arrowright") toggleShut(); else if (k === " " || k === "tab" || k === "c") { e.preventDefault(); if (k === " " && G.fis.win > 0 && G.view !== "cam") setBreath(true); else toggleCam(); } else if (k === "shift") setBreath(true); else if (/^[1-5]$/.test(k) && G.view === "cam") { G.cam = +k - 1; SFX.cam(); }
+});
+window.addEventListener("keyup", e => { const k = e.key.toLowerCase(); if (G.screen !== "play") return; if (k === "a" || k === "arrowleft") setLan(false); if (k === " " || k === "shift") setBreath(false); });
+window.addEventListener("blur", () => { if (G.screen === "play") { G.paused = true; setLan(false); setBreath(false); } });
+window.__GB = { G, update, startNight, die, win, SFX, setLan, toggleShut, toggleCam, setBreath, par, lvls, NIGHTS, startPlay, SAVE };
+requestAnimationFrame(loop);
+</script></body></html>

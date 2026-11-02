@@ -88,7 +88,36 @@ OMUR = {
     "updated_at": "",
 }
 
-SEEDS = [TAKIMADA, OMUR]
+GECE = {
+    "slug": "gece-bekcisi",
+    "name": "Gece Bekçisi",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Terk edilmiş kervansarayda 5 gece: fener, kepenk, kamera ve nefes",
+    "desc": "Müzenin gece bekçisisin. 22:00'den sabah 06:00'ya kadar sol pencereye gelen Gölge'yi fenerle kov, sağ kapıya gelen Cadı'ya kepenk indir, kameralarda yerinden oynayan Heykel'e gözünü ayırma ve fısıltıları duyunca nefesini tut. Gaz yağın sınırlı. Kulaklık ve karanlık oda önerilir; ani korkutmalar içerir.",
+    "tags": ["Tarayıcı", "Korku", "Hayatta kalma", "Kamera"],
+    "features": [
+        "5 gece + açılan Özel Gece (seviyeleri kendin ayarla)",
+        "4 farklı tehdit, her birinin kendine özgü çaresi",
+        "Gaz yağı yönetimi: fener, kepenk ve kamera yağ harcar",
+        "Kodla üretilmiş ses: ayak sesi, fısıltı, vuruş, ani korkutmalar",
+        "Korkutma şiddeti, ses ve ışık titremesi ayarları",
+        "Klavye ve dokunmatik destek, otomatik kayıt",
+    ],
+    "changelog": [{"version": "1.0", "date": "2026-11-02", "text": "İlk sürüm."}],
+    "version": "1.0",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "cover": "gece-bekcisi-oyun.png",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+    "play_url": "/oyna/gece-bekcisi",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE]
 
 
 def _empty(v):
