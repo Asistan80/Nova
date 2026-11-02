@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Telsiz</title>
+<style>
+html,body{margin:0;height:100%;background:#050403;color:#e8d9b0;font-family:system-ui,Segoe UI,Roboto,sans-serif;overflow:hidden;-webkit-user-select:none;user-select:none;touch-action:none}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+canvas{background:#000;max-width:100vw;max-height:100vh}
+</style></head><body><div id="wrap"><canvas id="c" width="1280" height="720"></canvas></div>
+<script>
+"use strict";
+/* ============================================================ TELSİZ
+   Karlı geçitte bir telsiz istasyonunda vardiyadasın. Kafile seni çağırıyor; ama hatta başka bir şey de var.
+   Kulaklıkla oyna. Konuşan kim? Doğrula. Kapıya ve pencereye gelen sesi duy. */
+const W = 1280, H = 720, cv = document.getElementById("c"), g = cv.getContext("2d");
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } } };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const SET = Object.assign({ vol: 0.85, scare: 1, tts: true, hints: true }, store.get("ts_set", {}));
+const BEST = store.get("ts_best", {});
+function hash(s) { let h = 2166136261; s = String(s); for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function rngf(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const newCode = () => { const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s = ""; for (let i = 0; i < 5; i++) s += c[Math.floor(Math.random() * c.length)]; return s; };
+
+/* ------------------------------------------------------------ ses */
+const A = { ctx: null, master: null, stat: null, statF: null, wind: null };
+function audioInit() {
+  if (A.ctx) { if (A.ctx.state === "suspended") A.ctx.resume(); return; }
+  try {
+    const C = window.AudioContext || window.webkitAudioContext; A.ctx = new C(); A.master = A.ctx.createGain(); A.master.gain.value = SET.vol; A.master.connect(A.ctx.destination);
+    const len = A.ctx.sampleRate * 2, w = A.ctx.createBuffer(1, len, A.ctx.sampleRate), d = w.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; A.white = w;
+    const br = A.ctx.createBuffer(1, len, A.ctx.sampleRate), bd = br.getChannelData(0); let b = 0; for (let i = 0; i < len; i++) { b = 0.97 * b + 0.03 * (Math.random() * 2 - 1); bd[i] = b * 3; } A.brown = br;
+    let s = A.ctx.createBufferSource(); s.buffer = br; s.loop = true; let f = A.ctx.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = 500; let gn = A.ctx.createGain(); gn.gain.value = 0.16; s.connect(f); f.connect(gn); gn.connect(A.master); s.start(); A.wind = { f, gn };
+    const lfo = A.ctx.createOscillator(), lg = A.ctx.createGain(); lfo.frequency.value = 0.1; lg.gain.value = 180; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+    // statik (telsiz paraziti)
+    s = A.ctx.createBufferSource(); s.buffer = w; s.loop = true; f = A.ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 2400; f.Q.value = 0.6; gn = A.ctx.createGain(); gn.gain.value = 0; s.connect(f); f.connect(gn); gn.connect(A.master); s.start(); A.stat = gn; A.statF = f;
+    // elektrik uğultusu
+    const o = A.ctx.createOscillator(), og = A.ctx.createGain(); o.type = "sine"; o.frequency.value = 60; og.gain.value = 0.02; o.connect(og); og.connect(A.master); o.start();
+  } catch (e) { A.ctx = null; }
+}
+function tone(freq, dur, type = "sine", vol = 0.2, pan = 0, slide = 0, delay = 0) { if (!A.ctx) return; const t0 = A.ctx.currentTime + delay, o = A.ctx.createOscillator(), gn = A.ctx.createGain(), p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null; o.type = type; o.frequency.setValueAtTime(freq, t0); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), t0 + dur); gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(vol, t0 + 0.01); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); o.connect(gn); if (p) { p.pan.value = clamp(pan, -1, 1); gn.connect(p); p.connect(A.master); } else gn.connect(A.master); o.start(t0); o.stop(t0 + dur + 0.05); }
+function noise(dur, vol = 0.3, f0 = 800, f1 = 800, type = "bandpass", pan = 0, delay = 0, q = 1) { if (!A.ctx) return; const t0 = A.ctx.currentTime + delay, s = A.ctx.createBufferSource(); s.buffer = A.white; const f = A.ctx.createBiquadFilter(); f.type = type; f.Q.value = q; f.frequency.setValueAtTime(f0, t0); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur); const gn = A.ctx.createGain(); gn.gain.setValueAtTime(vol, t0); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); const p = A.ctx.createStereoPanner ? A.ctx.createStereoPanner() : null; s.connect(f); f.connect(gn); if (p) { p.pan.value = clamp(pan, -1, 1); gn.connect(p); p.connect(A.master); } else gn.connect(A.master); s.start(t0, Math.random()); s.stop(t0 + dur + 0.05); }
+const SFX = {
+  click() { tone(900, 0.04, "square", 0.05); },
+  ping() { tone(1100, 0.1, "sine", 0.1); tone(1500, 0.14, "sine", 0.08, 0, 0, 0.1); },
+  ring() { for (let i = 0; i < 3; i++) { tone(1000, 0.12, "square", 0.06, 0, 0, i * 0.3); } },
+  step(pan, n = 6) { for (let i = 0; i < n; i++) noise(0.13, 0.2 + i * 0.05, 280, 110, "lowpass", pan * (1 - i * 0.12), i * 0.5); },
+  scratch(pan) { for (let i = 0; i < 6; i++) noise(0.16, 0.18, 3500, 1800, "bandpass", pan, i * 0.18, 4); },
+  knock(pan = 0) { for (let i = 0; i < 3; i++) { noise(0.09, 0.5, 220, 90, "lowpass", pan, i * 0.24); tone(110, 0.1, "sine", 0.3, pan, -50, i * 0.24); } },
+  shutter(pan) { noise(0.3, 0.3, 500, 120, "bandpass", pan, 0, 3); tone(80, 0.3, "square", 0.08, pan, -30); },
+  lamp() { tone(300, 0.05, "square", 0.05); noise(0.08, 0.08, 1500, 600, "highpass"); },
+  breath(pan) { noise(0.9, 0.12, 700, 400, "bandpass", pan, 0, 1.5); },
+  whisper(pan) { for (let i = 0; i < 3; i++) noise(0.9, 0.12, 1700 + i * 260, 900, "bandpass", pan, i * 0.3, 6); },
+  scare() { const v = [0.55, 0.9, 1.0][SET.scare]; noise(1.4, 0.9 * v, 4000, 200, "bandpass", 0, 0, 0.7); noise(1.2, 0.7 * v, 200, 60, "lowpass"); tone(180, 1.2, "sawtooth", 0.35 * v, 0, -140); tone(540, 1.0, "sawtooth", 0.25 * v, 0, -380); },
+  dawn() { [392, 523, 659, 784].forEach((f, i) => tone(f, 1.8, "sine", 0.12, 0, 0, i * 0.4)); },
+  cut() { noise(0.25, 0.4, 3000, 200, "bandpass"); },
+};
+
+/* ------------------------------------------------------------ konuşma (TTS + altyazı) */
+const TTS = { ok: typeof speechSynthesis !== "undefined", voice: null };
+function pickVoice() { if (!TTS.ok) return; const vs = speechSynthesis.getVoices(); TTS.voice = vs.find(v => /tr/i.test(v.lang)) || null; }
+if (TTS.ok) { pickVoice(); try { speechSynthesis.onvoiceschanged = pickVoice; } catch (e) { } }
+function mumble(text, fake, pan = 0) { // sesli okuma yoksa sentezlenmiş mırıltı
+  if (!A.ctx) return; const words = text.split(/\s+/); let t = 0;
+  for (const wd of words) { const n = Math.max(2, Math.min(7, Math.round(wd.length / 2))); for (let i = 0; i < n; i++) { const f = (fake ? 110 : 170) + ((hash(wd + i) % 90)); tone(f, 0.085, fake ? "sawtooth" : "triangle", 0.045, pan, 0, t); noise(0.07, 0.015, f * 5, f * 3, "bandpass", pan, t, 3); t += 0.09; } t += 0.11; }
+}
+function speechDur(text) { return Math.max(1.4, text.length * 0.065); }
+
+/* ------------------------------------------------------------ içerik */
+const PAROLA = ["Kızıl Elma", "Demir Kar", "Sessiz Çan", "Kırık Ay", "Eski Ardıç", "Soğuk Ateş", "Gümüş Kurt", "Kara Kilit"];
+const ITEMS = ["kırmızı fener", "yarım ekmek", "mavi battaniye", "pirinç pusula", "eski bir harita", "kırık bir gözlük"];
+const NAMES_T = "Kaptan Selim, Doktor Ayla ve Çoban Hasan";
+const NAMES_F = ["Kaptan Selim, Doktor Ayten ve Orhan", "Selim, Ayla… ve bir kişi daha", "Kaptan Selim ve… ve… kimse"];
+const ROUTES = [{ n: "Kuzey vadi yolu", c: "çığ riski var; vadiye inmeyin" }, { n: "Eski köprü yolu", c: "köprü çürük; geçilmez" }, { n: "Kızıl işaretli patika", c: "güvenli yol; kızıl bayrakları izleyin" }, { n: "Taş ocağı yolu", c: "tünel çökmüş" }];
+const M = { t: 0, calls: [], threats: [] };
+function newGame(code) {
+  audioInit(); S.code = (code || newCode()).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || newCode(); history.replaceState(null, "", "#s=" + S.code);
+  const R = rngf(hash(S.code));
+  S.parola = PAROLA[Math.floor(R() * PAROLA.length)]; S.item = ITEMS[Math.floor(R() * ITEMS.length)];
+  let ri = [0, 1, 2, 3]; for (let i = 3; i > 0; i--) { const j = Math.floor(R() * (i + 1)); [ri[i], ri[j]] = [ri[j], ri[i]]; } S.routes = ri.map(i => ROUTES[i]); S.safe = S.routes.findIndex(r => r.n === "Kızıl işaretli patika");
+  S.freqs = []; for (let i = 0; i < 8; i++) S.freqs.push(+(88.5 + R() * 19).toFixed(1));
+  // zaman çizelgesi (saniye): [t, tip, ayrıntı]
+  const j = () => (R() - 0.5) * 8; const sd = () => (R() < 0.5 ? -1 : 1);
+  S.events = [
+    [18 + j(), "true", 0], [58 + j(), "win", sd()], [90 + j(), "fake", 1], [132 + j(), "true", 1], [172 + j(), "door", sd()], [208 + j(), "fake", 2], [248 + j(), "win", sd()], [288 + j(), "true", 2], [332 + j(), "fake", 3], [372 + j(), "door", sd()], [402 + j(), "fake", 4], [430, "win", sd()],
+  ].sort((a, b) => a[0] - b[0]);
+  S.dawn = 470; S.t = 0; S.next = 0; S.freq = 98.0 + (R() - 0.5) * 6; S.menace = 0; S.saved = 3; S.call = null; S.threat = null; S.screen = "brief"; S.briefT = 0; S.sub = null; S.log = []; S.subs = ""; S.subT = 0; S.shutL = false; S.shutR = false; S.lamp = true; S.breath = false; S.breathBar = 100; S.shake = 0; S.deadT = 0; S.winT = 0; S.paused = false; S.fails = []; S.stats = { fakeCut: 0, trueGood: 0, lost: 0 };
+  S.noteOpen = false; S.flashHint = 0; S.msg = ""; S.msgT = 0; try { speechSynthesis.cancel(); } catch (e) { }
+}
+const S = { screen: "menu", code: "", t: 0, freq: 98, call: null, threat: null, menace: 0, sub: null, subs: "", keys: {}, paused: false, mx: 0, my: 0, drag: false, events: [], next: 0, log: [] };
+
+/* ------------------------------------------------------------ çağrılar */
+const Q = {
+  parola: "Parola nedir?", who: "Yanınızda kimler var?", item: "Elinizde ne var?", ok: "Güvenli. Yönlendireceğim.", cut: "Hattı kes.",
+};
+function startCall(kind, idx) {
+  const f = S.freqs[S.log.length % 8]; S.freqNeed = f;
+  S.call = { kind, idx, f, st: "ring", t: 0, asked: {}, line: "", lines: [], timer: 0, route: null, tuned: false, spoke: false, lastLineT: 0, done: false, lost: false };
+  SFX.ring(); say("ÇAĞRI — " + f.toFixed(1) + " MHz. Frekansı ayarla!", 5);
+}
+function say(t, d = 4) { S.msg = t; S.msgT = d; }
+function fakeAnswer(q, tier) {
+  if (q === "parola") return tier <= 1 ? ["Parola… hatırlamıyorum. Üşüyorum.", "Parola mı? " + PAROLA[(PAROLA.indexOf(S.parola) + 3) % PAROLA.length] + "."][tier] || "..." : "Parola " + S.parola + ".";
+  if (q === "who") return tier <= 2 ? NAMES_F[tier] + "." : tier === 3 ? NAMES_T + "." : NAMES_T + ".";
+  if (q === "item") return tier <= 3 ? (tier === 3 ? "Bir " + ITEMS[(ITEMS.indexOf(S.item) + 2) % ITEMS.length] + "." : "Bir şey… var. Tutuyorum.") : "Bir " + S.item + ".";
+}
+function trueAnswer(q) { if (q === "parola") return "Parola " + S.parola + "."; if (q === "who") return NAMES_T + "."; if (q === "item") return "Elimizde bir " + S.item + " var."; }
+function callSay(txt, fake, extra) {
+  const c = S.call; c.line = txt; c.lineT = 0; c.speaking = true; c.dur = speechDur(txt); c.fakeVoice = fake; c.said = false; c.spoken = false;
+}
+function openers(c) {
+  if (c.kind === "true") return ["Telsiz istasyonu, duyuyor musunuz? Biz kafile. Yol ayrımındayız.", "İstasyon! Kafile çağırıyor. Hava çok kötü, yönlendirme lazım.", "Duyuyor musunuz? Kar bastırıyor… Yön söyleyin!"][c.idx];
+  return ["İstasyon… duyuyor musunuz? Biz kafileyiz. Yardım edin.", "Telsiz, kafile bu. Hemen yön söyleyin.", "Kafile çağırıyor. Yön… yön söyleyin. Çabuk.", "Aç… kapıdayım. Kafile burada. Aç.", "Duyuyor musunuz? Duyuyor musunuz? Duyuyor musunuz?"][c.idx];
+}
+function callTune(dt) {
+  const c = S.call; if (!c) return; if (c.done) { c.dd = (c.dd || 0) + dt; if (c.dd > 1.6) S.call = null; return; } const d = Math.abs(S.freq - c.f); c.tuned = d < 0.35; c.quality = clamp(1 - d / 0.9, 0, 1);
+  if (c.st === "ring") { c.t += dt; if (c.tuned) { c.st = "talk"; c.t = 0; callSay(openers(c), c.kind === "fake"); } else if (c.t > 18) { endCall("missed"); } return; }
+  if (c.st === "talk" || c.st === "ask") {
+    c.timer += dt;
+    if (c.speaking) { if (c.tuned) { c.lineT += dt; if (!c.spoken) { c.spoken = true; speakLine(c.line, c.fakeVoice); } if (c.lineT > c.dur) { c.speaking = false; c.waitT = 0; } } }
+    else { c.waitT += dt; if (c.waitT > 24) { endCall("silent"); } }
+  }
+}
+function speakLine(txt, fake) {
+  const pan = fake ? (Math.random() < 0.5 ? -0.3 : 0.3) : 0;
+  if (SET.tts && TTS.ok && TTS.voice) { try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(txt); u.voice = TTS.voice; u.lang = "tr-TR"; u.rate = fake ? 0.82 : 0.95; u.pitch = fake ? 0.55 : 0.95; u.volume = 0.9; speechSynthesis.speak(u); return; } catch (e) { } }
+  mumble(txt, fake, pan);
+}
+function ask(q) {
+  const c = S.call; if (!c || c.st === "ring" || c.speaking || c.route || c.done) return; if (c.asked[q]) return; c.asked[q] = true; SFX.click();
+  c.st = "ask"; c.waitT = 0; const ans = c.kind === "true" ? trueAnswer(q) : fakeAnswer(q, c.idx); c.asked[q] = ans; callSay(ans, c.kind === "fake");
+  if (c.kind === "fake" && c.idx >= 1 && Math.random() < 0.25) S.shake = 0.1;
+}
+function guide() { const c = S.call; if (!c || c.speaking || c.route || c.done || c.st === "ring") return; SFX.click(); c.route = "choose"; c.rt = 0; }
+function pickRoute(i) {
+  const c = S.call; if (!c || c.route !== "choose") return; SFX.click(); c.route = "done"; c.done = true;
+  if (c.kind === "true") { if (i === S.safe) { S.stats.trueGood++; say("Kafile yola çıktı: \"Anlaşıldı, teşekkürler.\"", 5); } else { loseSurvivor("Yanlış yol: kafileden biri geride kaldı."); } }
+  else { S.menace++; say("Hattın öbür ucunda bir şey gülümsedi. Yol tarifini aldı.", 5); SFX.whisper(0); S.shake = 0.4; checkDeath(); }
+  setTimeout(() => { if (S.call === c) S.call = null; }, 1800);
+}
+function cutLine() {
+  const c = S.call; if (!c || c.done) return; SFX.cut(); c.done = true;
+  if (c.kind === "fake") { S.stats.fakeCut++; say("Hat kesildi. Statik sustu.", 4); } else { loseSurvivor("Gerçek kafileyle bağlantıyı kestin. Biri geride kaldı."); }
+  setTimeout(() => { if (S.call === c) S.call = null; }, 1200);
+}
+function endCall(why) {
+  const c = S.call; if (!c || c.done) return; c.done = true;
+  if (c.kind === "true") loseSurvivor(why === "missed" ? "Çağrıya yetişemedin. Kafile yönsüz kaldı." : "Kafile yanıt alamadı. Biri geride kaldı.");
+  else { S.menace += 0.5; say("Hat sessiz kaldı. Dışarıda bir şey yaklaştı.", 4); SFX.step(0.5, 3); checkDeath(); }
+  setTimeout(() => { if (S.call === c) S.call = null; }, 800);
+}
+function loseSurvivor(m) { S.saved = Math.max(0, S.saved - 1); S.stats.lost++; say(m, 5); S.shake = 0.3; SFX.whisper(0.2); }
+function checkDeath() { if (S.menace >= 3 && S.screen === "play") die("karalti"); }
+function die(by) { if (S.screen !== "play") return; S.screen = "dead"; S.deadT = 0; S.by = by; S.shake = 1; S.call = null; SFX.scare(); try { speechSynthesis.cancel(); } catch (e) { } }
+
+/* ------------------------------------------------------------ tehditler */
+function startThreat(kind, side) {
+  S.threat = { kind, side, t: 0, st: "warn", handled: false };
+  if (kind === "win") { SFX.scratch(side * 0.85); } else { SFX.step(side * 0.8, 6); }
+}
+function updateThreat(dt) {
+  const T = S.threat; if (!T) return; T.t += dt;
+  if (T.kind === "win") {
+    const closed = T.side < 0 ? S.shutL : S.shutR;
+    if (T.t < 6) { if (closed && !T.handled) { T.handled = true; } if (Math.floor(T.t * 3) !== Math.floor((T.t - dt) * 3) && T.t > 1 && !T.handled) SFX.scratch(T.side * 0.85); }
+    if (T.t >= 6) { if (!T.handled) { S.menace++; say("Cam kırıldı… bir şey içeri baktı.", 4); SFX.whisper(T.side * 0.8); S.shake = 0.6; checkDeath(); } else say("Çizik sesi uzaklaştı.", 3); S.threat = null; }
+  } else {
+    // kapı: ayak sesleri → vuruş; ışık kapalı ve nefes tutulu olmalı
+    if (T.t < 3.2 && !T.knocked) { }
+    if (T.t >= 3.2 && !T.knocked) { T.knocked = true; SFX.knock(T.side * 0.3); T.kt = 0; }
+    if (T.knocked) { T.kt += dt; if (S.lamp === false && S.breath) T.ok = (T.ok || 0) + dt; if (T.kt > 4.5) { if ((T.ok || 0) > 2.4) say("Vuruşlar kesildi. Adımlar uzaklaştı.", 4); else { S.menace++; say("Kapı kolu döndü… ışık seni ele verdi.", 4); SFX.whisper(0); S.shake = 0.6; checkDeath(); } S.threat = null; } }
+  }
+}
+
+/* ------------------------------------------------------------ ana güncelleme */
+function update(dt) {
+  if (S.screen === "dead") { S.deadT += dt; S.shake = Math.max(0, S.shake - dt * 0.6); return; }
+  if (S.screen === "win") { S.winT += dt; return; }
+  if (S.screen === "brief") { S.briefT += dt; return; }
+  if (S.screen !== "play" || S.paused) return;
+  S.t += dt; S.msgT = Math.max(0, S.msgT - dt); S.shake = Math.max(0, S.shake - dt * 2);
+  // ayar tuşları
+  const K = S.keys, step = K["shift"] ? 0.02 : 0.06; if (K["arrowleft"] || K["q"]) S.freq -= step * 60 * dt * 0.5; if (K["arrowright"] || K["e"]) S.freq += step * 60 * dt * 0.5; S.freq = clamp(S.freq, 88, 108);
+  S.breath = !!(K["h"] || K["b"]) && S.breathBar > 5; S.breathBar = S.breath ? Math.max(0, S.breathBar - 18 * dt) : Math.min(100, S.breathBar + 14 * dt);
+  // olay çizelgesi
+  while (S.next < S.events.length && S.t >= S.events[S.next][0]) { const ev = S.events[S.next++]; if (ev[1] === "true" || ev[1] === "fake") { if (!S.call) startCall(ev[1], ev[2]); else S.events.push([S.t + 12, ev[1], ev[2]]); S.events.sort((a, b) => a[0] - b[0]); } else if (!S.threat) startThreat(ev[1], ev[2]); else { S.events.push([S.t + 6, ev[1], ev[2]]); S.events.sort((a, b) => a[0] - b[0]); } }
+  callTune(dt); updateThreat(dt);
+  // ses karışımı
+  if (A.ctx) { const c = S.call; let q = 0; if (c && c.st !== "ring") q = c.quality; const stat = c ? (1 - q) * 0.22 : (0.04 + (Math.abs(S.freq - 98) > 6 ? 0.04 : 0)); A.stat.gain.value = lerp(A.stat.gain.value, stat + S.menace * 0.02 + (c && c.kind === "fake" && c.tuned ? 0.025 : 0), 0.1); A.statF.frequency.value = 1200 + ((S.freq - 88) / 20) * 2400; A.wind.gn.gain.value = lerp(A.wind.gn.gain.value, 0.16 + S.menace * 0.05, 0.05); }
+  if (S.t >= S.dawn) { win(); }
+}
+function win() { S.screen = "win"; S.winT = 0; SFX.dawn(); try { speechSynthesis.cancel(); } catch (e) { } const sc = S.saved * 10 + (3 - Math.floor(S.menace)) * 2 + S.stats.fakeCut; const k = S.code; if (BEST[k] == null || sc > BEST[k]) { BEST[k] = sc; store.set("ts_best", BEST); S.newBest = true; } else S.newBest = false; S.score = sc; }
+
+/* ------------------------------------------------------------ çizim */
+function panel(x, y, w, h, a = 0.7) { g.fillStyle = `rgba(14,10,6,${a})`; g.fillRect(x, y, w, h); g.strokeStyle = "#5a4526"; g.lineWidth = 2; g.strokeRect(x, y, w, h); }
+function txt(t, x, y, size = 20, col = "#e8d9b0", al = "left", wt = "500") { g.fillStyle = col; g.font = `${wt} ${size}px sans-serif`; g.textAlign = al; g.fillText(t, x, y); g.textAlign = "left"; }
+function wrap(t, x, y, mw, lh, size = 22, col = "#e8d9b0") { g.fillStyle = col; g.font = `500 ${size}px sans-serif`; const w = t.split(" "); let l = ""; for (const a of w) { const tt = l + a + " "; if (g.measureText(tt).width > mw && l) { g.fillText(l.trim(), x, y); l = a + " "; y += lh; } else l = tt; } g.fillText(l.trim(), x, y); return y; }
+function garble(t, q) { let o = ""; for (const ch of t) o += Math.random() > q * 1.1 && ch !== " " ? "▒░#%&*"[Math.floor(Math.random() * 6)] : ch; return o; }
+function drawRadio(tm) {
+  const cx = 640, cy = 560; panel(330, 330, 620, 360, 0.85);
+  g.strokeStyle = "#8a6d38"; g.lineWidth = 6; g.beginPath(); g.arc(cx, cy + 40, 250, Math.PI * 1.15, Math.PI * 1.85); g.stroke();
+  for (let f = 88; f <= 108; f += 2) { const a = Math.PI * 1.15 + (f - 88) / 20 * Math.PI * 0.7, x1 = cx + Math.cos(a) * 235, y1 = cy + 40 + Math.sin(a) * 235, x2 = cx + Math.cos(a) * 262, y2 = cy + 40 + Math.sin(a) * 262; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); g.fillStyle = "#c8a85a"; g.font = "600 16px sans-serif"; g.textAlign = "center"; g.fillText(String(f), cx + Math.cos(a) * 290 - 0, cy + 40 + Math.sin(a) * 290 + 6); }
+  g.textAlign = "left"; const na = Math.PI * 1.15 + (S.freq - 88) / 20 * Math.PI * 0.7; g.strokeStyle = "#e84a2a"; g.lineWidth = 4; g.beginPath(); g.moveTo(cx, cy + 40); g.lineTo(cx + Math.cos(na) * 255, cy + 40 + Math.sin(na) * 255); g.stroke(); g.fillStyle = "#3a2a14"; g.beginPath(); g.arc(cx, cy + 40, 26, 0, 7); g.fill();
+  txt(S.freq.toFixed(1) + " MHz", cx, 470, 54, "#ffbe55", "center", "700");
+  // sinyal ölçer
+  const c = S.call, q = c && c.st !== "ring" ? c.quality : 0; g.fillStyle = "#1a120a"; g.fillRect(380, 600, 520, 20); g.fillStyle = q > 0.7 ? "#7bd88a" : q > 0.3 ? "#e8c04a" : "#c44"; g.fillRect(380, 600, 520 * q, 20); txt("Sinyal", 380, 592, 15, "#9d8a62");
+  txt("← → ayar · Shift hassas · fareyle sürükle", cx, 662, 15, "#7a6a4a", "center");
+  if (c && c.st === "ring") { g.fillStyle = `rgba(255,120,60,${0.5 + 0.4 * Math.sin(tm * 10)})`; g.font = "700 28px sans-serif"; g.textAlign = "center"; g.fillText("ÇAĞRI: " + c.f.toFixed(1) + " MHz", cx, 400); g.textAlign = "left"; }
+}
+function drawCall() {
+  const c = S.call; panel(20, 110, 620, 190, 0.8); if (!c) { txt("Hatta çağrı yok.", 40, 150, 20, "#7a6a4a"); txt("Defter [N] · Duraklat [P]", 40, 285, 15, "#5a4a30"); return; }
+  txt(c.st === "ring" ? "Çağrı geliyor…" : "Hatta bir ses var", 40, 156, 22, "#ffbe55", "left", "700");
+  if (c.st !== "ring") { const line = c.tuned ? c.line : garble(c.line, c.quality); wrap((c.speaking ? line.slice(0, Math.floor(c.lineT / c.dur * line.length * 1.15)) : line) || "", 40, 196, 580, 30, 22, c.fakeVoice && SET.hints && c.lineT > 0 && Math.random() < 0.02 ? "#f77" : "#e8d9b0"); }
+}
+function drawOptions() {
+  const c = S.call; if (!c || c.st === "ring" || c.done) return; panel(20, 350, 290, 330, 0.8);
+  let y = 392; const items = [["1", Q.parola, "parola"], ["2", Q.who, "who"], ["3", Q.item, "item"], ["4", Q.ok, null], ["5", Q.cut, null]];
+  if (c.route === "choose") { txt("Hangi yoldan?", 36, 380, 18, "#ffbe55", "left", "700"); S.routes.forEach((r, i) => { txt((i + 1) + "  " + r.n, 36, 420 + i * 46, 19, "#e8d9b0"); }); return; }
+  items.forEach(([k, t, q]) => { const used = q && c.asked[q]; txt(k + "  " + t, 36, y, 17, used ? "#6a5a3a" : (c.speaking ? "#7a6a4a" : "#e8d9b0")); y += 46; });
+}
+function drawStation(tm) {
+  panel(660, 110, 600, 190, 0.7); txt("İstasyon", 680, 138, 20, "#ffbe55", "left", "700");
+  const st = (x, label, closed) => { g.fillStyle = closed ? "#3a3a3a" : "#14110a"; g.fillRect(x, 150, 100, 100); g.strokeStyle = "#5a4526"; g.lineWidth = 2; g.strokeRect(x, 150, 100, 100); txt(label, x + 50, 270, 14, "#9d8a62", "center"); if (closed) txt("KAPALI", x + 50, 206, 16, "#aaa", "center"); };
+  st(680, "Sol pencere [A]", S.shutL); st(800, "Kapı", false); st(920, "Sağ pencere [D]", S.shutR);
+  txt("Lamba [L]: " + (S.lamp ? "Açık" : "Kapalı"), 1045, 180, 19, S.lamp ? "#ffd070" : "#7a6a4a", "left", "700"); txt("Nefes [H basılı]", 1045, 215, 17, S.breath ? "#7ab8ff" : "#9d8a62"); g.fillStyle = "#1a1a24"; g.fillRect(1045, 225, 190, 10); g.fillStyle = "#7ab8ff"; g.fillRect(1045, 225, 190 * S.breathBar / 100, 10);
+  if (S.threat && SET.hints) { const T = S.threat; const x = T.kind === "win" ? (T.side < 0 ? 680 : 920) : 800; g.strokeStyle = `rgba(255,80,60,${0.5 + 0.4 * Math.sin(tm * 12)})`; g.lineWidth = 4; g.strokeRect(x, 150, 100, 100); }
+  txt("Tehlike", 1045, 268, 15, "#9d8a62"); for (let i = 0; i < 3; i++) { g.fillStyle = i < Math.floor(S.menace) ? "#c33" : (i < S.menace ? "#833" : "rgba(255,255,255,.12)"); g.beginPath(); g.arc(1125 + i * 26, 263, 8, 0, 7); g.fill(); }
+}
+function drawTop() {
+  const h = Math.floor(S.t / (S.dawn / 8)), hours = ["22:00", "23:00", "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00"], lab = hours[Math.min(8, h)]; txt(lab, 24, 56, 40, "#ffbe55", "left", "700"); txt("Kafile: " + S.saved + "/3 sağ", 24, 92, 18, "#9d8a62"); txt("kod " + S.code, W - 24, 36, 16, "#7a6a4a", "right");
+  g.fillStyle = "#1a120a"; g.fillRect(24, 100, 200, 6); g.fillStyle = "#c8a85a"; g.fillRect(24, 100, 200 * S.t / S.dawn, 6);
+  if (S.msgT > 0) { g.textAlign = "center"; g.font = "700 24px sans-serif"; g.fillStyle = `rgba(255,220,160,${Math.min(1, S.msgT)})`; g.shadowColor = "#000"; g.shadowBlur = 6; g.fillText(S.msg, W / 2, 80); g.shadowBlur = 0; g.textAlign = "left"; }
+}
+function drawNote() { panel(280, 90, 720, 480, 0.96); txt("İstasyon Defteri", 640, 140, 30, "#ffbe55", "center", "700"); const L = ["Önceki vardiya notu:", "• Parola: " + S.parola, "• Kafile: " + NAMES_T + ".", "• Yanlarında: " + S.item + ".", "• Güvenli yol: " + "Kızıl işaretli patika (" + ROUTES[2].c + ").", "• Diğer yollar: çığ riski, çürük köprü, çökmüş tünel.", "", "Kural: Hatta duyduğun herkesi doğrula. Parola, kimler, elinde ne var.", "Gerçek kafile üç kez çağıracak. Hatta başkaları da olacak.", "Pencereden çizik → o tarafın kepengini kapat. Kapıya adım → lambayı söndür ve nefesini tut."]; L.forEach((t, i) => txt(t, 320, 200 + i * 38, 21, i === 0 ? "#9d8a62" : "#e8d9b0")); txt("N ile kapat", 640, 548, 16, "#7a6a4a", "center"); }
+function drawMenu(tm) {
+  g.fillStyle = "#070503"; g.fillRect(0, 0, W, H); for (let i = 0; i < 40; i++) { g.fillStyle = `rgba(232,217,176,${0.03 + (i % 5) * 0.01})`; g.fillRect(0, i * 18 + (tm * 20) % 18, W, 2); }
+  txt("TELSİZ", W / 2, 190, 100, "#ffbe55", "center", "800"); txt("Karlı geçit · 22:00 – 06:00 · Hatta sadece sen yoksun", W / 2, 236, 24, "#9d8a62", "center", "600");
+  menuItems().forEach(it => { const b = it.b; g.fillStyle = "rgba(20,14,8,.9)"; g.fillRect(b.x, b.y, b.w, b.h); g.strokeStyle = "#8a6d38"; g.lineWidth = 2; g.strokeRect(b.x, b.y, b.w, b.h); txt(it.t, b.x + b.w / 2, b.y + 38, 23, "#e8d9b0", "center", "700"); });
+  txt("Kulaklık şart. Karanlık bir oda öner. Ani korkutmalar ve sesli konuşma içerir.", W / 2, H - 28, 16, "#7a6a4a", "center");
+  if (S.sub === "help") drawHelp(); if (S.sub === "set") drawSet();
+}
+function menuItems() { const bx = W / 2 - 190, o = []; let y = 275; const add = (id, t) => { o.push({ id, t, b: { x: bx, y, w: 380, h: 56 } }); y += 68; }; add("new", "Yeni Vardiya"); add("code", "Kodla Gir (" + (S.code || "—") + ")"); add("set", "Ayarlar"); add("help", "Nasıl Oynanır?"); return o; }
+function drawHelp() { panel(240, 100, 800, 520, 0.96); txt("Nasıl Oynanır?", 640, 150, 30, "#ffbe55", "center", "700"); ["Hattan çağrı gelince frekansı (← →) çağrının MHz değerine ayarla; yoksa ses boğulur.", "Konuşan kişiyi doğrula: Parola, Yanındakiler, Elindekiler. [1][2][3]", "Gerçek kafile her şeyi doğru söyler. Taklitçi bir yerde yanılır ya da tuhaflaşır.", "Gerçekse: [4] yönlendir, sonra güvenli yolu seç. Taklitçiyse: [5] hattı kes.", "Pencerede çizik sesi: o taraftaki kepengi kapat (A sol, D sağ). Ses hangi kulaktan geliyorsa o taraf.", "Kapıya adım sesleri: lambayı söndür (L) ve nefesini tut (H basılı) vuruşlar bitene kadar.", "Tehlike 3'e çıkarsa biter. Sabaha kadar kafileyi sağ çıkar.", "Defter [N]: önceki bekçinin notları. Aynı kod aynı vardiyayı üretir."].forEach((t, i) => { g.fillStyle = "#e8d9b0"; g.font = "500 19px sans-serif"; wrap("• " + t, 270, 205 + i * 50, 740, 26, 19); }); txt("Kapatmak için tıkla ya da Esc", 640, 590, 16, "#7a6a4a", "center"); }
+function drawSet() { panel(340, 170, 600, 400, 0.96); txt("Ayarlar", 640, 220, 30, "#ffbe55", "center", "700"); txt("Ses: %" + Math.round(SET.vol * 100) + "   [- / +]", 640, 290, 22, "#e8d9b0", "center"); txt("Korkutma: " + ["Hafif", "Normal", "Yoğun"][SET.scare] + "   [K]", 640, 340, 22, "#e8d9b0", "center"); txt("Sesli okuma: " + (SET.tts ? (TTS.voice ? "Açık (tarayıcı sesi)" : "Açık (ses bulunamadı, mırıltı)") : "Kapalı") + "   [V]", 640, 390, 22, "#e8d9b0", "center"); txt("Görsel ipuçları: " + (SET.hints ? "Açık" : "Kapalı") + "   [G]", 640, 440, 22, "#e8d9b0", "center"); txt("Kapatmak için tıkla ya da Esc", 640, 530, 16, "#7a6a4a", "center"); }
+function drawBrief(tm) { g.fillStyle = "#000"; g.fillRect(0, 0, W, H); txt("Vardiya devri", W / 2, 170, 56, "#ffbe55", "center", "800"); g.textAlign = "left"; const lines = ["Önceki bekçi bir not bıraktı: defterde parola, kafile ve güvenli yol yazıyor.", "Bir kafile geçitte mahsur kaldı. Seni telsizden arayacak.", "Ama bu gece hatta başkaları da var. Ve dışarıda bir şey dolaşıyor.", "Kulaklığını tak."]; lines.forEach((t, i) => { const a = clamp(S.briefT - i * 1.6, 0, 1); g.globalAlpha = a; txt(t, W / 2, 270 + i * 54, 24, "#e8d9b0", "center"); }); g.globalAlpha = 1; if (S.briefT > 6) txt("Tıkla / Enter: başla (N: defter)", W / 2, 560, 22, "#9d8a62", "center"); }
+function drawDead() { const t = S.deadT; g.fillStyle = "#000"; g.fillRect(0, 0, W, H); if (t < 1.6) { const k = Math.min(1, t / 0.2), s = lerp(0.6, 2.4, k), jx = (Math.random() - 0.5) * 40 * S.shake * SET.scare, jy = (Math.random() - 0.5) * 40 * S.shake * SET.scare; g.save(); g.translate(W / 2 + jx, H / 2 + jy); g.scale(s, s); g.fillStyle = "#0a0a0a"; g.beginPath(); g.ellipse(0, 0, 150, 190, 0, 0, 7); g.fill(); g.fillStyle = "#e8e8e8"; g.shadowColor = "#fff"; g.shadowBlur = 30; g.beginPath(); g.ellipse(-50, -30, 12, 28, 0, 0, 7); g.ellipse(50, -30, 12, 28, 0, 0, 7); g.fill(); g.shadowBlur = 0; g.beginPath(); g.ellipse(0, 70, 34, 60, 0, 0, 7); g.fillStyle = "#000"; g.fill(); g.restore(); if (Math.floor(t * 30) % 3 === 0) { g.fillStyle = "rgba(255,255,255,.4)"; g.fillRect(0, 0, W, H); } S.shake = Math.max(0, S.shake - 0.015); } else { txt("SABAH OLMADI", W / 2, 300, 72, "#b02020", "center", "800"); txt("Hatta duyduğun son ses senin sesindi.", W / 2, 350, 24, "#9d8a62", "center", "600"); txt("Tıkla / Enter: aynı vardiyayı tekrar dene · N: yeni vardiya · Esc: menü", W / 2, 450, 22, "#e8d9b0", "center"); } }
+function drawWin() { g.fillStyle = "#050403"; g.fillRect(0, 0, W, H); const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, "#1b2840"); gr.addColorStop(1, "#d9a441"); g.globalAlpha = Math.min(1, S.winT / 2); g.fillStyle = gr; g.fillRect(0, 0, W, H); g.globalAlpha = 1; txt("06:00", W / 2, 230, 110, "#fff6dc", "center", "800"); const m = ["Kafileden kimse kurtulamadı.", "Kafileden sadece biri geçide ulaştı.", "Kafileden ikisi sağ çıktı.", "Kafilenin üçü de sağ çıktı."][S.saved]; txt(m, W / 2, 310, 34, "#fff", "center", "700"); txt("Taklitçi çağrıları kestin: " + S.stats.fakeCut + " · Puan " + S.score + (S.newBest ? " (yeni rekor!)" : ""), W / 2, 360, 24, "#fff", "center"); if (S.winT > 2) txt("L: bağlantıyı kopyala · N: yeni vardiya · Tık/Enter: menü", W / 2, 520, 22, "#1a1208", "center", "700"); }
+function render(tm) {
+  g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, H);
+  if (S.screen === "menu") { drawMenu(tm); return; } if (S.screen === "brief") { drawBrief(tm); return; } if (S.screen === "dead") { drawDead(); return; } if (S.screen === "win") { drawWin(); return; }
+  g.save(); if (S.shake > 0 && SET.scare > 0) g.translate((Math.random() - 0.5) * 16 * S.shake, (Math.random() - 0.5) * 16 * S.shake);
+  g.fillStyle = "#0b0805"; g.fillRect(0, 0, W, H); const gr = g.createRadialGradient(640, 450, 50, 640, 450, 700); gr.addColorStop(0, "rgba(255,170,60,.12)"); gr.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+  drawTop(); drawCall(); drawStation(tm); drawRadio(tm); drawOptions(); g.restore();
+  if (!S.lamp) { g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(0, 0, W, H); }
+  if (S.noteOpen) drawNote();
+  g.fillStyle = "rgba(0,0,0,.12)"; for (let y = 0; y < H; y += 3) g.fillRect(0, y, W, 1);
+  if (S.paused) { g.fillStyle = "rgba(0,0,0,.75)"; g.fillRect(0, 0, W, H); txt("DURAKLATILDI", W / 2, 330, 60, "#e8d9b0", "center", "800"); txt("P / tıkla: devam · Esc: menü", W / 2, 380, 22, "#9d8a62", "center"); }
+}
+let last = performance.now(), TM = 0;
+function loop(now) { const dt = Math.min(0.1, (now - last) / 1000); last = now; TM += dt; try { update(dt); render(TM); } catch (e) { console.error(e); } requestAnimationFrame(loop); }
+
+/* ------------------------------------------------------------ girdi */
+function pos(e) { const r = cv.getBoundingClientRect(); const t = e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0] || e; return { x: (t.clientX - r.left) * W / r.width, y: (t.clientY - r.top) * H / r.height }; }
+const inb = (p, b) => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h;
+function dialFromMouse(p) { const cx = 640, cy = 600; let a = Math.atan2(p.y - cy, p.x - cx); if (a < 0) a += Math.PI * 2; const f = 88 + (a - Math.PI * 1.15) / (Math.PI * 0.7) * 20; if (f > 86 && f < 110) S.freq = clamp(f, 88, 108); }
+cv.addEventListener("mousedown", e => {
+  audioInit(); const p = pos(e); S.mx = p.x; S.my = p.y;
+  if (S.screen === "menu") { if (S.sub) { S.sub = null; return; } for (const it of menuItems()) if (inb(p, it.b)) { SFX.click(); if (it.id === "new") newGame(); else if (it.id === "code") { const c = prompt("Vardiya kodu (4-8 harf/rakam):", S.code || ""); if (c) newGame(c); } else if (it.id === "set") S.sub = "set"; else if (it.id === "help") S.sub = "help"; } return; }
+  if (S.screen === "brief") { if (S.briefT > 6) { S.screen = "play"; } return; }
+  if (S.screen === "dead") { if (S.deadT > 1.8) newGame(S.code); return; } if (S.screen === "win") { if (S.winT > 2) S.screen = "menu"; return; }
+  if (S.paused) { S.paused = false; return; }
+  const c = S.call; if (c && c.st !== "ring" && !c.done) { if (c.route === "choose") { for (let i = 0; i < 4; i++) if (inb(p, { x: 20, y: 396 + i * 46, w: 290, h: 40 })) pickRoute(i); } else { const act = [() => ask("parola"), () => ask("who"), () => ask("item"), guide, cutLine]; for (let i = 0; i < 5; i++) if (inb(p, { x: 20, y: 374 + i * 46, w: 290, h: 40 })) act[i](); } }
+  if (inb(p, { x: 330, y: 330, w: 620, h: 360 })) { S.drag = true; dialFromMouse(p); }
+  if (inb(p, { x: 690, y: 170, w: 120, h: 110 })) toggleShut(-1); if (inb(p, { x: 1100, y: 170, w: 120, h: 110 })) toggleShut(1); if (inb(p, { x: 960, y: 190, w: 150, h: 30 })) toggleLamp();
+});
+cv.addEventListener("mousemove", e => { if (S.drag) dialFromMouse(pos(e)); }); window.addEventListener("mouseup", () => { S.drag = false; });
+cv.addEventListener("touchstart", e => { e.preventDefault(); const t = e.changedTouches[0]; cv.dispatchEvent(new MouseEvent("mousedown", { clientX: t.clientX, clientY: t.clientY })); }, { passive: false });
+cv.addEventListener("touchmove", e => { e.preventDefault(); if (S.drag) dialFromMouse(pos(e)); }, { passive: false }); cv.addEventListener("touchend", e => { e.preventDefault(); S.drag = false; }, { passive: false });
+function toggleShut(side) { if (S.screen !== "play" || S.paused) return; if (side < 0) S.shutL = !S.shutL; else S.shutR = !S.shutR; SFX.shutter(side * 0.8); }
+function toggleLamp() { if (S.screen !== "play" || S.paused) return; S.lamp = !S.lamp; SFX.lamp(); }
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase(); audioInit(); S.keys[k] = true; if ([" ", "arrowup", "arrowdown", "arrowleft", "arrowright", "tab"].includes(k)) e.preventDefault();
+  if (S.screen === "menu") { if (k === "escape") S.sub = null; if (S.sub === "set") { if (k === "-" || k === "_") { SET.vol = Math.max(0, +(SET.vol - 0.1).toFixed(1)); if (A.master) A.master.gain.value = SET.vol; } if (k === "+" || k === "=") { SET.vol = Math.min(1, +(SET.vol + 0.1).toFixed(1)); if (A.master) A.master.gain.value = SET.vol; } if (k === "k") SET.scare = (SET.scare + 1) % 3; if (k === "v") SET.tts = !SET.tts; if (k === "g") SET.hints = !SET.hints; store.set("ts_set", SET); } return; }
+  if (S.screen === "brief") { if ((k === "enter" || k === " ") && S.briefT > 6) S.screen = "play"; if (k === "n") S.noteOpen = !S.noteOpen; return; }
+  if (S.screen === "dead") { if ((k === "enter" || k === " ") && S.deadT > 1.8) newGame(S.code); else if (k === "n" && S.deadT > 1.8) newGame(); else if (k === "escape") S.screen = "menu"; return; }
+  if (S.screen === "win") { if (k === "l") { try { navigator.clipboard.writeText(location.href.split("#")[0] + "#s=" + S.code); } catch (x) { } } else if (k === "n") newGame(); else if (((k === "enter" || k === " ") && S.winT > 2) || k === "escape") S.screen = "menu"; return; }
+  if (S.screen !== "play") return;
+  if (k === "p") { S.paused = !S.paused; return; } if (k === "escape") { if (S.noteOpen) S.noteOpen = false; else if (S.paused) { S.screen = "menu"; S.paused = false; } else S.paused = true; return; } if (S.paused) return;
+  if (e.repeat) return;
+  if (k === "n") S.noteOpen = !S.noteOpen;
+  else if (k === "a") toggleShut(-1); else if (k === "d") toggleShut(1); else if (k === "l") toggleLamp();
+  else if (S.call && S.call.route === "choose" && /^[1-4]$/.test(k)) pickRoute(+k - 1);
+  else if (k === "1") ask("parola"); else if (k === "2") ask("who"); else if (k === "3") ask("item"); else if (k === "4") guide(); else if (k === "5" || k === "x") cutLine();
+});
+window.addEventListener("keyup", e => { S.keys[e.key.toLowerCase()] = false; });
+window.addEventListener("blur", () => { S.keys = {}; if (S.screen === "play") S.paused = true; });
+const hm = location.hash.match(/s=([A-Za-z0-9]{3,8})/); if (hm) S.code = hm[1].toUpperCase();
+window.__TS = { S, update, newGame, ask, guide, pickRoute, cutLine, die, win, SET, toggleShut, toggleLamp, fakeAnswer, trueAnswer };
+requestAnimationFrame(loop);
+</script></body></html>

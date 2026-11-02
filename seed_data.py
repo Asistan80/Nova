@@ -163,7 +163,53 @@ FENER = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER]
+TELSIZ = {
+    "slug": "telsiz",
+    "name": "Telsiz",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/telsiz",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "telsiz-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Gece vardiyası, tek telsiz: hattaki ses gerçek kafile mi, yoksa taklitçi mi?",
+    "desc": "Dağ başındaki telsiz istasyonunda gece nöbetindesin. Karda kaybolan bir kafile seni arıyor, ama hatta başkaları da var. Frekansı ayarla, sesi dinle, parola ve yanındakileri sor; gerçekse güvenli yola yönlendir, taklitçiyse hattı kes. Pencerede çizik sesi duyarsan kepengi kapat, kapıya adım sesleri gelirse lambayı söndür ve nefesini tut. Şafağa kadar dayan. Her vardiya bir koddan üretilir: aynı kodla arkadaşların aynı gece nöbetini tutar.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "Ses odaklı",
+        "Kodlu vardiya"
+    ],
+    "features": [
+        "Ses odaklı oynanış: sesin yönü ve tınısıyla tehdidi ayırt et",
+        "Radyo kadranı ile frekans ayarı, gerçek ve taklit çağrılar",
+        "Parola, kimler, elinde ne var sorgusu; taklitçiler yavaş yavaş hata yapar",
+        "Pencere, kapı ve nefes yönetimi",
+        "Kodla üretilen vardiya, paylaşılabilir meydan okuma, kod başına rekor",
+        "Türkçe sesli konuşma desteği (tarayıcı sesleri), yoksa kodla üretilmiş mırıltı"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ]
 
 
 def _empty(v):
