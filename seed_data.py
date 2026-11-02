@@ -117,7 +117,53 @@ GECE = {
     "updated_at": "",
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE]
+FENER = {
+    "slug": "fener-isigi",
+    "name": "Fener Işığı",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/fener-isigi",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "fener-isigi-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Karanlık ormanda altı kandil: ışığa tutunca donan gölgelerden kaç",
+    "desc": "Sisli bir ormanda yalnızsın. Fenerinin ışığı ve yanan kandillerin çevresi dışında her yer karanlık. Altı kandili bul, yanında basılı tutarak yak ve kuzeydeki kapıya ulaş. Gölge Adamlar karanlıkta hızlıdır ama ışığa tutunca donar; yanan kandil güvenli alan açar ve pilini doldurur. Her orman bir koddan üretilir: aynı kodla arkadaşların aynı ormanı oynar ve süreni geçmeye çalışır.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "2B",
+        "Kodlu harita"
+    ],
+    "features": [
+        "Kodla üretilen orman: aynı kod, aynı harita, paylaşılabilir meydan okuma",
+        "Fener, pil ve dayanıklılık yönetimi",
+        "Işıkta donan, karanlıkta hızlanan Gölge Adamlar",
+        "Yanan kandil güvenli alan açar",
+        "3 zorluk, kod başına rekor kaydı",
+        "Kodla üretilmiş ses, klavye/fare ve dokunmatik destek"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER]
 
 
 def _empty(v):
