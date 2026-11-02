@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kayıp Kaset</title>
+<style>html,body{margin:0;height:100%;background:#000;overflow:hidden}canvas{display:block;width:100vw;height:100vh;object-fit:contain;background:#000;cursor:crosshair}</style></head>
+<body><canvas id="c" width="1280" height="720"></canvas>
+<script>
+"use strict";
+/* ============ Kayıp Kaset — found footage korku (raycaster) ============ */
+const cv = document.getElementById("c"), g = cv.getContext("2d");
+const RW = 480, RH = 270; const rc = document.createElement("canvas"); rc.width = RW; rc.height = RH; const r = rc.getContext("2d");
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v)), lerp = (a, b, t) => a + (b - a) * t;
+const store = { get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } } };
+const SET = Object.assign({ vol: 0.8, scare: 1, sens: 1 }, store.get("kk_set", {})); const BEST = store.get("kk_best", {});
+function hashSeed(s) { let h = 2166136261; for (const c of s) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const WORDS = "ABCDEFGHJKLMNPRSTUVYZ23456789"; function randCode() { let s = ""; for (let i = 0; i < 5; i++) s += WORDS[Math.floor(Math.random() * WORDS.length)]; return s; }
+
+/* ------------------------------------------------ hikâye */
+const TAPES = [
+  ["KASET 1 · 14 EKİM", "Belgesel ekibi Sarıdere Sanatoryumu'na vardı. Dört kişiyiz: ben, Selim, Derya ve ses mühendisi Orhan. Kapı zincirliydi ama kilit içeriden açılmış gibi duruyordu."],
+  ["KASET 2 · 14 EKİM, GECE", "Derya koridorda birinin bizi izlediğini söylüyor. Kameraya bakınca kimse yok. Ama Orhan'ın kulaklığında bir çocuk sayıyor: bir… iki… üç…"],
+  ["KASET 3 · 15 EKİM", "Selim sabah odasında yoktu. Yatağın üstünde kaset kutusu vardı, içinde kendi sesi: 'Kameraya bakmayı bırakmayın. Bakmadığınız an yaklaşıyor.'"],
+  ["KASET 4 · 15 EKİM, AKŞAM", "Flaşın ışığında ilk kez gördük: uzun, ince, yüzü yok. Flaş patlayınca dondu. Derya koşarak merdivene gitti. Pil kalmadı. Orhan sayıyor."],
+  ["KASET 5 · 16 EKİM", "Arşiv odasında 1974 tarihli bir rapor: 'Hasta 14 hiç uyumuyor. Karşısında kamera varsa hareket etmiyor.' Hasta 14'ün fotoğrafı yok. Yalnızca bir kasetin etiketi."],
+  ["KASET 6 · SON KAYIT", "Çıkış kapısını buldum. Hepsini bulduğumda açılıyormuş. Arkadaşlar… Orhan'ın sayısı bitti. Kamerayı bıraktım. Kim bulursa: kapıdan çık ve geriye bakma."],
+];
+const ENDING = ["Kapı açıldı ve soğuk gece havası yüzüne çarptı.", "Kasetleri izlerken fark ettin: kameranın arkasında hiç kimsenin yüzünü görmemiştin.", "Çünkü sen de ekibin bir parçasıydın. Hasta 14, kamerayı elinden bırakmadığın sürece hareket etmeyen şeydi.", "Kapıdan çıkarken kamera yerde kayıt almaya devam etti. Sayaç: bir… iki… üç…"];
+
+/* ------------------------------------------------ ses */
+const A = { ctx: null }; let hbT = 0;
+function audioInit() { if (A.ctx) return; try { const C = window.AudioContext || window.webkitAudioContext; A.ctx = new C(); A.master = A.ctx.createGain(); A.master.gain.value = SET.vol; A.master.connect(A.ctx.destination);
+  const nb = A.ctx.createBuffer(1, A.ctx.sampleRate * 2, A.ctx.sampleRate), d = nb.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; A.nb = nb;
+  A.drone = A.ctx.createOscillator(); A.drone.type = "sawtooth"; A.drone.frequency.value = 42; const dg = A.ctx.createGain(); dg.gain.value = 0.05; const df = A.ctx.createBiquadFilter(); df.type = "lowpass"; df.frequency.value = 120; A.drone.connect(df); df.connect(dg); dg.connect(A.master); A.drone.start(); A.dg = dg;
+  A.st = A.ctx.createBufferSource(); A.st.buffer = nb; A.st.loop = true; const sf = A.ctx.createBiquadFilter(); sf.type = "bandpass"; sf.frequency.value = 2400; A.sg = A.ctx.createGain(); A.sg.gain.value = 0; A.st.connect(sf); sf.connect(A.sg); A.sg.connect(A.master); A.st.start(); } catch (e) { A.ctx = null; } }
+function tone(f, d, type = "sine", v = 0.2, pan = 0, slide = 0) { if (!A.ctx) return; const t = A.ctx.currentTime, o = A.ctx.createOscillator(), gn = A.ctx.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(20, f + slide), t + d); gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(0.0008, t + d); let n = gn; if (A.ctx.createStereoPanner) { const p = A.ctx.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); o.connect(gn); gn.connect(p); p.connect(A.master); } else { o.connect(gn); gn.connect(A.master); } o.start(t); o.stop(t + d + 0.05); }
+function noise(d, v = 0.2, fq = 1500, pan = 0) { if (!A.ctx) return; const t = A.ctx.currentTime, s = A.ctx.createBufferSource(); s.buffer = A.nb; const f = A.ctx.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = fq; const gn = A.ctx.createGain(); gn.gain.setValueAtTime(v, t); gn.gain.exponentialRampToValueAtTime(0.0008, t + d); s.connect(f); f.connect(gn); if (A.ctx.createStereoPanner) { const p = A.ctx.createStereoPanner(); p.pan.value = clamp(pan, -1, 1); gn.connect(p); p.connect(A.master); } else gn.connect(A.master); s.start(t, Math.random()); s.stop(t + d + 0.05); }
+const SFX = { step() { noise(0.07, 0.07, 300 + Math.random() * 200); }, pick() { tone(660, 0.12, "triangle", 0.2); setTimeout(() => tone(990, 0.2, "triangle", 0.2), 90); }, bat() { tone(440, 0.1, "square", 0.1); setTimeout(() => tone(880, 0.15, "square", 0.1), 80); }, flash() { noise(0.4, 0.35, 5000); tone(1800, 0.35, "sawtooth", 0.1, 0, -1500); }, nv() { tone(300, 0.1, "square", 0.08); }, locked() { tone(120, 0.2, "square", 0.2); }, scare() { const k = SET.scare === 0 ? 0.4 : SET.scare === 2 ? 1.4 : 1; noise(1.1, 0.5 * k, 800); tone(90, 1.2, "sawtooth", 0.4 * k, 0, -50); tone(1500, 0.6, "square", 0.15 * k, 0, -900); }, heart(v) { tone(55, 0.15, "sine", v); setTimeout(() => tone(48, 0.18, "sine", v * 0.8), 160); }, play() { noise(0.5, 0.12, 3000); }, whisper(p) { noise(0.6, 0.08, 1800, p); }, win() { [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.5, "triangle", 0.2), i * 160)); } };
+
+/* ------------------------------------------------ harita */
+const N = 18, GW = N * 2 + 1;
+let M = [], S = { screen: "menu" };
+function newGame(code) {
+  code = (code || randCode()).toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) || randCode(); const R = mulberry(hashSeed(code)); audioInit();
+  M = []; for (let y = 0; y < GW; y++) { M.push([]); for (let x = 0; x < GW; x++) M[y].push(1); }
+  const vis = []; for (let y = 0; y < N; y++) { vis.push(Array(N).fill(false)); }
+  const stack = [[0, 0]]; vis[0][0] = true; M[1][1] = 0;
+  while (stack.length) { const [cx, cy] = stack[stack.length - 1]; const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]].map(d => [cx + d[0], cy + d[1], d]).filter(n => n[0] >= 0 && n[1] >= 0 && n[0] < N && n[1] < N && !vis[n[1]][n[0]]);
+    if (!nb.length) { stack.pop(); continue; } const [nx, ny, d] = nb[Math.floor(R() * nb.length)]; vis[ny][nx] = true; M[ny * 2 + 1][nx * 2 + 1] = 0; M[cy * 2 + 1 + d[1]][cx * 2 + 1 + d[0]] = 0; stack.push([nx, ny]); }
+  for (let i = 0; i < 40; i++) { const x = 1 + Math.floor(R() * (GW - 2)), y = 1 + Math.floor(R() * (GW - 2)); if ((x % 2) !== (y % 2)) M[y][x] = 0; }
+  for (let i = 0; i < 8; i++) { const cx = 3 + 2 * Math.floor(R() * (N - 3)), cy = 3 + 2 * Math.floor(R() * (N - 3)); for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) M[y][x] = 0; }
+  for (let y = 0; y < GW; y++) for (let x = 0; x < GW; x++) if (M[y][x] === 1) M[y][x] = (((x >> 3) + (y >> 3)) % 2) ? 2 : 1;
+  const dist = bfs(1, 1); let far = [1, 1], fd = 0; for (let y = 0; y < GW; y++) for (let x = 0; x < GW; x++) if (M[y][x] === 0 && dist[y][x] < 9999 && dist[y][x] > fd) { fd = dist[y][x]; far = [x, y]; }
+  // çıkış: en uzak hücrenin yanındaki duvar
+  let ex = null; for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const x = far[0] + d[0], y = far[1] + d[1]; if (x > 0 && y > 0 && x < GW - 1 && y < GW - 1 && M[y][x] > 0) { ex = [x, y]; break; } }
+  if (!ex) { ex = [far[0] + 1, far[1]]; } M[ex[1]][ex[0]] = 3;
+  const cells = []; for (let y = 0; y < GW; y++) for (let x = 0; x < GW; x++) if (M[y][x] === 0 && dist[y][x] >= 8 && !(x === far[0] && y === far[1])) cells.push([x, y]);
+  const pick = (n, minSep, list) => { const out = []; let tries = 0; while (out.length < n && tries++ < 4000) { const c = cells[Math.floor(R() * cells.length)]; if (out.every(o => Math.hypot(o[0] - c[0], o[1] - c[1]) >= minSep) && !list.some(o => Math.hypot(o[0] - c[0], o[1] - c[1]) < 2)) out.push(c); } return out; };
+  const tp = pick(6, 11, []); const order = [0, 1, 2, 3, 4, 5];
+  const bt = pick(9, 5, tp);
+  S = { screen: "play", code, t: 0, p: { x: 1.5, y: 1.5, a: 0.4 }, fov: 1.15, keys: {}, tapes: tp.map((c, i) => ({ x: c[0] + 0.5, y: c[1] + 0.5, got: false, n: i })), bats: bt.map(c => ({ x: c[0] + 0.5, y: c[1] + 0.5, got: false })), got: 0, bat: 100, nv: false, flashT: 0, flashCd: 0, stamina: 100, en: { x: far[0] + 0.5, y: far[1] + 0.5, active: false, frozen: 0, seen: false, path: [], pt: 0, vis: 0 }, exit: ex, far, dist, msg: "", msgT: 0, shake: 0, glitch: 0, stepT: 0, bobT: 0, playing: null, paused: false, dead: false, deadT: 0, winT: 0, readT: 0, locked: false, story: [], by: "", lastSeenT: 0 };
+  S.screen = "intro"; S.introT = 0; hbT = 0; say("Hepsini topla: 6 kaset. Sonra çıkışı bul.", 6);
+}
+function bfs(sx, sy) { const d = []; for (let y = 0; y < GW; y++) d.push(Array(GW).fill(9999)); const q = [[sx, sy]]; d[sy][sx] = 0; for (let i = 0; i < q.length; i++) { const [x, y] = q[i]; for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < GW && ny < GW && M[ny][nx] === 0 && d[ny][nx] === 9999) { d[ny][nx] = d[y][x] + 1; q.push([nx, ny]); } } } return d; }
+function say(t, d = 4) { S.msg = t; S.msgT = d; }
+const solid = (x, y) => { const ix = Math.floor(x), iy = Math.floor(y); return ix < 0 || iy < 0 || ix >= GW || iy >= GW || M[iy][ix] > 0; };
+function los(x0, y0, x1, y1) { const d = Math.hypot(x1 - x0, y1 - y0), n = Math.ceil(d / 0.2); for (let i = 1; i < n; i++) { const t = i / n; if (solid(lerp(x0, x1, t), lerp(y0, y1, t))) return false; } return true; }
+
+/* ------------------------------------------------ güncelleme */
+function die(by) { if (S.screen !== "play") return; S.screen = "dead"; S.deadT = 0; S.by = by; S.shake = 1; SFX.scare(); try { document.exitPointerLock(); } catch (e) { } }
+function win() { S.screen = "win"; S.winT = 0; SFX.win(); const sc = Math.max(0, Math.round(1200 - S.t)) + Math.round(S.bat); if (BEST[S.code] == null || sc > BEST[S.code]) { BEST[S.code] = sc; store.set("kk_best", BEST); S.newBest = true; } else S.newBest = false; S.score = sc; try { document.exitPointerLock(); } catch (e) { } }
+function move(dx, dy) { const rad = 0.24, p = S.p; if (!solid(p.x + dx + Math.sign(dx) * rad, p.y)) p.x += dx; if (!solid(p.x, p.y + dy + Math.sign(dy) * rad)) p.y += dy; }
+function update(dt) {
+  if (S.screen === "intro") { S.introT += dt; return; }
+  if (S.screen === "dead") { S.deadT += dt; S.shake = Math.max(0, S.shake - dt * 0.5); return; }
+  if (S.screen === "win") { S.winT += dt; return; }
+  if (S.screen !== "play" || S.paused) return;
+  if (S.playing) { S.playing.t += dt; return; }
+  const p = S.p, K = S.keys; S.t += dt; S.msgT = Math.max(0, S.msgT - dt); S.shake = Math.max(0, S.shake - dt * 2); S.flashT = Math.max(0, S.flashT - dt); S.flashCd = Math.max(0, S.flashCd - dt); S.glitch = Math.max(0, S.glitch - dt * 1.5);
+  const ts = 1.9 * dt * SET.sens; if (K["arrowleft"]) p.a -= ts; if (K["arrowright"]) p.a += ts;
+  let f = (K["w"] || K["arrowup"] ? 1 : 0) - (K["s"] || K["arrowdown"] ? 1 : 0), sd = (K["d"] ? 1 : 0) - (K["a"] ? 1 : 0);
+  const sprint = K["shift"] && S.stamina > 5 && (f || sd); S.stamina = sprint ? Math.max(0, S.stamina - 22 * dt) : Math.min(100, S.stamina + 14 * dt);
+  const sp = (sprint ? 3.7 : 2.3) * dt, l = Math.hypot(f, sd) || 1; const ca = Math.cos(p.a), sa = Math.sin(p.a);
+  if (f || sd) { move((ca * f - sa * sd) / l * sp, (sa * f + ca * sd) / l * sp); S.stepT -= dt; S.bobT += dt * (sprint ? 12 : 8); if (S.stepT <= 0) { SFX.step(); S.stepT = sprint ? 0.28 : 0.45; } }
+  // pil
+  S.bat = Math.max(0, S.bat - (0.35 + (S.nv ? 1.3 : 0)) * dt); if (S.bat <= 0 && S.nv) S.nv = false; if (S.bat <= 0 && !S.batWarn) { S.batWarn = true; say("Pil bitti! Görüş daraldı.", 5); }
+  if (S.bat > 0) S.batWarn = false;
+  // eşyalar
+  for (const t of S.tapes) if (!t.got && Math.hypot(t.x - p.x, t.y - p.y) < 0.7) { t.got = true; S.got++; SFX.pick(); S.playing = { n: t.n, t: 0 }; if (S.got === 1) S.en.active = true; return; }
+  for (const b of S.bats) if (!b.got && Math.hypot(b.x - p.x, b.y - p.y) < 0.6) { b.got = true; S.bat = Math.min(100, S.bat + 35); SFX.bat(); say("Pil bulundu (+35).", 2.5); }
+  // çıkış
+  const ex = S.exit; if (Math.hypot(ex[0] + 0.5 - p.x, ex[1] + 0.5 - p.y) < 1.15) { if (S.got >= 6) { win(); return; } else if (S.msgT < 1) { say("Çıkış kilitli. " + (6 - S.got) + " kaset daha gerek.", 3); SFX.locked(); } }
+  // yaratık
+  const en = S.en; if (S.t > 25 && S.got === 0) en.active = true;
+  if (en.active) {
+    const dx = en.x - p.x, dy = en.y - p.y, d = Math.hypot(dx, dy); let ang = Math.atan2(dy, dx) - (p.a + Math.PI); ang = Math.atan2(Math.sin(ang), Math.cos(ang)); // kamera yönüne göre
+    const inView = Math.abs(ang) < S.fov / 2 + 0.08 && d < 13 && los(p.x, p.y, en.x, en.y); en.seen = inView; if (inView) { en.vis += dt; S.lastSeenT = S.t; S.glitch = Math.max(S.glitch, 0.35 + Math.max(0, 1 - d / 7)); } else en.vis = 0;
+    if (S.flashT > 2.5 && inView) en.frozen = 4.5; en.frozen = Math.max(0, en.frozen - dt);
+    const lowBat = S.bat <= 0 ? 1.25 : 1; const spd = (1.15 + S.got * 0.26) * lowBat;
+    if (!inView && en.frozen <= 0) {
+      en.pt -= dt; if (en.pt <= 0) { en.pt = 0.3; const ds = bfs(Math.floor(p.x), Math.floor(p.y)); let ex2 = Math.floor(en.x), ey = Math.floor(en.y), best = ds[ey][ex2], bc = null; for (const [ax, ay] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = ex2 + ax, ny = ey + ay; if (nx >= 0 && ny >= 0 && nx < GW && ny < GW && ds[ny][nx] < best) { best = ds[ny][nx]; bc = [nx + 0.5, ny + 0.5]; } } en.tgt = bc; }
+      const tg = en.tgt || [p.x, p.y]; let tx = tg[0], ty = tg[1]; if (d < 1.6 && los(en.x, en.y, p.x, p.y)) { tx = p.x; ty = p.y; } const dd = Math.hypot(tx - en.x, ty - en.y) || 1; en.x += (tx - en.x) / dd * spd * dt; en.y += (ty - en.y) / dd * spd * dt;
+    }
+    if (d < 0.75 && en.frozen <= 0) die("yakaladı");
+    // ses
+    const near = clamp(1 - d / 9, 0, 1); if (A.ctx) { A.sg.gain.value = lerp(A.sg.gain.value, (S.glitch * 0.18 + near * 0.12), 0.1); A.dg.gain.value = 0.05 + near * 0.12; }
+    hbT -= dt; if (near > 0.15 && hbT <= 0) { SFX.heart(0.12 + near * 0.4); hbT = 1.0 - near * 0.55; }
+    if (!en.seen && d < 9 && Math.random() < dt * 0.5) SFX.whisper(clamp(dx * -0.2, -1, 1));
+    if (inView && en.vis < dt * 1.5 && d < 8) { SFX.scare(); S.shake = Math.max(S.shake, 0.4); }
+  }
+}
+function toggleNV() { if (S.bat > 0) { S.nv = !S.nv; SFX.nv(); } }
+function flash() { if (S.flashCd > 0 || S.bat < 8 || S.screen !== "play" || S.playing) return; S.bat -= 8; S.flashT = 3; S.flashCd = 8; SFX.flash(); }
+
+/* ------------------------------------------------ sprite & doku */
+function mk(w, h, fn) { const c = document.createElement("canvas"); c.width = w; c.height = h; fn(c.getContext("2d"), w, h); return c; }
+const TEX = [null, mk(64, 64, (c, w, h) => { c.fillStyle = "#6b5a46"; c.fillRect(0, 0, w, h); for (let y = 0; y < 64; y += 16) { c.fillStyle = "#3a2e22"; c.fillRect(0, y, w, 2); for (let x = (y / 16 % 2) * 16; x < 64; x += 32) c.fillRect(x, y, 2, 16); } for (let i = 0; i < 260; i++) { c.fillStyle = `rgba(0,0,0,${Math.random() * 0.25})`; c.fillRect(Math.random() * 64, Math.random() * 64, 2, 2); } }),
+  mk(64, 64, (c, w, h) => { c.fillStyle = "#5d7568"; c.fillRect(0, 0, w, h); c.fillStyle = "#8aa396"; c.fillRect(0, 0, w, 20); for (let x = 0; x < 64; x += 16) { c.fillStyle = "#2f3f38"; c.fillRect(x, 0, 1, 64); } c.fillStyle = "#2f3f38"; c.fillRect(0, 20, w, 3); for (let i = 0; i < 220; i++) { c.fillStyle = `rgba(0,0,0,${Math.random() * 0.3})`; c.fillRect(Math.random() * 64, Math.random() * 64, 2, 3); } }),
+  mk(64, 64, (c, w, h) => { c.fillStyle = "#3a1212"; c.fillRect(0, 0, w, h); c.fillStyle = "#8e1d1d"; c.fillRect(6, 6, 52, 52); c.fillStyle = "#e8d9b0"; c.font = "bold 14px sans-serif"; c.textAlign = "center"; c.fillText("ÇIKIŞ", 32, 30); c.fillRect(14, 38, 36, 4); c.fillRect(28, 38, 8, 12); })];
+const SPR = { en: mk(64, 128, (c, w, h) => { c.fillStyle = "#050505"; c.beginPath(); c.ellipse(32, 20, 12, 15, 0, 0, 7); c.fill(); c.fillRect(27, 32, 10, 50); c.fillRect(14, 36, 36, 6); c.fillRect(14, 36, 5, 62); c.fillRect(45, 36, 5, 62); c.fillRect(26, 82, 5, 44); c.fillRect(34, 82, 5, 44); c.fillStyle = "#ddd"; c.beginPath(); c.ellipse(32, 20, 8, 11, 0, 0, 7); c.fill(); c.fillStyle = "#000"; c.fillRect(27, 15, 3, 7); c.fillRect(35, 15, 3, 7); c.fillRect(30, 28, 5, 6); }),
+  tape: mk(32, 32, (c) => { c.fillStyle = "#222"; c.fillRect(2, 8, 28, 18); c.fillStyle = "#e8d9b0"; c.fillRect(6, 11, 20, 8); c.fillStyle = "#000"; c.beginPath(); c.arc(11, 15, 3, 0, 7); c.arc(21, 15, 3, 0, 7); c.fill(); c.fillStyle = "#d33"; c.fillRect(6, 21, 20, 2); }),
+  bat: mk(24, 32, (c) => { c.fillStyle = "#222"; c.fillRect(4, 6, 16, 22); c.fillStyle = "#4c4"; c.fillRect(6, 10, 12, 14); c.fillStyle = "#ccc"; c.fillRect(9, 2, 6, 4); }) };
+
+/* ------------------------------------------------ çizim */
+const zb = new Float32Array(RW);
+function render3D() {
+  const p = S.p, nv = S.nv && S.bat > 0, vis = S.bat <= 0 ? 2.4 : (nv ? 10 : 5.8) + (S.flashT > 0 ? 6 : 0);
+  const sky = r.createLinearGradient(0, 0, 0, RH / 2); sky.addColorStop(0, "#050505"); sky.addColorStop(1, "#14110f"); r.fillStyle = sky; r.fillRect(0, 0, RW, RH / 2);
+  const fl = r.createLinearGradient(0, RH / 2, 0, RH); fl.addColorStop(0, "#0d0b09"); fl.addColorStop(1, "#2a2420"); r.fillStyle = fl; r.fillRect(0, RH / 2, RW, RH / 2);
+  const bob = Math.sin(S.bobT) * 2.2;
+  for (let x = 0; x < RW; x++) {
+    const ra = p.a - S.fov / 2 + S.fov * x / RW, rx = Math.cos(ra), ry = Math.sin(ra); let mx = Math.floor(p.x), my = Math.floor(p.y); const ddx = Math.abs(1 / (rx || 1e-9)), ddy = Math.abs(1 / (ry || 1e-9)); let sx = rx < 0 ? -1 : 1, sy = ry < 0 ? -1 : 1, sdx = (rx < 0 ? p.x - mx : mx + 1 - p.x) * ddx, sdy = (ry < 0 ? p.y - my : my + 1 - p.y) * ddy, side = 0, hit = 0, guard = 0;
+    while (!hit && guard++ < 60) { if (sdx < sdy) { sdx += ddx; mx += sx; side = 0; } else { sdy += ddy; my += sy; side = 1; } if (mx < 0 || my < 0 || mx >= GW || my >= GW) { hit = 1; break; } if (M[my][mx] > 0) hit = M[my][mx]; }
+    let pd = side === 0 ? sdx - ddx : sdy - ddy; pd = Math.max(0.05, pd); zb[x] = pd; const cd = pd * Math.cos(ra - p.a); const h = Math.min(RH * 3, RH / cd * 0.95); const top = RH / 2 - h / 2 + bob;
+    let u = side === 0 ? p.y + pd * ry : p.x + pd * rx; u -= Math.floor(u); const tex = TEX[hit] || TEX[1]; r.drawImage(tex, Math.floor(u * 64), 0, 1, 64, x, top, 1, h);
+    const dark = clamp(pd / vis, 0, 1); r.fillStyle = `rgba(0,0,0,${Math.min(0.97, dark * dark * 1.05 + (side ? 0.12 : 0))})`; r.fillRect(x, top, 1, h);
+  }
+  // sprite'lar
+  const list = []; for (const t of S.tapes) if (!t.got) list.push({ x: t.x, y: t.y, img: SPR.tape, sz: 0.5, z: 0.55, glow: "#ffe" }); for (const b of S.bats) if (!b.got) list.push({ x: b.x, y: b.y, img: SPR.bat, sz: 0.45, z: 0.6, glow: "#8f8" });
+  if (S.en.active) list.push({ x: S.en.x, y: S.en.y, img: SPR.en, sz: 1.5, z: 0, en: true });
+  for (const s of list) s.d = Math.hypot(s.x - p.x, s.y - p.y); list.sort((a, b) => b.d - a.d);
+  for (const s of list) {
+    let ang = Math.atan2(s.y - p.y, s.x - p.x) - p.a; ang = Math.atan2(Math.sin(ang), Math.cos(ang)); if (Math.abs(ang) > S.fov / 2 + 0.3) continue; const cd = s.d * Math.cos(ang); if (cd < 0.2) continue;
+    const hh = RH / cd * 0.95 * s.sz, ww = hh * s.img.width / s.img.height, cx = RW / 2 + Math.tan(ang) * (RW / 2) / Math.tan(S.fov / 2) * 1, yb = RH / 2 + RH / cd * 0.95 * 0.5 * (1 - s.z * 2) + bob, ytop = yb - hh;
+    const dark = clamp(s.d / vis, 0, 1); const aA = s.en ? 1 - Math.min(0.97, dark * dark * 1.05) : 1 - Math.min(0.9, dark * dark); if (aA <= 0.02) continue;
+    const x0 = Math.floor(cx - ww / 2), x1 = Math.floor(cx + ww / 2); for (let x = Math.max(0, x0); x < Math.min(RW, x1); x++) { if (zb[x] < cd) continue; const sxp = Math.floor((x - x0) / (x1 - x0) * s.img.width); r.globalAlpha = aA; if (s.en && S.en.frozen > 0) r.globalAlpha = aA * 0.75; r.drawImage(s.img, sxp, 0, 1, s.img.height, x, ytop, 1, hh); }
+    r.globalAlpha = 1;
+  }
+  if (nv) { r.fillStyle = "rgba(20,255,60,0.18)"; r.globalCompositeOperation = "lighter"; r.fillRect(0, 0, RW, RH); r.globalCompositeOperation = "source-over"; }
+  if (S.flashT > 0) { r.fillStyle = `rgba(255,255,255,${Math.min(0.9, S.flashT * 0.5)})`; r.fillRect(0, 0, RW, RH); }
+}
+function vhs(tm) {
+  g.imageSmoothingEnabled = false; const sh = S.shake * 10, gl = S.glitch; const ox = (Math.random() - 0.5) * sh, oy = (Math.random() - 0.5) * sh;
+  g.fillStyle = "#000"; g.fillRect(0, 0, 1280, 720); g.drawImage(rc, ox, oy, 1280, 720);
+  // renk kayması
+  g.globalCompositeOperation = "lighter"; g.globalAlpha = 0.12 + gl * 0.25; g.drawImage(rc, ox + 5 + gl * 12, oy, 1280, 720); g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
+  if (gl > 0.3) for (let i = 0; i < 4; i++) { const y = Math.random() * 720, hh = 6 + Math.random() * 30; g.drawImage(cv, 0, y, 1280, hh, (Math.random() - 0.5) * gl * 60, y, 1280, hh); }
+  g.fillStyle = "rgba(0,0,0,.22)"; for (let y = 0; y < 720; y += 4) g.fillRect(0, y, 1280, 2);
+  for (let i = 0; i < 60; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * (0.05 + gl * 0.25)})`; g.fillRect(Math.random() * 1280, Math.random() * 720, 3, 2); }
+  const vg = g.createRadialGradient(640, 360, 250, 640, 360, 800); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.75)"); g.fillStyle = vg; g.fillRect(0, 0, 1280, 720);
+  const ty = (tm * 60) % 800 - 40; g.fillStyle = "rgba(255,255,255,.04)"; g.fillRect(0, ty, 1280, 26);
+}
+const mono = (sz, w = "600") => `${w} ${sz}px "Courier New",monospace`;
+function T(t, x, y, sz = 22, col = "#e8e8e8", al = "left") { g.font = mono(sz); g.fillStyle = col; g.textAlign = al; g.fillText(t, x, y); g.textAlign = "left"; }
+function wrapT(t, x, y, mw, lh, sz = 22, col = "#ddd") { g.font = mono(sz); g.fillStyle = col; const w = t.split(" "); let l = ""; for (const a of w) { const tt = l + a + " "; if (g.measureText(tt).width > mw && l) { g.fillText(l.trim(), x, y); l = a + " "; y += lh; } else l = tt; } g.fillText(l.trim(), x, y); return y; }
+function hud(tm) {
+  const tmr = Math.floor(S.t), hh = String(Math.floor(tmr / 3600)).padStart(2, "0"), mm = String(Math.floor(tmr / 60) % 60).padStart(2, "0"), ss = String(tmr % 60).padStart(2, "0");
+  if (Math.floor(tm * 1.6) % 2 === 0) { g.fillStyle = "#e22"; g.beginPath(); g.arc(60, 56, 12, 0, 7); g.fill(); } T("REC", 82, 66, 30, "#eee"); T(`${hh}:${mm}:${ss}`, 1240, 66, 28, "#eee", "right"); T("SP 1974-10-" + (14 + Math.min(2, Math.floor(S.t / 400))), 1240, 98, 20, "#bbb", "right");
+  // pil
+  const bx = 1020, by = 650; g.strokeStyle = "#eee"; g.lineWidth = 3; g.strokeRect(bx, by, 80, 30); g.fillRect(bx + 80, by + 8, 6, 14); g.fillStyle = S.bat > 25 ? "#eee" : (Math.floor(tm * 3) % 2 ? "#e22" : "#600"); g.fillRect(bx + 4, by + 4, 72 * S.bat / 100, 22); T(Math.round(S.bat) + "%", bx - 12, by + 24, 22, "#eee", "right");
+  T("KASET " + S.got + "/6", 50, 690, 26, "#e8d9b0"); if (S.nv) T("NV", 50, 650, 26, "#7f7"); T("FLAŞ [F]" + (S.flashCd > 0 ? " " + Math.ceil(S.flashCd) + "s" : " hazır"), 340, 690, 20, S.flashCd > 0 ? "#888" : "#ddd"); T("NV [N]", 560, 690, 20, "#ddd");
+  g.fillStyle = "rgba(255,255,255,.25)"; g.fillRect(50, 700, 150, 5); g.fillStyle = "#ddd"; g.fillRect(50, 700, 150 * S.stamina / 100, 5);
+  g.strokeStyle = "rgba(255,255,255,.5)"; g.lineWidth = 2; g.strokeRect(630, 350, 20, 20); T(" ", 0, 0);
+  if (S.msgT > 0) T(S.msg, 640, 620, 24, "#fff", "center");
+  // mini harita (yalnızca yön oku)
+  if (S.en.active && S.en.seen) T("▲ GÖRÜNTÜDE", 640, 120, 26, "#f55", "center");
+}
+function drawPlaying() {
+  const t = S.playing, tp = TAPES[t.n]; g.fillStyle = "rgba(0,0,0,.88)"; g.fillRect(0, 0, 1280, 720); for (let i = 0; i < 120; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.2})`; g.fillRect(Math.random() * 1280, Math.random() * 720, 20 + Math.random() * 40, 2); }
+  T("▶ OYNATILIYOR", 80, 100, 32, "#e22"); T(tp[0], 80, 160, 30, "#e8d9b0"); const n = Math.floor(t.t * 28); wrapT(tp[1].slice(0, n), 80, 250, 1100, 44, 30, "#ddd"); if (n >= tp[1].length) T("[Enter] devam", 640, 600, 24, "#aaa", "center"); else T("[Enter] atla", 640, 600, 20, "#666", "center");
+}
+function drawMenu(tm) {
+  g.fillStyle = "#050505"; g.fillRect(0, 0, 1280, 720); for (let i = 0; i < 300; i++) { g.fillStyle = `rgba(255,255,255,${Math.random() * 0.12})`; g.fillRect(Math.random() * 1280, Math.random() * 720, 3, 2); }
+  T("KAYIP KASET", 640, 190, 90, "#e8e8e8", "center"); T("bulunmuş görüntü · korku", 640, 240, 26, "#999", "center"); if (S.pending) T("Paylaşılan gece: " + S.pending.toUpperCase() + " — Yeni Gece ile başlar", 640, 270, 20, "#e8d9b0", "center"); if (Math.floor(tm * 1.6) % 2 === 0) { g.fillStyle = "#e22"; g.beginPath(); g.arc(80, 70, 14, 0, 7); g.fill(); } T("REC", 106, 80, 34);
+  const it = menuItems(); it.forEach(m => { g.fillStyle = "rgba(255,255,255,.08)"; g.fillRect(m.b[0], m.b[1], m.b[2], m.b[3]); g.strokeStyle = "#666"; g.lineWidth = 2; g.strokeRect(m.b[0], m.b[1], m.b[2], m.b[3]); T(m.t, 640, m.b[1] + 36, 26, "#eee", "center"); });
+  T("Fare: bak · WASD: yürü · Shift: koş · E/otomatik: topla", 640, 690, 20, "#777", "center");
+  if (S.sub === "help") { g.fillStyle = "rgba(0,0,0,.95)"; g.fillRect(180, 80, 920, 560); g.strokeStyle = "#888"; g.strokeRect(180, 80, 920, 560); T("Nasıl Oynanır?", 640, 140, 36, "#e8d9b0", "center"); ["Terk edilmiş sanatoryumdan 6 kaset topla; hepsi toplandığında çıkış kapısı (kırmızı) açılır.", "Hasta 14 yalnızca kamera onu görmediğinde hareket eder. Ona bakarsan donar.", "Ama ona bakmak görüntüyü bozar; sürekli bakıp geri geri gidemezsin.", "F: Flaş. Yaratığı 4 saniye dondurur (8 sn bekleme, pil harcar).", "N: Gece görüşü. Daha uzağı görürsün ama pil hızla gider.", "Pil biterse görüş daralır ve yaratık hızlanır. Pil bul.", "Shift ile koşarsın ama yorulursun. P: duraklat.", "Kod (#s=KOD) aynı haritayı üretir; arkadaşınla aynı kaseti ararsınız."].forEach((l, i) => wrapT(l, 220, 200 + i * 52, 840, 28, 22, "#ddd")); T("tıkla: kapat", 640, 610, 20, "#888", "center"); }
+  if (S.sub === "set") { g.fillStyle = "rgba(0,0,0,.95)"; g.fillRect(300, 150, 680, 400); g.strokeStyle = "#888"; g.strokeRect(300, 150, 680, 400); T("Ayarlar", 640, 210, 36, "#e8d9b0", "center"); T("Ses [-/+]: " + Math.round(SET.vol * 100) + "%", 340, 290, 26); T("Korku şiddeti [K]: " + ["hafif", "normal", "yoğun"][SET.scare], 340, 350, 26); T("Fare hassasiyeti [M]: " + SET.sens.toFixed(1), 340, 410, 26); T("tıkla: kapat", 640, 510, 20, "#888", "center"); }
+  const b = BEST[S.code]; if (b != null) T("Bu kodun rekoru: " + b, 640, 660, 20, "#aaa", "center");
+}
+function menuItems() { return [{ id: "new", t: "Yeni Gece", b: [490, 290, 300, 54] }, { id: "code", t: "Kodla Oyna", b: [490, 358, 300, 54] }, { id: "help", t: "Nasıl Oynanır", b: [490, 426, 300, 54] }, { id: "set", t: "Ayarlar", b: [490, 494, 300, 54] }]; }
+function draw(tm) {
+  if (S.screen === "menu") { drawMenu(tm); return; }
+  render3D(); vhs(tm);
+  if (S.screen === "intro") { g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(0, 0, 1280, 720); T("KOD " + S.code, 640, 260, 34, "#e8d9b0", "center"); T("Sarıdere Sanatoryumu · Son kayıt", 640, 330, 30, "#eee", "center"); wrapT("Kaset toplayarak ne olduğunu çöz. Hasta 14'e bakınca durur, bakmayınca yaklaşır.", 260, 400, 760, 36, 26, "#ccc"); T("[Tıkla / Enter] başla", 640, 560, 26, "#aaa", "center"); return; }
+  if (S.screen === "play") { hud(tm); if (S.paused) { g.fillStyle = "rgba(0,0,0,.7)"; g.fillRect(0, 0, 1280, 720); T("DURAKLATILDI", 640, 330, 50, "#eee", "center"); T("Devam için tıkla  ·  M: menü", 640, 390, 26, "#aaa", "center"); } else if (!S.locked && !S.playing && !("ontouchstart" in window)) { T("Fareyle bakmak için tıkla (ok tuşlarıyla da dönebilirsin)", 640, 560, 20, "#999", "center"); } if (S.playing) drawPlaying(); return; }
+  if (S.screen === "dead") { hud(tm); g.fillStyle = `rgba(0,0,0,${Math.min(0.9, S.deadT * 0.6)})`; g.fillRect(0, 0, 1280, 720); if (S.deadT > 0.8) { T("KAYIT KESİLDİ", 640, 300, 70, "#e22", "center"); T("Kaset " + S.got + "/6 · " + Math.floor(S.t) + " sn", 640, 360, 28, "#ccc", "center"); if (S.deadT > 1.8) { T("[Enter] aynı kod · [N] yeni gece · [Esc] menü", 640, 450, 24, "#aaa", "center"); } } return; }
+  if (S.screen === "win") { g.fillStyle = "rgba(0,0,0,.92)"; g.fillRect(0, 0, 1280, 720); T("ÇIKIŞ", 640, 130, 60, "#e8d9b0", "center"); const n = Math.min(ENDING.length, 1 + Math.floor(S.winT / 3)); for (let i = 0; i < n; i++) wrapT(ENDING[i], 200, 210 + i * 90, 880, 32, 24, "#ddd"); if (S.winT > 12) { T("Puan: " + S.score + (S.newBest ? "  (yeni rekor!)" : ""), 640, 600, 30, "#ffd070", "center"); T("[L] kodu kopyala · [N] yeni gece · [Enter] menü", 640, 650, 22, "#aaa", "center"); } }
+}
+
+/* ------------------------------------------------ girdi */
+function pos(e) { const b = cv.getBoundingClientRect(); const sc = Math.min(b.width / 1280, b.height / 720); const ox = (b.width - 1280 * sc) / 2, oy = (b.height - 720 * sc) / 2; return { x: (e.clientX - b.left - ox) / sc, y: (e.clientY - b.top - oy) / sc }; }
+function lock() { try { cv.requestPointerLock && cv.requestPointerLock(); } catch (e) { } }
+cv.addEventListener("mousedown", e => {
+  audioInit(); if (A.ctx && A.ctx.state === "suspended") A.ctx.resume(); const p = pos(e);
+  if (S.screen === "menu") { if (S.sub) { S.sub = null; return; } for (const it of menuItems()) { const b = it.b; if (p.x > b[0] && p.x < b[0] + b[2] && p.y > b[1] && p.y < b[1] + b[3]) { if (it.id === "new") { const pc = S.pending; S.pending = null; newGame(pc || undefined); } else if (it.id === "code") { const c = prompt("Gece kodu (4-8 harf/rakam):", ""); if (c) newGame(c); } else S.sub = it.id; } } return; }
+  if (S.screen === "intro" && S.introT > 0.5) { S.screen = "play"; lock(); return; } if (S.screen === "play") { if (S.paused) { S.paused = false; lock(); } else if (!S.locked && !S.playing) lock(); else if (S.playing) endTape(); return; }
+  if (S.screen === "dead" && S.deadT > 1.8) newGame(S.code);
+});
+function endTape() { if (!S.playing) return; const n = Math.floor(S.playing.t * 28); if (n >= TAPES[S.playing.n][1].length) { S.playing = null; S.pauseGuard = 0; } else S.playing.t = TAPES[S.playing.n][1].length / 28 + 0.01; }
+document.addEventListener("pointerlockchange", () => { S.locked = document.pointerLockElement === cv; if (!S.locked && S.screen === "play" && !S.playing) S.paused = true; });
+document.addEventListener("mousemove", e => { if (S.screen === "play" && S.locked && !S.paused && !S.playing) S.p.a += e.movementX * 0.0022 * SET.sens; });
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase(); audioInit(); if (A.ctx && A.ctx.state === "suspended") A.ctx.resume(); if (["arrowup", "arrowdown", "arrowleft", "arrowright", " "].includes(k)) e.preventDefault();
+  if (S.screen === "menu") { if (k === "escape") S.sub = null; if (S.sub === "set") { if (k === "-") SET.vol = Math.max(0, +(SET.vol - 0.1).toFixed(1)); if (k === "+" || k === "=") SET.vol = Math.min(1, +(SET.vol + 0.1).toFixed(1)); if (A.master) A.master.gain.value = SET.vol; if (k === "k") SET.scare = (SET.scare + 1) % 3; if (k === "m") SET.sens = SET.sens >= 2 ? 0.5 : +(SET.sens + 0.25).toFixed(2); store.set("kk_set", SET); } return; }
+  if (S.screen === "intro") { if (k === "enter" || k === " ") { S.screen = "play"; lock(); } return; }
+  if (S.screen === "dead") { if ((k === "enter") && S.deadT > 1.8) newGame(S.code); else if (k === "n" && S.deadT > 1.8) newGame(); else if (k === "escape") S.screen = "menu"; return; }
+  if (S.screen === "win") { if (k === "l") { try { navigator.clipboard.writeText(location.href.split("#")[0] + "#s=" + S.code); } catch (x) { } } else if (k === "n") newGame(); else if ((k === "enter" || k === "escape") && S.winT > 2) S.screen = "menu"; return; }
+  if (S.screen !== "play") return; if (S.playing) { if (k === "enter" || k === " " || k === "e") endTape(); return; }
+  S.keys[k] = true; if (k === "f") flash(); else if (k === "n") toggleNV(); else if (k === "p") { S.paused = !S.paused; if (!S.paused) lock(); } else if (k === "m" && S.paused) { S.screen = "menu"; S.paused = false; S.sub = null; try { document.exitPointerLock(); } catch (x) { } }
+});
+window.addEventListener("keyup", e => { if (S) S.keys && (S.keys[e.key.toLowerCase()] = false); });
+window.addEventListener("blur", () => { if (S.keys) S.keys = {}; if (S.screen === "play" && !S.playing) S.paused = true; });
+S = { screen: "menu", keys: {}, t: 0, code: "", sub: null, p: { x: 1.5, y: 1.5, a: 0 }, en: {}, tapes: [], bats: [], got: 0, bat: 100, flashT: 0, glitch: 0, shake: 0, stamina: 100 };
+window.__KK = { get S() { return S; }, get M() { return M; }, update, newGame, die, win, bfs, flash, toggleNV, SET };
+let last = performance.now(), tmr = 0; function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; tmr += dt; update(dt); draw(tmr); requestAnimationFrame(loop); }
+const hm = location.hash.match(/s=([A-Za-z0-9]+)/); requestAnimationFrame(loop); if (hm) { /* kod ile gelen bağlantı: menü bekler, ilk tıkta başlatır */ S.pending = hm[1]; cv.addEventListener("mousedown", function f() { if (S.screen === "menu" && !S.sub && S.pending) { } }); }
+</script></body></html>

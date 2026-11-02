@@ -209,7 +209,54 @@ TELSIZ = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ]
+KAYIP = {
+    "slug": "kayip-kaset",
+    "name": "Kayıp Kaset",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/kayip-kaset",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "kayip-kaset-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Terk edilmiş sanatoryumda kasetleri topla: kamera bakarken hareket etmeyen şey seni arıyor",
+    "desc": "Eski kamera görüntüsüyle birinci şahıs bir korku oyunu. Sarıdere Sanatoryumu'nun labirent koridorlarında 6 kayıp kaseti bul, ekibin başına ne geldiğini çöz ve çıkış kapısına ulaş. Hasta 14 yalnızca kamera ona bakmadığında hareket eder; flaşı, gece görüşünü ve pilini akıllıca kullan. Her gece bir koddan üretilir: aynı kodla arkadaşların aynı sanatoryumda aynı kasetleri arar.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "3B",
+        "Bulunmuş görüntü",
+        "Kodlu harita"
+    ],
+    "features": [
+        "Raycasting ile 3B koridorlar, eski kamera (VHS) görünümü: REC, zaman damgası, parazit",
+        "Bakınca duran, bakmayınca yaklaşan yaratık",
+        "Flaş, gece görüşü, pil ve dayanıklılık yönetimi",
+        "6 kasetle çözülen hikaye ve sürpriz son",
+        "Kodla üretilen harita, paylaşılabilir meydan okuma, rekor",
+        "Kodla üretilmiş ses, fare + klavye"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP]
 
 
 def _empty(v):
