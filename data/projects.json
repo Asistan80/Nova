@@ -1338,5 +1338,119 @@
     "updated_at": "",
     "slug": "telsiz",
     "created_at": "2026-11-02T11:41:52.552035+00:00"
+  },
+  {
+    "slug": "gece-bekcisi",
+    "name": "Gece Bekçisi",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "Terk edilmiş kervansarayda 5 gece: fener, kepenk, kamera ve nefes",
+    "desc": "Müzenin gece bekçisisin. 22:00'den sabah 06:00'ya kadar sol pencereye gelen Gölge'yi fenerle kov, sağ kapıya gelen Cadı'ya kepenk indir, kameralarda yerinden oynayan Heykel'e gözünü ayırma ve fısıltıları duyunca nefesini tut. Gaz yağın sınırlı. Kulaklık ve karanlık oda önerilir; ani korkutmalar içerir.",
+    "tags": [
+      "Tarayıcı",
+      "Korku",
+      "Hayatta kalma",
+      "Kamera"
+    ],
+    "features": [
+      "5 gece + açılan Özel Gece (seviyeleri kendin ayarla)",
+      "4 farklı tehdit, her birinin kendine özgü çaresi",
+      "Gaz yağı yönetimi: fener, kepenk ve kamera yağ harcar",
+      "Kodla üretilmiş ses: ayak sesi, fısıltı, vuruş, ani korkutmalar",
+      "Korkutma şiddeti, ses ve ışık titremesi ayarları",
+      "Klavye ve dokunmatik destek, otomatik kayıt"
+    ],
+    "changelog": [
+      {
+        "version": "1.0",
+        "date": "2026-11-02",
+        "text": "İlk sürüm."
+      }
+    ],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "gece-bekcisi-oyun.png",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "play_url": "/oyna/gece-bekcisi",
+    "download_url": null,
+    "download_file": null,
+    "updated_at": "",
+    "created_at": "2026-11-02T11:43:28.565678+00:00"
+  },
+  {
+    "slug": "fener-isigi",
+    "name": "Fener Işığı",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/fener-isigi",
+    "download_url": null,
+    "download_file": null,
+    "updated_at": "",
+    "cover": "fener-isigi-oyun.png",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "changelog": [
+      {
+        "version": "1.0",
+        "date": "2026-11-02",
+        "text": "İlk sürüm."
+      }
+    ],
+    "version": "1.0",
+    "tagline": "Karanlık ormanda altı kandil: ışığa tutunca donan gölgelerden kaç",
+    "desc": "Sisli bir ormanda yalnızsın. Fenerinin ışığı ve yanan kandillerin çevresi dışında her yer karanlık. Altı kandili bul, yanında basılı tutarak yak ve kuzeydeki kapıya ulaş. Gölge Adamlar karanlıkta hızlıdır ama ışığa tutunca donar; yanan kandil güvenli alan açar ve pilini doldurur. Her orman bir koddan üretilir: aynı kodla arkadaşların aynı ormanı oynar ve süreni geçmeye çalışır.",
+    "tags": [
+      "Tarayıcı",
+      "Korku",
+      "2B",
+      "Kodlu harita"
+    ],
+    "features": [
+      "Kodla üretilen orman: aynı kod, aynı harita, paylaşılabilir meydan okuma",
+      "Fener, pil ve dayanıklılık yönetimi",
+      "Işıkta donan, karanlıkta hızlanan Gölge Adamlar",
+      "Yanan kandil güvenli alan açar",
+      "3 zorluk, kod başına rekor kaydı",
+      "Kodla üretilmiş ses, klavye/fare ve dokunmatik destek"
+    ],
+    "created_at": "2026-11-02T11:43:28.565724+00:00"
+  },
+  {
+    "name": "Fener Işığı",
+    "kind": "oyun",
+    "status": "playable",
+    "tagline": "",
+    "desc": "Farklı oyunlardan bir tanesi daha.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "fener-isigi-2-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/fener-isigi-2",
+    "download_url": null,
+    "download_file": "FenerIsigi.zip",
+    "updated_at": "",
+    "slug": "fener-isigi-2",
+    "created_at": "2026-11-02T11:44:02.119513+00:00"
   }
 ]
