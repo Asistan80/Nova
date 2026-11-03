@@ -1361,11 +1361,7 @@
       "Klavye ve dokunmatik destek, otomatik kayıt"
     ],
     "changelog": [
-      {
-        "version": "1.0",
-        "date": "2026-11-02",
-        "text": "İlk sürüm."
-      }
+      "{'version': '1.0', 'date': '2026-11-02', 'text': 'İlk sürüm.'}"
     ],
     "version": "1.0",
     "published": true,
@@ -1381,7 +1377,7 @@
     ],
     "play_url": "/oyna/gece-bekcisi",
     "download_url": null,
-    "download_file": null,
+    "download_file": "GeceBekcisi.zip",
     "updated_at": "",
     "created_at": "2026-11-02T11:43:28.565678+00:00"
   },
