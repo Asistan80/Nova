@@ -1395,7 +1395,7 @@
     "publish_at": null,
     "play_url": "/oyna/fener-isigi",
     "download_url": null,
-    "download_file": null,
+    "download_file": "FenerIsigi.zip",
     "updated_at": "",
     "cover": "fener-isigi-oyun.png",
     "gallery": [
@@ -1406,11 +1406,7 @@
       "ekran-5.jpg"
     ],
     "changelog": [
-      {
-        "version": "1.0",
-        "date": "2026-11-02",
-        "text": "İlk sürüm."
-      }
+      "{'version': '1.0', 'date': '2026-11-02', 'text': 'İlk sürüm.'}"
     ],
     "version": "1.0",
     "tagline": "Karanlık ormanda altı kandil: ışığa tutunca donan gölgelerden kaç",
@@ -1547,7 +1543,7 @@
   {
     "name": "Saatçinin Köşkü",
     "kind": "oyun",
-    "status": "download",
+    "status": "playable",
     "tagline": "",
     "desc": "",
     "tags": [],
