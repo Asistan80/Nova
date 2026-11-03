@@ -375,7 +375,7 @@ SEED_KA = {
             "text": "İlk sürüm."
         }
     ],
-    "version": "1.0",
+    "version": "1.1",
     "tagline": "Yukarıdan inen düşman dalgalarını vur, gemini geliştir, 4 dev patronu yen",
     "desc": "Galaxy Attack tarzı, tamamen özgün bir uzay nişancı oyunu. 50 bölümlük seferde on sektörü geç, her beşinci bölümde dev bir patronla yüzleş. Düşürdüğün ganimetle silahını yükselt, kalkan ve bomba topla; kazandığın kredilerle hangarda 7 farklı gemi satın al ve 8 kalıcı geliştirmeyle gemini güçlendir. Bitmeyen dalgalar için Sonsuz Akın modu da var. Fare, dokunmatik veya klavye ile oynanır.",
     "tags": [
