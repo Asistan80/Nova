@@ -1570,7 +1570,7 @@
     "publish_at": null,
     "play_url": "/oyna/kozmik-akin",
     "download_url": null,
-    "download_file": null,
+    "download_file": "KozmikAkin_1.zip",
     "updated_at": "",
     "cover": "kozmik-akin-oyun.png",
     "gallery": [
@@ -1581,16 +1581,8 @@
       "ekran-5.jpg"
     ],
     "changelog": [
-      {
-        "version": "1.1",
-        "date": "2026-11-04",
-        "text": "50 bölüm, 6 patron tasarımı, 2 yeni gemi, yeni düşmanlar, ses ayarları, klavye kontrol düzeltmesi."
-      },
-      {
-        "version": "1.0",
-        "date": "2026-11-02",
-        "text": "İlk sürüm."
-      }
+      "{'version': '1.1', 'date': '2026-11-04', 'text': '50 bölüm, 6 patron tasarımı, 2 yeni gemi, yeni düşmanlar, ses ayarları, klavye kontrol düzeltmesi.'}",
+      "{'version': '1.0', 'date': '2026-11-02', 'text': 'İlk sürüm.'}"
     ],
     "version": "1.1",
     "tagline": "Yukarıdan inen düşman dalgalarını vur, gemini geliştir, 4 dev patronu yen",
