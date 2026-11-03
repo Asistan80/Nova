@@ -1602,27 +1602,5 @@
       "Ses, müzik ve efekt ayarları; fare, dokunmatik ve klavye desteği; otomatik kayıt"
     ],
     "created_at": "2026-11-03T22:30:22.952234+00:00"
-  },
-  {
-    "name": "Kozmik Akın",
-    "kind": "oyun",
-    "status": "download",
-    "tagline": "",
-    "desc": "Savaş oyunu yaptım sizce nasıl.",
-    "tags": [],
-    "features": [],
-    "changelog": [],
-    "version": "1.0",
-    "published": true,
-    "youtube_url": "",
-    "publish_at": null,
-    "cover": "kozmik-akin-2-auto.png",
-    "gallery": [],
-    "play_url": "/oyna/kozmik-akin-2",
-    "download_url": null,
-    "download_file": "KozmikAkin_1.zip",
-    "updated_at": "",
-    "slug": "kozmik-akin-2",
-    "created_at": "2026-11-03T22:36:00.171243+00:00"
   }
 ]
