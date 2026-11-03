@@ -256,7 +256,52 @@ KAYIP = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP]
+SAATCI = {
+    "slug": "saatcinin-kosku",
+    "name": "Saatçinin Köşkü",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/saatcinin-kosku",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "saatcinin-kosku-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Saatçi ustanın köşkünde 5 oda, 18 bulmaca: Zamanın Kalbi'ni bul, gece yarısı kapıyı aç",
+    "desc": "Büyük bir kaçış bulmacası. Fırtınada kilitlenen saatçi köşkünde ipuçlarını topla, eşyaları birleştir, şifreleri çöz. Hol, Çalışma Odası, Kütüphane, Atölye ve Gözlemevi boyunca ilerle; Zamanın Kalbi'ni bulup büyük mekanizmayı yeniden çalıştır. Her oyun bir koddan üretilir: aynı kodla arkadaşın aynı şifreleri bulur, süre ve ipucu sayınızı karşılaştırırsınız. Köşkte gizlenmiş 5 Zaman Pulu'nu bulursan gizli bir son seni bekler.",
+    "tags": [
+        "Tarayıcı",
+        "Bulmaca",
+        "Kaçış oyunu",
+        "Kodlu şifreler"
+    ],
+    "features": [
+        "5 oda, 18 bulmaca: tuş takımı, şifre çarkı, saat kurma, kayan taşlar, ışık/ayna, borular, kablolar, teleskop ve daha fazlası",
+        "Eşya toplama ve birleştirme, günlük ve ipucu sistemi (3 kademe)",
+        "Kodla üretilen şifreler: aynı kodla aynı oyun, paylaşılabilir meydan okuma",
+        "5 gizli Zaman Pulu ve gizli son",
+        "Otomatik kayıt, kodla üretilmiş ses"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI]
 
 
 def _empty(v):
