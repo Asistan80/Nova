@@ -301,7 +301,53 @@ SAATCI = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI]
+SEED_PK = {
+    "slug": "pera-kosku-cinayeti",
+    "name": "Pera Köşkü Cinayeti",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/pera-kosku-cinayeti",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "pera-kosku-cinayeti-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Kar fırtınasında kapalı kalan köşkte bir cinayet: beş şüpheli, tek katil, sabaha kadar vaktin var",
+    "desc": "1927 Pera. Hacı Nazım Efendi çalışma odasında zehirlenmiş, kapı içeriden kilitli; köşkten kimse çıkamıyor. Odaları ara, ifadeleri al, alibileri kanıtlarla sına, şüphelileri sıkıştır. Katil her oyunda rastgele değişir ve kanıtlar ona göre yazılır. Hazır çevrimdışı yanıtlarla tam oynanır; istersen kendi Groq, Gemini veya Claude anahtarını girip şüphelilerle canlı yapay zekâ ile konuşabilirsin. Vaka kodu ile aynı cinayeti arkadaşına gönderebilirsin.",
+    "tags": [
+        "Tarayıcı",
+        "Dedektif",
+        "Yapay zekâ",
+        "Gizem"
+    ],
+    "features": [
+        "Her oyunda rastgele katil, yöntem ve neden; 5 şüpheli, 11 oda, 25 kanıt",
+        "Serbest cümleyle sorgu, kanıt gösterme, baskı ve itiraf sistemi",
+        "İsteğe bağlı canlı yapay zekâ (Groq / Gemini / Claude); anahtar yalnızca senin tarayıcında kalır",
+        "Kolay, normal, zor mod; ipucu, dedektif defteri, puan",
+        "Vaka kodu (#s=KOD) ile aynı vakayı paylaş",
+        "Otomatik kayıt"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK]
 
 
 def _empty(v):

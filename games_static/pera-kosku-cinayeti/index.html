@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pera Köşkü Cinayeti</title>
+<style>
+:root{--bg:#14110f;--panel:#1d1815;--panel2:#26201b;--line:#3b3129;--ink:#e8dcc8;--dim:#a29480;--gold:#c9a15a;--red:#b5483a;--green:#6f9a63;--blue:#5f86a8}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 700px at 50% -10%,#2a2019,var(--bg));color:var(--ink);font:16px/1.5 Georgia,'Times New Roman',serif;min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer}
+header{display:flex;align-items:center;gap:16px;padding:10px 18px;border-bottom:1px solid var(--line);background:#100d0bcc;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+h1{font-size:19px;margin:0;letter-spacing:.08em;color:var(--gold);font-weight:normal;text-transform:uppercase}
+.clock{margin-left:auto;display:flex;gap:14px;align-items:center}
+.time{font-size:26px;font-variant-numeric:tabular-nums;color:var(--gold)}
+.bar{width:150px;height:6px;background:var(--line);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold)}
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 12px}
+.btn:hover{border-color:var(--gold)}.btn.pri{background:#5b3a22;border-color:var(--gold)}.btn.danger{background:#4a1f19;border-color:var(--red)}
+.btn:disabled{opacity:.45;cursor:default}
+main{display:grid;grid-template-columns:320px 1fr 330px;gap:14px;padding:14px;max-width:1500px;margin:auto}
+@media(max-width:1100px){main{grid-template-columns:minmax(0,1fr)}}main>section{min-width:0}header{padding:10px 12px}.clock{margin-left:0;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+.card h2{margin:0 0 8px;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);font-weight:normal}
+.map{position:relative;height:330px;background:#120f0d;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.pin{position:absolute;transform:translate(-50%,-50%);border:1px solid var(--line);background:var(--panel2);border-radius:14px;padding:2px 8px;font-size:12px;white-space:nowrap}
+.pin:hover{border-color:var(--gold)}.pin.v{border-color:var(--green)}.pin.hot{box-shadow:0 0 0 2px #c9a15a55}
+.locinfo{font-size:14px;color:var(--dim);min-height:60px;margin:8px 0}
+.sus{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+@media(max-width:700px){.sus{grid-template-columns:repeat(3,1fr)}}
+.s{border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:6px 4px;text-align:center;font-size:12px}
+.s.on{border-color:var(--gold);background:#3a2a1c}
+.av{width:44px;height:44px;border-radius:50%;margin:0 auto 4px;display:grid;place-items:center;font-size:22px;color:#fff;border:2px solid #0005}
+.pr{height:4px;background:var(--line);border-radius:2px;margin-top:4px;overflow:hidden}.pr i{display:block;height:100%;background:var(--red)}
+.who{display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.who .av{margin:0}.who b{font-size:18px}.who span{color:var(--dim);font-size:13px}
+.claim{font-size:13px;color:var(--dim);border-left:3px solid var(--gold);padding-left:8px;margin:6px 0 10px}
+.chat{height:340px;overflow:auto;background:#120f0d;border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:85%;padding:7px 11px;border-radius:10px;font-size:15px;white-space:pre-wrap}
+.m.you{align-self:flex-end;background:#3b2c1d}.m.them{align-self:flex-start;background:#2a2622;border:1px solid var(--line)}
+.m small{display:block;color:var(--dim);font-size:11px;margin-top:3px}
+.m.sys{align-self:center;color:var(--dim);font-size:13px;font-style:italic;background:none}
+.m.conf{border-color:var(--red);background:#3a1b16}
+.ask{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.ask input,.ask select,textarea,select,input[type=text],input[type=password]{background:#120f0d;color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px;font:inherit}
+.ask input{flex:1;min-width:180px}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.quick button{font-size:12px;padding:3px 8px;background:none;border:1px dashed var(--line);border-radius:12px;color:var(--dim)}
+.quick button:hover{color:var(--ink);border-color:var(--gold)}
+.ev{border:1px solid var(--line);border-left:3px solid var(--gold);background:var(--panel2);border-radius:6px;padding:7px 9px;margin-bottom:7px;font-size:13px}
+.ev b{display:block;color:var(--gold);font-size:13px}.ev.olay{border-left-color:var(--blue)}.ev.alibi_iyi,.ev.kaynak_iyi{border-left-color:var(--green)}.ev.alibi_kotu,.ev.kaynak_kotu,.ev.kesin{border-left-color:var(--red)}
+.evl{max-height:420px;overflow:auto}
+textarea{width:100%;height:120px;resize:vertical}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:20;padding:14px}
+.modal.on{display:flex}
+.box{background:var(--panel);border:1px solid var(--gold);border-radius:12px;padding:20px;max-width:640px;width:100%;max-height:92vh;overflow:auto}
+.box h3{margin:0 0 10px;color:var(--gold);font-weight:normal;letter-spacing:.06em}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}.row label{min-width:120px;color:var(--dim);font-size:14px}.row select,.row input{flex:1}
+.found{animation:fl 1.2s}
+@keyframes fl{from{background:#5b3a22}to{background:var(--panel2)}}
+.tag{font-size:11px;color:var(--dim)}
+.best{color:var(--dim);font-size:13px}
+.res.win h3{color:var(--green)}.res.lose h3{color:var(--red)}
+</style></head><body>
+<header>
+<h1 id="ttl">Pera Köşkü · 12 Mart 1927</h1>
+<div class="clock"><div><div class="time" id="time">00:10</div><div class="bar"><i id="tbar" style="width:100%"></i></div></div>
+<button class="btn" id="bHint" title="15 dakikaya mal olur, puanı 3 düşürür">İpucu</button><button class="btn" id="bNotes">Defter</button><button class="btn" id="bCfg">Ayarlar</button><button class="btn" id="bNew">Yeni vaka</button><button class="btn danger" id="bAcc">Suçla</button></div>
+</header>
+<main>
+<section class="card"><h2>Köşk planı</h2><div class="map" id="map"></div><div class="locinfo" id="locinfo">Bir odaya tıkla: ayrıntısı ve arama süresi burada çıkar.</div><button class="btn pri" id="bSearch" disabled style="width:100%">Odayı ara</button>
+<h2 style="margin-top:14px">Vaka</h2><div id="intro" style="font-size:13px;color:var(--dim)"></div></section>
+<section class="card"><h2>Sorgu</h2><div class="sus" id="sus"></div>
+<div class="who"><div class="av" id="wAv"></div><div><b id="wName"></b><br><span id="wRole"></span></div></div>
+<div class="claim" id="claim"></div>
+<div class="chat" id="chat"></div>
+<div class="quick" id="quick"></div>
+<form class="ask" id="form"><input id="q" maxlength="400" placeholder="Sorunu yaz... (ör. Gece neredeydin?)" autocomplete="off">
+<select id="evSel" title="Kanıt göster"><option value="">Kanıt göstermeden</option></select><button class="btn pri" id="send">Sor</button></form>
+<div class="tag" id="aiTag" style="margin-top:6px"></div></section>
+<section class="card"><h2>Kanıtlar <span id="evCount" class="tag"></span></h2><div class="evl" id="evl"></div></section>
+</main>
+
+<div class="modal" id="mIntro"><div class="box"><h3>Pera Köşkü Cinayeti</h3><p id="introTxt"></p>
+<p style="color:var(--dim);font-size:14px">Her soru 4 dakika, her oda araması 12–20 dakika alır. Saat 06:00'da dosya kapanır. Doğru kişiyi, yöntemi ve nedeni bulmalısın. Katil her oyunda değişir.</p>
+<button class="btn pri" id="bStart">Soruşturmaya başla</button></div></div>
+
+<div class="modal" id="mNotes"><div class="box"><h3>Dedektif defteri</h3><textarea id="notes" placeholder="Zaman çizelgesi, şüpheler, çelişkiler..." style="height:260px"></textarea><div class="row"><button class="btn" id="nClose">Kapat</button></div></div></div>
+
+<div class="modal" id="mLoc"><div class="box" id="locBox"></div></div>
+
+<div class="modal" id="mAcc"><div class="box"><h3>Suçlama</h3><p style="color:var(--dim);font-size:14px">Bunu sadece bir kez yapabilirsin.</p>
+<div class="row"><label>Katil</label><select id="aS"></select></div>
+<div class="row"><label>Yöntem</label><select id="aM"></select></div>
+<div class="row"><label>Neden</label><select id="aN"></select></div>
+<div class="row"><button class="btn danger" id="aGo">Suçla</button><button class="btn" id="aX">Vazgeç</button></div></div></div>
+
+<div class="modal" id="mRes"><div class="box res" id="resBox"></div></div>
+
+<div class="modal" id="mCfg"><div class="box"><h3>Ayarlar</h3>
+<p style="color:var(--dim);font-size:14px">Anahtar girersen şüpheliler gerçek yapay zekâyla konuşur. Girmezsen hazır çevrimdışı yanıtlar kullanılır. Anahtar yalnızca bu tarayıcıda saklanır ve sadece seçtiğin sağlayıcıya gönderilir; oyun kuralları (itiraf, sır açma) yine oyunda belirlenir.</p>
+<div class="row"><label>Sağlayıcı</label><select id="cProv"><option value="yerel">Yalnızca çevrimdışı</option><option value="groq">Groq (ücretsiz katman)</option><option value="gemini">Gemini</option><option value="claude">Claude</option></select></div>
+<div class="row"><label>API anahtarı</label><input type="password" id="cKey" placeholder="API anahtarı"></div>
+<div class="row"><label>Model (isteğe bağlı)</label><input type="text" id="cModel" placeholder="boş = varsayılan"></div>
+<div class="row"><label>Ses efektleri</label><select id="cSnd"><option value="1">Açık</option><option value="0">Kapalı</option></select></div>
+<div class="row"><label>Sesli konuşma</label><select id="cVoice"><option value="0">Kapalı</option><option value="1">Açık (tarayıcı sesi)</option></select></div>
+<div class="row"><label>Zorluk</label><select id="cDiff"><option value="kolay">Kolay (07:00'a kadar)</option><option value="normal">Normal (06:00)</option><option value="zor">Zor (05:00)</option></select></div>
+<div class="row"><button class="btn pri" id="cSave">Kaydet</button><button class="btn" id="cTest">Bağlantıyı dene</button><button class="btn" id="cX">Kapat</button></div>
+<div id="cOut" class="tag"></div></div></div>
+<script>const DATA={"VICTIM": {"name": "Hacı Nazım Efendi", "age": 62, "role": "İthalat tüccarı, köşkün sahibi"}, "INTRO": "12 Mart 1927, gece 00:10. Pera'daki Nazım Efendi'nin köşkü kar fırtınasının ortasında kalmış; yollar kapalı. Evin reisi Hacı Nazım Efendi, yıl dönümü yemeğinden sonra çalışma odasında ölü bulundu. Oda içeriden kilitliydi. Kadehinde arsenik var. Köşkte beş kişi ve kapıcı var; kimse içeri girmedi, kimse çıkmadı. Sabah 06:00'da yol açılınca Komiser Rıza ekibiyle gelecek ve dosyayı kapatacak. Katili o zamana kadar bulmak sana kaldı.", "LOCATIONS": {"calisma": {"name": "Çalışma Odası", "desc": "Cinayet yeri. Meşe masa, deri koltuk, kilitli kapı.", "cost": 20, "x": 66, "y": 12, "short": "Çalışma Odası"}, "salon": {"name": "Salon", "desc": "Yemekten sonra herkesin toplandığı geniş oda.", "cost": 12, "x": 24, "y": 34, "short": "Salon"}, "hol": {"name": "Giriş Holü", "desc": "Telefon, kapıcı defteri ve ana merdiven.", "cost": 12, "x": 50, "y": 46, "short": "Giriş Holü"}, "kutuphane": {"name": "Kütüphane", "desc": "Rafların arasında okuma masası ve şirket defterleri.", "cost": 15, "x": 22, "y": 12, "short": "Kütüphane"}, "mutfak": {"name": "Mutfak", "desc": "Uşakların dünyası: dolaplar, defter, bulaşık teknesi.", "cost": 15, "x": 78, "y": 34, "short": "Mutfak"}, "bahce": {"name": "Bahçe", "desc": "Karla kaplı yol, çardak ve bahçe kulübesi.", "cost": 18, "x": 50, "y": 95, "short": "Bahçe"}, "leman_oda": {"name": "Leman Hanım'ın Odası", "desc": "Üst kat, doğu kanadı.", "cost": 15, "x": 27, "y": 59, "short": "Leman'ın odası"}, "cevdet_oda": {"name": "Cevdet Bey'in Odası", "desc": "Üst kat, misafir odası.", "cost": 15, "x": 72, "y": 59, "short": "Cevdet'in odası"}, "artin_oda": {"name": "Dr. Artin'in Odası", "desc": "Üst kat, batı kanadı.", "cost": 15, "x": 27, "y": 72, "short": "Artin'in odası"}, "sureyya_oda": {"name": "Süreyya'nın Odası", "desc": "Çatı katındaki dar hizmetçi odası.", "cost": 15, "x": 50, "y": 84, "short": "Süreyya'nın odası"}, "kemal_oda": {"name": "Kemal'in Odası", "desc": "Üst kat, bahçeye bakan oda.", "cost": 15, "x": 73, "y": 72, "short": "Kemal'in odası"}}, "SUSPECTS": {"leman": {"name": "Leman Hanım", "age": 46, "role": "Nazım Efendi'nin eşi", "color": "#8b5a8c", "attire": "mor ipek şal, sedef broş", "fiber": "mor ipek şal lifi", "initial": "L", "style": "Kibar, soğukkanlı ve gururlu. Kısa, keskin cümleler kurar; duygusunu belli etmez. 'Efendim' der.", "claim": "Yemekten sonra başım ağrıdı, 22:30'da odama çekildim ve mektup yazdım. Kimseyi görmedim.", "claim_short": "22:30'dan sonra odasında mektup yazıyordu.", "relation": "Yirmi iki yıllık eşi. Evlilikleri son yıllarda soğuk ve resmîydi.", "secret": "Avukat Mösyö Kerim'e boşanma dilekçesi hazırlıyordu; Nazım Efendi öğrenirse onu mirastan edecekti.", "slip": "Mektubun ne olduğunu söylemek zorunda değilim... sadece özel bir yazışma.", "cleared": "Peki... Avukatıma yazıyordum. Boşanmak istiyordum, evet. Ama bunun için kimseyi öldürmem; yalnızca imzayı beklerdim.", "method": "Bahçe kulübesindeki gül ilacındaki arseniği kadehe kattı.", "motive": "Boşanırsa mirastan eli boş kalacaktı; Nazım ölürse her şey ona kalıyordu.", "confession": "Evet... ben yaptım. Yirmi iki yılımı çaldı, bir de her şeyimi elimden alacaktı. Gül ilacı bahçe kulübesindeydi; kadehine ben kattım, sonra kendi kadehimi yıkadım.", "gossip": {"cevdet": "Cevdet Bey kasaya son aylarda sık girip çıkıyordu, defterleri de gizliyordu.", "kemal": "Kemal yine borçlanmıştı; Tarlabaşı'ndan biri kapıda onu bekliyormuş."}, "room": "leman_oda", "alibi_loc": "mutfak", "src_loc": "bahce", "room_text": "Yazı masasında yarım kalmış bir mektup: 'Sayın Mösyö Kerim, boşanma davası için gerekli belgeleri...' Mürekkep taze görünüyor.", "room_vial": "Yatak başlığının arkasına sıkıştırılmış ipek mendil içinde küçük cam şişe: dibinde mavimsi beyaz tortu var.", "a_clear": "Mutfak çay defteri: '23:15 — Leman Hanım'a ıhlamur; hanım yazı masasındaydı, kapıyı aralık tuttu, 'bırak' dedi.'", "a_break": "Mutfak çay defteri: '23:15 — Leman Hanım'a ıhlamur götürdüm; kapıyı çaldım, ses gelmedi. Fincanı kapıya bıraktım.' Fincan sabah hâlâ dolu.", "src_clear": "Bahçe kulübesinde gül ilacı kutusu: mühür sağlam, kutu dolu.", "src_bad": "Bahçe kulübesinde arsenikli gül ilacı kutusu: kapak yeni açılmış, yarısı eksik; kilit kırılmamış, yani anahtarı olan biri açmış."}, "cevdet": {"name": "Cevdet Bey", "age": 51, "role": "Nazım Efendi'nin iş ortağı", "color": "#7a5a2e", "attire": "kahverengi takım, kehribar tespih", "fiber": "kehribar tespih tanesi", "initial": "C", "style": "Terli, çok konuşan, her şeyi yumuşatmaya çalışan biri. 'Aman efendim', 'Allah Allah' der; panikleyince lafı uzatır.", "claim": "Saat 23:00'ten sonra holdeki telefondan Galata Bankası'ndan Mösyö Vitali ile görüştüm; uzun sürdü.", "claim_short": "23:00'ten sonra telefonda banka ile görüşüyordu.", "relation": "Yirmi yıllık ortağı. Şirketi birlikte kurdular ama kâr payı eşit değildi.", "secret": "Şirket kasasından 4.200 lira zimmetine geçirmişti; Nazım Efendi defterlerde açığı bulmuştu.", "slip": "Hesaplar... evet, ufak tefek düzeltmeler. Muhasebe işi böyle, efendim.", "cleared": "Tamam! Açık var, evet. Parayı geri koyacaktım. Bankayla o yüzden görüşüyordum. Ama adam öldürmek? Asla.", "method": "Fabrikadan getirdiği arsenikli boya numunesini kadehe kattı.", "motive": "Zimmet açığı yarın ortaya çıkacak ve ihbar edilecekti.", "confession": "Kapana kısıldım... Beni savcıya verecekti! Valizimdeki boya numunesinden aldım; kadehine kattım, sonra holde telefon çalıyormuş gibi durdum.", "gossip": {"leman": "Leman Hanım son haftalarda avukat Kerim'le mektuplaşıyor, bunu bana bahçıvan söyledi.", "artin": "Doktor Artin'in çantası ağırdı, ellerinin titremesini fark ettim."}, "room": "cevdet_oda", "alibi_loc": "hol", "src_loc": "cevdet_oda", "room_text": "Çekmecede defter sayfaları ve Galata Bankası'ndan ödenmemiş bir senet: açığı kapatmak için borçlanmış.", "room_vial": "Valizin çift dibinde cam şişe: etiketsiz, mavimsi tortulu; yanında boya fabrikasından bir irsaliye.", "a_clear": "Santral kaydı: 23:05–23:32 Galata Bankası, Mösyö Vitali, 27 dakika. Cevdet Bey o saatte hatta.", "a_break": "Santral kaydı: 22:00'den sonra köşkten HİÇBİR görüşme yapılmamış. Bankayla görüşmesi yok.", "src_clear": "Valizdeki boya numuneleri: arsenikli kutu mühürlü, sayılı, dokunulmamış.", "src_bad": "Arsenikli boya numune kutusunun mührü kırık; içinden bir miktar eksik."}, "artin": {"name": "Dr. Artin Vartanyan", "age": 55, "role": "Aile doktoru", "color": "#4a6a7a", "attire": "gri yün palto, siyah doktor çantası", "fiber": "gri yün palto lifi", "initial": "A", "style": "Ağırbaşlı, yorgun, hep bir doktor tonuyla konuşur. Latince kelimeler karıştırır, sakin görünür ama ellerini hiç durduramaz.", "claim": "Yemekten sonra kütüphaneye geçip saat 23:00'te hasta notlarımı yazdım; Nazım Efendi'yi son olarak yemekte gördüm.", "claim_short": "23:00–23:40 arası kütüphanede not yazıyordu.", "relation": "On beş yıldır ailenin doktoru ve Nazım Efendi'nin satranç arkadaşı.", "secret": "Morfine bağımlıydı; üstelik eski bir hastası Madam Roza'nın ölümüne yol açan doz hatasını Nazım Efendi biliyordu ve ifşa etmekle tehdit ediyordu.", "slip": "Çantamdaki ilaçlar mesleğimin gereği. Ve geçmişteki bir vaka... soruşturulmuş, kapanmış.", "cleared": "Evet, morfin kullanıyorum; Madam Roza'nın ölümünde hatam vardı ve Nazım bunu biliyordu. Ama o gece kütüphanedeydim, öldürmedim.", "method": "Tıbbi çantasındaki arsenikli tonikten kadehe kattı.", "motive": "Nazım Efendi, morfin bağımlılığını ve Madam Roza'nın ölümündeki hatasını yarın ifşa edecekti.", "confession": "Mesleğimi, adımı elimden alacaktı... Tonik çantamdaydı; kadehine bir miktar kattım. Bir doktor olarak ne kadar yeteceğini biliyordum.", "gossip": {"leman": "Leman Hanım'ın geceleri odasında yazı yazdığını biliyorum; ışığı sabaha kadar yanıyor.", "sureyya": "Süreyya yorgun görünüyordu, gözleri kızarmıştı. Annesi hastaymış galiba."}, "room": "artin_oda", "alibi_loc": "kutuphane", "src_loc": "artin_oda", "room_text": "Doktor çantasında morfin ampulleri ve kullanılmış bir şırınga; yarım bırakılmış 'Nazım, lütfen konuşalım' notu.", "room_vial": "Çantanın astarının altında cam şişe: arsenikli tonik, neredeyse boş; etiketi kazınmış.", "a_clear": "Kütüphanede okuma lambası yanmış, masada Doktor'un 23:00–23:40 arası yazdığı hasta notları var; mürekkep taze.", "a_break": "Kütüphanede okuma lambası hiç yakılmamış, gaz seviyesi tam; defter kapalı, koltuk soğuk.", "src_clear": "Tıbbi çanta: arsenikli tonik şişesi dolu, mühürlü.", "src_bad": "Tıbbi çanta: arsenikli tonik şişesi neredeyse boş, mühür sökülmüş."}, "sureyya": {"name": "Süreyya", "age": 24, "role": "Hizmetçi", "color": "#3b6fa0", "attire": "mavi pamuklu önlük, beyaz tülbent", "fiber": "mavi pamuk önlük lifi", "initial": "S", "style": "Ürkek, saygılı, başı hep önde. 'Hanımefendi', 'Efendim', 'Allah korusun' der; korkunca kekeler.", "claim": "Akşam yemeğinden sonra mutfakta bulaşık yıkadım, sonra odama çıktım. Başka bir yere gitmedim.", "claim_short": "Mutfakta bulaşık yıkıyordu.", "relation": "Üç yıldır köşkte çalışıyor; Nazım Efendi ona hep sert davranırdı.", "secret": "Gümüş kaşıkları çalıp rehincide bozduruyordu; hasta annesinin ilaç parası içindi.", "slip": "Efendim ben... kaşıkları saydım, hepsi yerinde... yani neredeyse.", "cleared": "Çaldım efendim... annem için! Ama o gece mutfaktaydım. Beyefendiye bir şey yapmadım, Allah şahit.", "method": "Mutfaktaki fare zehrini kadehe kattı.", "motive": "Nazım Efendi hırsızlığını öğrenmiş, yarın polise verecekti.", "confession": "Beni hapse atacaktı, annem de ölecekti... Fare zehrini kadehe kattım, tepsiye geri koydum. Kimse beni görmez, hiç görmedi.", "gossip": {"kemal": "Kemal Bey'i gece bahçede gördüm sanki, elinde sigara; kar üstünde iz bırakıyordu.", "cevdet": "Cevdet Bey öğleden sonra defter çekmecesini kilitledi; elleri titriyordu."}, "room": "sureyya_oda", "alibi_loc": "mutfak", "src_loc": "mutfak", "room_text": "Yatağın altında bohça: gümüş kaşıklar, rehinci makbuzu ve annesinden gelmiş telgraf: 'Hastayım, para gönder.'", "room_vial": "Yatak başlığının altında kavanoz kapağı ve içinde mavimsi tozla bulaşmış bez: kadehteki tortuyla aynı.", "a_clear": "Mutfak: bulaşık teknesinde 23:30'a kadar yıkanmış tabaklar, sabun hâlâ ılık; kurutma bezi ıslak.", "a_break": "Mutfak: tabaklar kirli, sabun kurumuş; bulaşığa hiç dokunulmamış.", "src_clear": "Mutfak rafı: fare zehri kavanozu en üstte, tozlu, dokunulmamış.", "src_bad": "Mutfak rafı: fare zehri kavanozunun tozu silinmiş, yarısı eksik, kapakta parmak izi."}, "kemal": {"name": "Kemal", "age": 27, "role": "Nazım Efendi'nin yeğeni", "color": "#a0392b", "attire": "kırmızı yün atkı, koyu palto", "fiber": "kırmızı yün atkı lifi", "initial": "K", "style": "Havalı, küstah, alaycı; ama korkunca sesi çatlar. Argo kelimeler ve 'amca' der; sinirlenince bağırır.", "claim": "Yemekten sonra 22:50'de bahçeye çıkıp çardakta sigara içtim; 23:40'a kadar dışarıdaydım.", "claim_short": "22:50–23:40 bahçede sigara içiyordu.", "relation": "Öksüz kaldığı için amcası yetiştirdi; ama harçlığını kesmeye başlamıştı.", "secret": "Tarlabaşı'nda kumarda 3.000 lira borçlanmıştı; bahçe kapısında tefeciyle buluşup süre istiyordu. Amcası onu vasiyetten çıkaracaktı.", "slip": "Dışarıda biriyle... işim vardı. Sana ne?", "cleared": "Tamam! Borçluyum, tefeci kapıdaydı. Ama o gece bahçedeydim, amcama zarar vermedim. Ona minnettardım bile.", "method": "Pera Eczanesi'nden sahte reçeteyle aldığı arseniği kadehe kattı.", "motive": "Vasiyetten çıkarılacaktı ve kumar borcunu ancak mirasla ödeyebilirdi.", "confession": "Beni sokağa atacaktı... Eczaneden sahte reçeteyle aldım; kadehine kattım, sonra bahçeye çıktım. Ama yemin ederim sadece uyusun sandım!", "gossip": {"artin": "Doktor Artin geceleri yalnız dolaşıyor, bazen kütüphanede hiç ışık yakmadan oturuyor.", "leman": "Yenge geceleri kimseye görünmeden gazete okuyor, avukat ilanlarına bakıyor."}, "room": "kemal_oda", "alibi_loc": "bahce", "src_loc": "kemal_oda", "room_text": "Çekmecede Tarlabaşı Hayri imzalı 3.000 liralık borç senedi; sandalyede kırmızı yün atkı asılı.", "room_vial": "Paltonun iç cebinde cam şişe ve içinde mavimsi tortu; yanında Pera Eczanesi etiketi.", "a_clear": "Bahçe: yolda taze ayak izleri; 22:55'ten 23:40'a kadar kapı ile çardak arasında gidiş-geliş, çardakta altı izmarit.", "a_break": "Bahçe: kar bozulmamış; çardak dahil hiçbir yerde taze iz yok. Kimse dışarı çıkmamış.", "src_clear": "Palto cebi: Pera Eczanesi makbuzu — 'öksürük şurubu', masum bir alışveriş.", "src_bad": "Palto cebi: Pera Eczanesi makbuzu — 'arsenik trioksit 20 gr, 11 Mart', sahte reçeteyle alınmış."}}, "WITNESS": {"name": "Kapıcı Hamdi", "age": 58, "role": "Köşkün kapıcısı", "color": "#5c6b4a", "style": "Yaşlı, mahcup, Anadolu ağzıyla konuşur. 'Beyim', 'vallahi' der; aşağı sınıf olduğunu bilir, çekingendir.", "claim": "Kapıyı saat 21:00'de kilitledim, anahtar bende. Fırtına yüzünden kimse çıkmadı, kimse girmedi."}, "ORDER": ["leman", "cevdet", "artin", "sureyya", "kemal"], "METHODS": {"leman": "Bahçe kulübesindeki gül ilacındaki arsenik", "cevdet": "Fabrika boya numunesindeki arsenik", "artin": "Doktor çantasındaki arsenikli tonik", "sureyya": "Mutfaktaki fare zehri", "kemal": "Eczaneden sahte reçeteyle alınan arsenik"}, "MOTIVES": {"leman": "Boşanırsa mirasın dışında kalacaktı", "cevdet": "Zimmet açığı ortaya çıkıp ihbar edilecekti", "artin": "Morfin bağımlılığı ve hastasının ölümü ifşa olacaktı", "sureyya": "Hırsızlığı öğrenilip polise verilecekti", "kemal": "Vasiyetten çıkarılacak, kumar borcu ödenemeyecekti"}};
+// ---- Pera Köşkü Cinayeti: tarayıcı motoru (case.py + engine.py + providers.py taşıması) ----
+const START_MIN = 10, ASK_COST = 4, CONFESS_AT = 60;
+const DIFF = { kolay: 420, normal: 360, zor: 300 };
+const C = DATA;
+const ORDER = C.ORDER;
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function fold(t) { const m = { 'ç': 'c', 'ğ': 'g', 'ı': 'i', 'ö': 'o', 'ş': 's', 'ü': 'u', 'Ç': 'c', 'Ğ': 'g', 'İ': 'i', 'Ö': 'o', 'Ş': 's', 'Ü': 'u', 'â': 'a', 'î': 'i', 'û': 'u' }; return t.replace(/[çğıöşüÇĞİÖŞÜâîû]/g, c => m[c]).toLowerCase(); }
+function fmtTime(m) { m = Math.min(m, 1440); return String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0'); }
+
+function buildCase(seed, culprit) {
+  const rnd = mulberry32(seed);
+  const pick = a => a[Math.floor(rnd() * a.length)];
+  const c = culprit || pick(ORDER);
+  const decoy = pick(ORDER.filter(s => s !== c));
+  const S = C.SUSPECTS, ev = [];
+  const add = (id, loc, name, text, strength, req, targets, kind) => ev.push({ id, loc, name, text, strength: strength || 0, req: req || [], targets: targets || {}, kind: kind || 'genel' });
+  const T = (k, v) => ({ [k]: v });
+  add('body', 'calisma', "Nazım Efendi'nin cesedi", "Nazım Efendi koltuğunda, başı yana düşmüş. Dudakları morarmış. Ölüm saati 23:00–23:40 arası. Kapı içeriden kilitliydi, anahtar yeleğindeydi: yani katil, Nazım kapıyı kilitlemeden ÖNCE çıkmış, zehir ise sonradan etki etmiş.", 0, 0, 0, 'olay');
+  add('glasses', 'calisma', 'İki kadeh', "Masada iki kadeh: biri yarı dolu konyaklı, tabanında beyaz tortu; test kâğıdım arsenik gösterdi. İkinci kadeh yıkanıp ters çevrilmiş: biri onunla içer gibi yapmış ve izini silmiş. Katil Nazım'la yüz yüze oturmuş.", 0, 0, 0, 'olay');
+  add('calendar', 'calisma', 'Masa takvimi', "12 Mart satırında 'Saat 23:00 — görüşme' yazıyor; yanındaki isim silinmiş. Kurşun kalemle gölgelediğimde baş harf belirdi: '" + S[c].initial + ".'", 22, 0, T(c, 22), 'isaret');
+  add('fiber', 'calisma', 'Koltuk altındaki lif', 'Koltuğun altında, ikinci kadehin yakınında bir parça: ' + S[c].fiber + '.', 22, 0, T(c, 22), 'isaret');
+  add('decoy', 'calisma', 'Halıdaki ikinci lif', 'Halıda başka bir iz: ' + S[decoy].fiber + '. Odaya birisi daha girmiş olmalı.', 0, 0, T(decoy, 40), 'sahte');
+  const tg = {}; ORDER.forEach(s => tg[s] = 14);
+  add('notes', 'calisma', "Nazım Efendi'nin cep defteri", "Yarınki kahvaltı için not almış: 'L. — avukat Kerim meselesi. C. — defterlerdeki açık. A. — Madam Roza'nın ölümü ve morfin. S. — gümüş kaşıklar. K. — borç ve vasiyet.' Herkesin bir sırrı varmış; herkesin bir nedeni.", 0, 0, tg, 'motif');
+  add('will', 'calisma', 'Vasiyet taslağı', "İmzasız yeni vasiyet: ev ve gelirler Leman Hanım'a; Kemal'in payı silinmiş; Cevdet'in ortaklık payı Leman'a devrediliyor. İmzalanmadan ölmüş; bu, gerçek varisleri belirsiz bırakıyor.", 0, 0, { kemal: 14, cevdet: 14, leman: 8 }, 'motif');
+  add('seating', 'salon', 'Yemek sofrası düzeni', "Sofra 22:25'te dağıldı. Nazım Efendi kadehini kaldırıp 'Yarın kahvaltıda herkesin hesabı görülecek' demiş. Herkes kendi yoluna gitmiş; 22:30–23:40 arası kimin nerede olduğu tek tek sorulmalı.", 0, 0, 0, 'olay');
+  add('doorman', 'hol', 'Kapıcı defteri', 'Kapıcı defteri: 21:00\'de ana kapı ve bahçe kapısı kilitlendi, fırtına yüzünden köşke giren çıkan olmadı. Katil içeridekilerden biri.', 0, 0, 0, 'olay');
+  add('ledger', 'kutuphane', 'Şirket defterleri', "Şirket defterlerinde 4.200 liralık açık; düzeltmeler Cevdet Bey'in el yazısıyla.", 0, 0, { cevdet: 40 }, 'motif');
+  for (const sid of ORDER) {
+    const s = S[sid], g = sid === c;
+    add('a_' + sid, s.alibi_loc, 'Alibi kontrolü: ' + s.name, g ? s.a_break : s.a_clear, g ? 24 : 0, [['asked', sid]], T(sid, g ? 24 : 55), g ? 'alibi_kotu' : 'alibi_iyi');
+    add('src_' + sid, s.src_loc, 'Zehir kaynağı: ' + s.name, g ? s.src_bad : s.src_clear, g ? 24 : 0, ['glasses'], T(sid, g ? 24 : 0), g ? 'kaynak_kotu' : 'kaynak_iyi');
+    if (g) add('vial_' + sid, s.room, 'Gizlenmiş şişe', s.room_vial, 30, ['glasses'], T(sid, 30), 'kesin');
+    else add('room_' + sid, s.room, s.name.split(' ')[0] + "'in odasında bulunan", s.room_text, 0, 0, T(sid, 45), 'sir');
+  }
+  return { culprit: c, decoy, evidence: ev };
+}
+
+class Game {
+  constructor(seed, culprit, diff) {
+    this.diff = DIFF[diff] ? diff : 'normal'; this.deadline = DIFF[this.diff]; this.hints = 0;
+    this.seed = seed != null ? seed : Math.floor(Math.random() * 1e9);
+    this.case = buildCase(this.seed, culprit);
+    this.minute = START_MIN; this.found = []; this.asked = []; this.revealed = [];
+    this.presented = {}; this.pressure = {}; this.log = {};
+    ORDER.forEach(s => { this.presented[s] = []; this.pressure[s] = 0; this.log[s] = []; });
+    this.confessed = null; this.visited = []; this.notes = ''; this.over = null; this.asks = 0;
+  }
+  get ev() { const m = {}; this.case.evidence.forEach(e => m[e.id] = e); return m; }
+  _met(e) { return e.req.every(r => Array.isArray(r) ? this.asked.includes(r[1]) : this.found.includes(r)); }
+  pub(e) { return { id: e.id, loc: e.loc, name: e.name, text: e.text, kind: e.kind }; }
+  search(loc) {
+    if (this.over) return { error: 'Soruşturma bitti.' };
+    if (!C.LOCATIONS[loc]) return { error: 'Böyle bir yer yok.' };
+    const cost = C.LOCATIONS[loc].cost; this.minute += cost;
+    if (!this.visited.includes(loc)) this.visited.push(loc);
+    const here = this.case.evidence.filter(e => e.loc === loc);
+    const nw = here.filter(e => !this.found.includes(e.id) && this._met(e));
+    nw.forEach(e => this.found.push(e.id));
+    const hidden = here.filter(e => !this.found.includes(e.id)).length;
+    this._check();
+    return { new: nw.map(e => this.pub(e)), hidden, cost };
+  }
+  intent(text) {
+    const t = fold(text);
+    if (/katil|sen yapt|sen oldur|itiraf|zehirle/.test(t)) return 'accuse';
+    for (const sid of ORDER) if (t.includes(sid)) return 'other:' + sid;
+    if (/nerede|alibi|ne yapiyor|nerdeydin|saat|gece|yemekten sonra|22|23/.test(t)) return 'alibi';
+    if (/sir|gizle|sakla|borc|para|neden|niye|sebep|dava|miras|vasiyet|hirsiz|morfin|kumar/.test(t)) return 'secret';
+    if (/iliski|aran|nasil biri|sevdi|kimdi|hakkinda|nazim|amca|esin|ortag/.test(t)) return 'relation';
+    if (/merhaba|selam|iyi geceler|gunaydin/.test(t)) return 'hello';
+    return 'other_q';
+  }
+  plan(sid, text, evId) {
+    const s = C.SUSPECTS[sid], guilty = sid === this.case.culprit, ev = evId ? this.ev[evId] : null;
+    let intent = ev ? 'evidence' : this.intent(text);
+    const p = { intent, confess: false, reveal: false, stage: 'calm', facts: [], cost: ASK_COST };
+    if (ev && this.found.includes(evId)) {
+      if (this.presented[sid].includes(evId)) { p.intent = 'repeat'; p.facts.push('Aynı kanıt daha önce gösterildi.'); p.cost = 1; }
+      else {
+        this.presented[sid].push(evId);
+        const w = ev.targets[sid] || 0;
+        if (w) { this.pressure[sid] += w; p.facts.push('Kanıt doğrudan bu kişiyi ilgilendiriyor: ' + ev.text); }
+        else { p.facts.push('Kanıt bu kişiyle ilgisiz görünüyor: ' + ev.name); p.intent = 'evidence_miss'; }
+        if (ev.kind === 'sahte' && w) { p.stage = 'nervous'; p.facts.push('Bu iz masum bir nedenle de orada olabilir; bunu söyle.'); }
+      }
+    } else if (intent === 'alibi') { if (!this.asked.includes(sid)) this.asked.push(sid); p.facts.push('Alibi: ' + s.claim); }
+    else if (intent === 'accuse') { this.pressure[sid] += 3; p.stage = guilty ? 'nervous' : 'angry'; }
+    else if (intent === 'secret') this.pressure[sid] += 6;
+    else if (intent === 'relation') p.facts.push('İlişki: ' + s.relation);
+    else if (intent.startsWith('other:')) {
+      const o = intent.split(':')[1];
+      if (o === sid) p.intent = 'other_q';
+      else { const g = s.gossip[o]; p.facts.push('Hakkındaki sözler: ' + (g || 'Onu pek tanımıyorum, kendi işine bakar.')); p.gossip_target = o; }
+    }
+    const pr = this.pressure[sid];
+    const proof = this.presented[sid].reduce((a, i) => a + ((this.ev[i] && this.ev[i].targets[sid]) || 0), 0);
+    if (guilty && proof >= CONFESS_AT) { p.confess = true; p.stage = 'break'; this.confessed = sid; }
+    else if (!this.revealed.includes(sid) && pr >= 40 && !guilty) { p.reveal = true; p.stage = 'cleared'; this.revealed.push(sid); p.facts.push('Sırrını itiraf et: ' + s.secret + '. Ama cinayeti işlemediğini vurgula, o gece alibini yinele: ' + s.claim); }
+    else if (!this.revealed.includes(sid) && pr >= 25 && !guilty) { p.stage = 'slip'; p.facts.push('Sırrına yaklaşıldı; kaçamak yap: ' + s.slip); }
+    else if (guilty && pr >= 30) p.stage = 'nervous';
+    else if (pr >= 15 && guilty) p.stage = 'tense';
+    else if (pr >= 20) p.stage = 'tense';
+    return p;
+  }
+  ask(sid, text, evId) {
+    if (this.over) return { error: 'Soruşturma bitti.' };
+    if (!C.SUSPECTS[sid]) return { error: 'Bilinmeyen kişi.' };
+    const p = this.plan(sid, text, evId); this.minute += p.cost; this.asks++; this._check(); return p;
+  }
+  offline(sid, p) {
+    const s = C.SUSPECTS[sid], st = p.stage, it = p.intent;
+    if (p.confess) return s.confession;
+    if (p.reveal) return s.cleared;
+    if (it === 'repeat') return 'Bunu zaten gösterdin. Yeni bir şey söyleyeceksen dinliyorum.';
+    if (it === 'hello') return 'İyi geceler... Şu halde nazik olmak zor ama dinliyorum.';
+    if (it === 'alibi') return s.claim + ({ tense: ' Neden tekrar soruyorsun?', nervous: ' Yeter artık, bunu anlattım!', slip: ' Ve bunun ötesi beni ilgilendirmez.', angry: ' Bu bir suçlama mı?' }[st] || '');
+    if (it === 'relation') return s.relation + ' Ama bu cinayetle ne ilgisi var?';
+    if (it === 'secret') { if (st === 'slip') return s.slip; return { calm: 'Herkesin bir şeyi vardır, kimsenin değil. Bana özel bir şey sormuyorsun umarım.', tense: 'Neyi ima ediyorsun? Dikkatli ol.', nervous: 'Bu soruyu duymak istemiyorum.' }[st] || 'Cevap vermek zorunda değilim.'; }
+    if (it === 'accuse') return st === 'nervous' ? 'Ben... bak, yanlış yoldasın. Kanıtın var mı?' : 'Beni mi suçluyorsun?! Kanıtın varsa göster, yoksa susmayı tercih ederim.';
+    if (it === 'evidence_miss') return 'Bu bana ne anlatıyor? Bunun benimle ilgisi yok, komiserim.';
+    if (it === 'evidence') {
+      if (st === 'nervous' && sid === this.case.culprit) return 'Bu... bir tesadüf olmalı. Orada başkaları da vardı. Yanlış anlıyorsun.';
+      if (st === 'nervous') return 'Evet, bu benim... ama göründüğü gibi değil. Açıklayabilirim.';
+      return 'Bunu görmüştüm. Şüpheli görünebilir ama masum bir açıklaması var.';
+    }
+    if (it.startsWith('other:') || p.gossip_target) { const g = s.gossip[p.gossip_target]; return g ? g + ' Ama kimseyi suçlamak istemem.' : 'Onu pek tanımam. Kendi işine bakan biridir.'; }
+    return { calm: 'Bu soruyu anlamadım. Cinayet gecesi hakkında mı soruyorsun?', tense: 'Daha net sor. Sabrım sınırlı.', nervous: 'Beni sıkıştırıyorsun...' }[st] || 'Ne demek istiyorsun?';
+  }
+  systemPrompt(sid, p) {
+    const s = C.SUSPECTS[sid], guilty = sid === this.case.culprit, known = this.presented[sid].map(i => this.ev[i].name);
+    const L = ['Sen 1927 İstanbul\'unda geçen bir cinayet soruşturması oyununda ' + s.name + ' rolündesin (' + s.role + ', ' + s.age + ' yaşında).', 'Konuşma tarzın: ' + s.style,
+      'Dedektif sana sorular soruyor. SADECE bu karakteri canlandır; her zaman Türkçe, 1–4 cümle, tırnak ya da sahne yönergesi (*...*) olmadan konuş.',
+      'Asla oyunun, yapay zekânın veya kuralların farkında olduğunu belli etme.', 'Kurban: Hacı Nazım Efendi (62), arsenikle zehirlendi. Alibin: ' + s.claim, 'İlişkin: ' + s.relation, 'Saklı sırrın (kendiliğinden SÖYLEME): ' + s.secret];
+    L.push(guilty ? 'GİZLİ GERÇEK: Nazım Efendi\'yi sen öldürdün. Yöntem: ' + s.method + '. Neden: ' + s.motive + '. Bunu ancak aşağıdaki KARAR izin verirse itiraf edebilirsin. Aksi halde inkâr et, ayrıntıyı bulandır; alibin YALAN ama bunu bilmiyormuş gibi savun.' : 'Sen cinayeti İŞLEMEDİN. Gerçek katili bilmiyorsun; başkalarını yalnızca kendi izlenimlerinle, kesin suçlamadan kaçınarak yorumla.');
+    const stg = { calm: 'Sakinsin, mesafeli ve kibarsın.', tense: 'Gerginsin; kısa cevap verir, geçiştirirsin.', nervous: 'Çok gergin ve savunmasızsın; tutarsızlıklar yaparsın.', slip: 'Sırrına yaklaşıldı; kaçamak, yarım bir cümle kur, sırrı TAM açma.', cleared: 'Baskı sonucu sırrını açıkça söyle ama cinayeti reddet.', break: 'Çöktün: itiraf et, kısaca nedenini ve yöntemini anlat.', angry: 'Suçlandığın için öfkelisin.' }[p.stage];
+    L.push('KARAR (bu tur için zorunlu): ' + stg);
+    p.facts.forEach(f => L.push('Bu turda kullanman gereken bilgi: ' + f));
+    if (p.confess) L.push('İTİRAF METNİNİN ÖZÜ (kendi sözlerinle): ' + s.confession);
+    if (p.reveal) L.push('AÇIKLAMA ÖZÜ (kendi sözlerinle): ' + s.cleared);
+    if (known.length) L.push('Dedektif sana şunları gösterdi: ' + known.join(', ') + '.');
+    L.push('Kanıt göstermediyse, kanıtı varmış gibi davranma. Bilmediğin şeyi uydurma.');
+    return L.join('\n');
+  }
+  hint() {
+    if (this.over) return { error: 'Soruşturma bitti.' };
+    let txt = null;
+    for (const loc of ['calisma', 'hol']) if (!this.visited.includes(loc)) { txt = 'Önce olay yerine bak: ' + C.LOCATIONS[loc].name + '.'; break; }
+    if (!txt) { const m = ORDER.filter(s => !this.asked.includes(s)); if (m.length) txt = C.SUSPECTS[m[0]].name + "'in ifadesini henüz almadın; ifade verince alibisini doğrulayacak kanıt ortaya çıkar."; }
+    if (!txt) for (const e of this.case.evidence) if (!this.found.includes(e.id) && this._met(e)) { txt = C.LOCATIONS[e.loc].name + ' tekrar aranmaya değer; yeni bir şey çıkabilir.'; break; }
+    if (!txt) for (const l in C.LOCATIONS) if (!this.visited.includes(l)) { txt = 'Henüz bakmadığın bir yer var: ' + C.LOCATIONS[l].name + '.'; break; }
+    if (!txt) { const u = this.found.filter(i => ['isaret', 'alibi_kotu', 'kaynak_kotu', 'kesin'].includes(this.ev[i].kind) && !ORDER.some(s => this.presented[s].includes(i))); if (u.length) txt = "'" + this.ev[u[0]].name + "' kanıtını şüphelilere göster; çelişen biri çıkacaktır."; }
+    if (!txt) { const top = ORDER.reduce((a, b) => this.pressure[b] > this.pressure[a] ? b : a); txt = 'Baskıyı artır: en çok sıkıştırdığın kişi ' + C.SUSPECTS[top].name.split(' ')[0] + '; ona yeni kanıtlar göster.'; }
+    this.hints++; this.minute += 15; this._check(); return { hint: txt };
+  }
+  _check() { if (this.minute >= this.deadline && !this.over) this.over = { win: false, timeout: true, title: 'Zaman doldu', text: 'Sabah 06:00. Komiser Rıza geldi, kanıtların yetersizliği yüzünden dosyayı kapattı. Katil aranızda gezmeye devam ediyor.' }; }
+  accuse(sid, method, motive) {
+    if (this.over && !this.over.timeout) return this.over;
+    const c = this.case.culprit;
+    if (sid === c) {
+      let sc = 60 + (method === c ? 20 : 0) + (motive === c ? 20 : 0);
+      sc += Math.max(0, Math.min(20, Math.floor((this.deadline - this.minute) / 15)));
+      sc -= 3 * this.hints; sc = Math.max(sc, 40); if (this.confessed === c) sc += 10;
+      let text = 'Katil ' + C.SUSPECTS[c].name + "'ydi. " + C.METHODS[c] + '. Neden: ' + C.MOTIVES[c] + '. ';
+      text += (method === c && motive === c) ? 'Her ayrıntıyı doğru çıkardın. Komiser Rıza şapkasını çıkardı.' : 'Ama yöntem ya da nedeni tam kavrayamadın; mahkemede savcı seni zorlayacak.';
+      if (this.confessed === c) text += ' Üstelik itirafı da aldın.';
+      this.over = { win: true, title: sc >= 100 ? 'Dosya kapandı' : 'Katil yakalandı', text, score: sc, culprit: c };
+    } else this.over = { win: false, title: 'Yanlış suçlama', text: 'Yanlış kişiyi suçladın. ' + C.SUSPECTS[sid].name + ' masumdu; gerçek katil ' + C.SUSPECTS[c].name + ' idi, ' + C.METHODS[c].toLowerCase() + '. ', score: 0, culprit: c };
+    this.over.time = fmtTime(this.minute); return this.over;
+  }
+  state() {
+    return { time: fmtTime(this.minute), minutes_left: Math.max(0, this.deadline - this.minute), deadline: this.deadline, diff: this.diff, hints: this.hints,
+      found: this.found.map(i => this.pub(this.ev[i])), asked: this.asked, revealed: this.revealed,
+      pressure: Object.fromEntries(ORDER.map(k => [k, Math.min(100, this.pressure[k])])), visited: this.visited, confessed: this.confessed, over: this.over, seed: this.seed, notes: this.notes, log: JSON.parse(JSON.stringify(this.log)) };
+  }
+  dump() { const d = {}; for (const k in this) if (k !== 'case') d[k] = this[k]; d.culprit = this.case.culprit; return d; }
+  static load(d) { const g = new Game(d.seed, d.culprit, d.diff); for (const k in d) if (k !== 'culprit') g[k] = d[k]; return g; }
+}
+
+// ---------------- yapay zekâ (tarayıcıdan doğrudan; anahtar yalnızca bu tarayıcıda) ----------------
+async function aiReply(cfg, system, history, userText) {
+  const msgs = history.slice(-8).map(m => ({ role: m.who === 'you' ? 'user' : 'assistant', content: m.text }));
+  msgs.push({ role: 'user', content: userText || '(Kanıtı gösteriyorum.)' });
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 20000);
+  try {
+    if (cfg.provider === 'groq') {
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.key }, body: JSON.stringify({ model: cfg.model || 'llama-3.3-70b-versatile', max_tokens: 300, messages: [{ role: 'system', content: system }, ...msgs] }) });
+      if (!r.ok) throw new Error('Groq ' + r.status); return (await r.json()).choices[0].message.content.trim();
+    }
+    if (cfg.provider === 'gemini') {
+      const m = cfg.model || 'gemini-2.0-flash';
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + m + ':generateContent?key=' + encodeURIComponent(cfg.key), { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ systemInstruction: { parts: [{ text: system }] }, contents: msgs.map(x => ({ role: x.role === 'user' ? 'user' : 'model', parts: [{ text: x.content }] })), generationConfig: { maxOutputTokens: 300 } }) });
+      if (!r.ok) throw new Error('Gemini ' + r.status); return (await r.json()).candidates[0].content.parts[0].text.trim();
+    }
+    if (cfg.provider === 'claude') {
+      const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json', 'x-api-key': cfg.key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' }, body: JSON.stringify({ model: cfg.model || 'claude-haiku-4-5', max_tokens: 300, system, messages: msgs }) });
+      if (!r.ok) throw new Error('Claude ' + r.status); return (await r.json()).content[0].text.trim();
+    }
+  } finally { clearTimeout(to); }
+  throw new Error('sağlayıcı yok');
+}
+function badAiText(t, p, guilty) {
+  if (!t || t.length < 2) return true;
+  if (!p.confess && guilty && /(ben (öldürdüm|yaptım|zehirledim)|itiraf ediyorum)/i.test(t)) return true;
+  if (/(yapay zek|language model|as an ai)/i.test(t)) return true;
+  return false;
+}
+
+// ---- sunucu yerine yerel "api" ----
+let G=null,CFG={provider:'yerel',key:'',model:'',sound:true,voice:false,difficulty:'normal'};
+const SAVEK='pk_save_v1',CFGK='pk_cfg_v1';
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function seedFromHash(){const m=/[#&]s=(\d{1,9})/.exec(location.hash||'');return m?+m[1]:null}
+function newGame(seed){G=new Game(seed!=null?seed:(seedFromHash()??undefined),undefined,CFG.difficulty);try{history.replaceState(null,'','#s='+G.seed)}catch(e){}persist()}
+function persist(){lsSet(SAVEK,G.dump())}
+(function boot(){const c=lsGet(CFGK);if(c)CFG=Object.assign(CFG,c);
+  const sv=lsGet(SAVEK),hs=seedFromHash();
+  if(sv&&(hs==null||hs===sv.seed)){try{G=Game.load(sv)}catch(e){G=null}}
+  if(!G)newGame();else{try{history.replaceState(null,'','#s='+G.seed)}catch(e){}}
+})();
+function pubCfg(){const k=CFG.key;return{provider:CFG.provider,sound:CFG.sound,voice:CFG.voice,difficulty:CFG.difficulty,model:CFG.model,key_set:!!k,voice:CFG.voice}}
+async function api(u,b){
+  if(u==='/api/info')return{intro:DATA.INTRO,victim:DATA.VICTIM,locations:DATA.LOCATIONS,order:DATA.ORDER,methods:DATA.METHODS,motives:DATA.MOTIVES,deadline:360,config:pubCfg(),
+    suspects:Object.fromEntries(DATA.ORDER.map(k=>{const v=DATA.SUSPECTS[k];return[k,{name:v.name,age:v.age,role:v.role,color:v.color,claim:v.claim_short,initial:v.initial,attire:v.attire}]}))};
+  if(u==='/api/state')return G.state();
+  if(u==='/api/search'){const r=G.search(b.loc);persist();return r.error?r:Object.assign(r,{state:G.state()})}
+  if(u==='/api/hint'){const r=G.hint();persist();return r.error?r:Object.assign(r,{state:G.state()})}
+  if(u==='/api/notes'){G.notes=b.notes||'';persist();return{ok:1}}
+  if(u==='/api/new'){history.replaceState(null,'',location.pathname);newGame(Math.floor(Math.random()*1e9));return G.state()}
+  if(u==='/api/accuse'){const r=G.accuse(b.suspect,b.method,b.motive);persist();return{result:r,state:G.state()}}
+  if(u==='/api/config'){const k=b.key;CFG.provider=b.provider;if(k)CFG.key=k;CFG.model=b.model||'';CFG.sound=b.sound;CFG.voice=b.voice;CFG.difficulty=b.difficulty;lsSet(CFGK,CFG);return pubCfg()}
+  if(u==='/api/ask'){
+    const p=G.ask(b.suspect,b.text,b.evidence);if(p.error)return p;
+    const hist=G.log[b.suspect].slice();let reply=null,prov='yerel';
+    if(CFG.provider!=='yerel'&&CFG.key){try{reply=await aiReply(CFG,G.systemPrompt(b.suspect,p),hist,b.text);
+      if(badAiText(reply,p,b.suspect===G.case.culprit))reply=null;else prov=CFG.provider}catch(e){reply=null}}
+    if(!reply)reply=G.offline(b.suspect,p);
+    G.log[b.suspect].push({who:'you',text:b.evidence?'[Kanıt] '+(b.text||''):b.text},{who:'them',text:reply});
+    persist();return{reply,provider:prov,confess:p.confess,reveal:p.reveal,state:G.state()}}
+  if(u==='/api/test-ai'){
+    if(CFG.provider==='yerel'||!CFG.key)return{summary:'Çevrimdışı mod (anahtar yok). Oyun tam oynanır.',results:[]};
+    const t=Date.now();try{const x=await aiReply(CFG,'Kısa Türkçe cevap ver.',[],'Merhaba de.');return{summary:'Bağlantı çalışıyor.',results:[{ok:1,label:CFG.provider,model:CFG.model||'varsayılan',ms:Date.now()-t}]}}
+    catch(e){return{summary:'Bağlantı kurulamadı; oyun çevrimdışı yanıtlarla devam eder.',results:[{ok:0,error:String(e.message||e)}]}}}
+  return{error:'?'};
+}
+
+const $=s=>document.querySelector(s);
+let INFO=null,ST=null,cur=null,selLoc=null,busy=false,cfg={};
+function speak(t,sid){ if(!cfg.voice||!('speechSynthesis' in window))return; try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='tr-TR';
+  const vs=speechSynthesis.getVoices().filter(v=>/^tr/i.test(v.lang));const fem=sid==='leman'||sid==='sureyya';
+  const pick=vs.find(v=>fem?/(emel|female|kad)/i.test(v.name):/(tolga|male|erkek)/i.test(v.name))||vs[0];if(pick)u.voice=pick;
+  u.pitch={leman:1.0,sureyya:1.4,cevdet:0.9,artin:0.7,kemal:1.1}[sid]||1;u.rate={sureyya:1.1,artin:0.9}[sid]||1;speechSynthesis.speak(u);}catch(e){} }
+// --- ses (WebAudio, dosyasız)
+let AC=null;
+function snd(kind){
+  if(cfg.sound===false)return;
+  try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  const t=AC.currentTime,o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);
+  const P={click:[520,.05,'triangle',.06],found:[330,.35,'sine',.1],bad:[120,.4,'sawtooth',.07],conf:[90,.9,'sawtooth',.1],send:[400,.06,'triangle',.05]}[kind]||[400,.05,'sine',.05];
+  o.frequency.value=P[0];o.type=P[2];g.gain.setValueAtTime(P[3],t);g.gain.exponentialRampToValueAtTime(.0001,t+P[1]);
+  if(kind==='found')o.frequency.setValueAtTime(330,t),o.frequency.setValueAtTime(495,t+.12);
+  o.start(t);o.stop(t+P[1]);}catch(e){}
+}
+function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+async function init(){
+  INFO=await api('/api/info');cfg=INFO.config;ST=await api('/api/state');
+  $('#intro').textContent=INFO.intro;$('#introTxt').textContent=INFO.intro+'\n\n(Vaka kodu: '+ST.seed+' — adres çubuğundaki #s=KOD ile aynı vakayı paylaşabilirsin.)';
+  const fill=(sel,obj)=>{$(sel).innerHTML=Object.entries(obj).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join('')};
+  fill('#aS',Object.fromEntries(INFO.order.map(k=>[k,INFO.suspects[k].name])));fill('#aM',INFO.methods);fill('#aN',INFO.motives);
+  cur=INFO.order[0];drawMap();drawSus();render();
+  let seen=false;try{seen=localStorage.getItem('dedektif_intro')===ST.seed+''}catch(e){}
+  if(!seen&&ST.found.length===0&&ST.time==='00:10')$('#mIntro').classList.add('on');
+  if(ST.over)showRes(ST.over);
+}
+function drawMap(){
+  $('#map').innerHTML=Object.entries(INFO.locations).map(([k,l])=>`<button class="pin${ST.visited.includes(k)?' v':''}${selLoc===k?' hot':''}" data-k="${k}" style="left:${l.x}%;top:${l.y}%">${esc(l.short)}</button>`).join('');
+  document.querySelectorAll('.pin').forEach(b=>b.onclick=()=>{selLoc=b.dataset.k;snd('click');const l=INFO.locations[selLoc];
+    $('#locinfo').innerHTML=`<b>${esc(l.name)}</b> — ${esc(l.desc)}<br>Arama: ${l.cost} dk`+(ST.visited.includes(selLoc)?' · <i>daha önce arandı</i>':'');
+    $('#bSearch').disabled=!!ST.over;drawMap();});
+}
+function drawSus(){
+  $('#sus').innerHTML=INFO.order.map(k=>{const s=INFO.suspects[k];return `<button class="s${k===cur?' on':''}" data-k="${k}"><div class="av" style="background:${s.color}">${s.initial}</div>${esc(k==='artin'?'Artin':s.name.split(' ')[0])}<div class="pr"><i style="width:${ST.pressure[k]||0}%"></i></div></button>`}).join('');
+  document.querySelectorAll('.s').forEach(b=>b.onclick=()=>{cur=b.dataset.k;snd('click');drawSus();drawChat()});
+}
+function drawChat(){
+  const s=INFO.suspects[cur];
+  $('#wAv').style.background=s.color;$('#wAv').textContent=s.initial;$('#wName').textContent=s.name;$('#wRole').textContent=s.role+' · '+s.age+' · '+s.attire;
+  $('#claim').textContent=ST.asked.includes(cur)?'İfadesi: '+s.claim:'Henüz ifadesini almadın.';
+  const L=ST.log[cur]||[];
+  $('#chat').innerHTML=(L.length?'':`<div class="m sys">${esc(s.name)} karşında oturuyor. Soruna başla.</div>`)+L.map(m=>`<div class="m ${m.who}">${esc(m.text)}</div>`).join('');
+  $('#chat').scrollTop=1e9;
+  const q=[['Gece neredeydin?','neredeydin']];
+  q.push(['Nazım Efendi ile aranız nasıldı?',''],['Saklayacak bir şey var mı?','']);
+  INFO.order.filter(k=>k!==cur).forEach(k=>q.push(['"'+(k==='artin'?'Artin':INFO.suspects[k].name.split(' ')[0])+'" hakkında ne düşünüyorsun?','']));
+  $('#quick').innerHTML=q.map(x=>`<button data-q="${esc(x[0])}">${esc(x[0])}</button>`).join('');
+  document.querySelectorAll('#quick button').forEach(b=>b.onclick=()=>{$('#q').value=b.dataset.q.replace(/&quot;/g,'"');$('#q').focus()});
+}
+function drawEv(){
+  $('#evCount').textContent='('+ST.found.length+')';
+  $('#evl').innerHTML=ST.found.slice().reverse().map(e=>`<div class="ev ${e.kind}"><b>${esc(e.name)}</b>${esc(e.text)}<div class="tag">${esc(INFO.locations[e.loc].name)}</div></div>`).join('')||'<div class="tag">Henüz kanıt yok. Odaları ara.</div>';
+  const v=$('#evSel').value;
+  $('#evSel').innerHTML='<option value="">Kanıt göstermeden</option>'+ST.found.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');$('#evSel').value=v;
+}
+function render(){
+  $('#time').textContent=ST.time;$('#tbar').style.width=(ST.minutes_left/ST.deadline*100)+'%';$('#bHint').textContent='İpucu ('+ST.hints+')';
+  drawSus();drawChat();drawEv();drawMap();$('#notes').value=ST.notes||'';
+  $('#aiTag').textContent=ST.over?'Soruşturma bitti.':'';
+}
+$('#bStart').onclick=()=>{$('#mIntro').classList.remove('on');try{localStorage.setItem('dedektif_intro',ST.seed+'')}catch(e){}snd('click')};
+$('#bSearch').onclick=async()=>{
+  if(!selLoc||busy)return;busy=true;const r=await api('/api/search',{loc:selLoc});busy=false;
+  if(r.error){alert(r.error);return}
+  ST=r.state;render();
+  const l=INFO.locations[selLoc];
+  let h=`<h3>${esc(l.name)} <span class="tag">(${r.cost} dk geçti)</span></h3>`;
+  if(r.new.length){snd('found');h+=r.new.map(e=>`<div class="ev found ${e.kind}"><b>${esc(e.name)}</b>${esc(e.text)}</div>`).join('')}
+  else h+='<p>Yeni bir şey bulamadın.</p>';
+  if(r.hidden)h+=`<p class="tag">Bu odada henüz anlam veremediğin ${r.hidden} ayrıntı olabilir; ilgili kişinin ifadesini veya başka bir kanıtı aldıktan sonra tekrar bak.</p>`;
+  $('#locBox').innerHTML=h+'<div class="row"><button class="btn" id="lx">Tamam</button></div>';$('#mLoc').classList.add('on');$('#lx').onclick=()=>{$('#mLoc').classList.remove('on');if(ST.over)showRes(ST.over)};
+};
+$('#form').onsubmit=async e=>{
+  e.preventDefault();if(busy||ST.over)return;
+  const text=$('#q').value.trim(),ev=$('#evSel').value;if(!text&&!ev)return;
+  busy=true;$('#send').disabled=true;snd('send');
+  const L=ST.log[cur];L.push({who:'you',text:ev?'[Kanıt] '+text:text});L.push({who:'them',text:'…'});drawChat();
+  $('#q').value='';$('#evSel').value='';
+  const r=await api('/api/ask',{suspect:cur,text,evidence:ev});
+  busy=false;$('#send').disabled=false;
+  if(r.error){L.pop();L.pop();drawChat();alert(r.error);return}
+  ST=r.state;render();
+  speak(r.reply,cur);
+  if(r.confess){snd('conf');const c=[...document.querySelectorAll('#chat .m.them')].pop();if(c)c.classList.add('conf')}
+  $('#aiTag').textContent='Yanıt: '+({yerel:'çevrimdışı',claude:'Claude',groq:'Groq',gemini:'Gemini'}[r.provider]||r.provider)+(r.reveal?' · sır açıldı':'')+(r.confess?' · İTİRAF':'');
+  if(ST.over)showRes(ST.over);
+};
+$('#bHint').onclick=async()=>{if(ST.over||busy)return;if(!confirm('İpucu 15 dakikaya mal olur ve puanını 3 düşürür. Devam?'))return;
+  const r=await api('/api/hint',{});if(r.error){alert(r.error);return}ST=r.state;render();$('#locBox').innerHTML='<h3>İpucu</h3><p>'+esc(r.hint)+'</p><div class="row"><button class="btn" id="lx">Tamam</button></div>';$('#mLoc').classList.add('on');$('#lx').onclick=()=>{$('#mLoc').classList.remove('on');if(ST.over)showRes(ST.over)}};
+$('#bNotes').onclick=()=>$('#mNotes').classList.add('on');
+$('#nClose').onclick=async()=>{await api('/api/notes',{notes:$('#notes').value});ST.notes=$('#notes').value;$('#mNotes').classList.remove('on')};
+$('#bNew').onclick=async()=>{if(!confirm('Yeni vaka başlasın mı? Mevcut soruşturma silinir.'))return;ST=await api('/api/new',{});selLoc=null;$('#mRes').classList.remove('on');$('#locinfo').textContent='Bir odaya tıkla.';$('#bSearch').disabled=true;render();$('#mIntro').classList.add('on')};
+$('#bAcc').onclick=()=>{if(ST.over)return;$('#mAcc').classList.add('on')};
+$('#aX').onclick=()=>$('#mAcc').classList.remove('on');
+$('#aGo').onclick=async()=>{
+  if(!confirm('Emin misin? Bu karar kesindir.'))return;
+  const r=await api('/api/accuse',{suspect:$('#aS').value,method:$('#aM').value,motive:$('#aN').value});
+  if(r.error){alert(r.error);return}
+  ST=r.state;$('#mAcc').classList.remove('on');render();showRes(r.result);
+};
+function showRes(o){
+  snd(o.win?'found':'bad');
+  $('#resBox').className='box res '+(o.win?'win':'lose');
+  let best='';if(o.win){try{const k='dd_best';const b=Math.max(+localStorage.getItem(k)||0,o.score);localStorage.setItem(k,b);best=`<p class="best">En yüksek puanın: ${b}</p>`}catch(e){}}
+  $('#resBox').innerHTML=`<h3>${esc(o.title)}</h3><p>${esc(o.text)}</p>`+(o.win?`<p>Puan: <b>${o.score}</b> / 140</p>${best}`:'')+`<div class="row"><button class="btn pri" id="rn">Yeni vaka</button><button class="btn" id="rc">Kapat</button></div>`;
+  $('#mRes').classList.add('on');
+  $('#rn').onclick=()=>$('#bNew').click();$('#rc').onclick=()=>$('#mRes').classList.remove('on');
+}
+$('#bCfg').onclick=()=>{const c=cfg;$('#cProv').value=c.provider;$('#cModel').value=c.model||'';$('#cSnd').value=c.sound?'1':'0';$('#cVoice').value=c.voice?'1':'0';$('#cDiff').value=c.difficulty||'normal';$('#cKey').placeholder=c.key_set?'(kayıtlı — değiştirmek için yaz)':'API anahtarı';$('#cOut').textContent='';$('#mCfg').classList.add('on')};
+$('#cX').onclick=()=>$('#mCfg').classList.remove('on');
+$('#cSave').onclick=async()=>{cfg=await api('/api/config',{provider:$('#cProv').value,key:$('#cKey').value,model:$('#cModel').value,sound:$('#cSnd').value==='1',voice:$('#cVoice').value==='1',difficulty:$('#cDiff').value});$('#cKey').value='';$('#cOut').textContent='Kaydedildi. Zorluk yeni vakada geçerli.'};
+$('#cTest').onclick=async()=>{$('#cOut').textContent='Deneniyor…';const r=await api('/api/test-ai',{});
+  $('#cOut').innerHTML=esc(r.summary)+'<br>'+r.results.map(x=>x.ok?`✓ ${esc(x.label)}: ${esc(x.model||'')} (${x.ms} ms)`:`✗ ${esc(x.error||'hata')}${x.models&&x.models.length?'<br>&nbsp;&nbsp;Yüklü modeller: '+esc(x.models.slice(0,6).join(', ')):''}`).join('<br>')};
+init();
+</script></body></html>
