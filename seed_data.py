@@ -347,7 +347,53 @@ SEED_PK = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK]
+SEED_KA = {
+    "slug": "kozmik-akin",
+    "name": "Kozmik Akın",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/kozmik-akin",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "kozmik-akin-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Yukarıdan inen düşman dalgalarını vur, gemini geliştir, 4 dev patronu yen",
+    "desc": "Galaxy Attack tarzı, tamamen özgün bir uzay nişancı oyunu. 20 bölümlük seferde dört sektörü geç, her beşinci bölümde dev bir patronla yüzleş. Düşürdüğün ganimetle silahını yükselt, kalkan ve bomba topla; kazandığın kredilerle hangarda 5 farklı gemi satın al ve 8 kalıcı geliştirmeyle gemini güçlendir. Bitmeyen dalgalar için Sonsuz Akın modu da var. Fare, dokunmatik veya klavye ile oynanır.",
+    "tags": [
+        "Tarayıcı",
+        "Uzay",
+        "Nişancı",
+        "Geliştirmeli"
+    ],
+    "features": [
+        "20 bölüm, 4 sektör ve 4 farklı patron (her birinin 3 aşaması var)",
+        "5 gemi: dengeli, hızlı, dayanıklı, zırh delici ve güdümlü füzeli",
+        "8 kalıcı geliştirme: güç, ateş hızı, zırh, mıknatıs, bomba, drone, başlangıç silahı, kredi",
+        "Oyun içinde silah seviyesi 8'e kadar, kalkan, bomba, hızlı ateş ve can ganimetleri",
+        "Kombo çarpanı, yıldız derecelendirmesi, Sonsuz Akın modu",
+        "Fare, dokunmatik ve klavye desteği; otomatik kayıt"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA]
 
 
 def _empty(v):
