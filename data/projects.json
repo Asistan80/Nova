@@ -1513,5 +1513,124 @@
     "updated_at": "",
     "slug": "saatcinin-kosku",
     "created_at": "2026-11-03T07:32:49.187207+00:00"
+  },
+  {
+    "slug": "pera-kosku-cinayeti",
+    "name": "Pera Köşkü Cinayeti",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/pera-kosku-cinayeti",
+    "download_url": null,
+    "download_file": null,
+    "updated_at": "",
+    "cover": "pera-kosku-cinayeti-oyun.png",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "changelog": [
+      {
+        "version": "1.0",
+        "date": "2026-11-02",
+        "text": "İlk sürüm."
+      }
+    ],
+    "version": "1.0",
+    "tagline": "Kar fırtınasında kapalı kalan köşkte bir cinayet: beş şüpheli, tek katil, sabaha kadar vaktin var",
+    "desc": "1927 Pera. Hacı Nazım Efendi çalışma odasında zehirlenmiş, kapı içeriden kilitli; köşkten kimse çıkamıyor. Odaları ara, ifadeleri al, alibileri kanıtlarla sına, şüphelileri sıkıştır. Katil her oyunda rastgele değişir ve kanıtlar ona göre yazılır. Hazır çevrimdışı yanıtlarla tam oynanır; istersen kendi Groq, Gemini veya Claude anahtarını girip şüphelilerle canlı yapay zekâ ile konuşabilirsin. Vaka kodu ile aynı cinayeti arkadaşına gönderebilirsin.",
+    "tags": [
+      "Tarayıcı",
+      "Dedektif",
+      "Yapay zekâ",
+      "Gizem"
+    ],
+    "features": [
+      "Her oyunda rastgele katil, yöntem ve neden; 5 şüpheli, 11 oda, 25 kanıt",
+      "Serbest cümleyle sorgu, kanıt gösterme, baskı ve itiraf sistemi",
+      "İsteğe bağlı canlı yapay zekâ (Groq / Gemini / Claude); anahtar yalnızca senin tarayıcında kalır",
+      "Kolay, normal, zor mod; ipucu, dedektif defteri, puan",
+      "Vaka kodu (#s=KOD) ile aynı vakayı paylaş",
+      "Otomatik kayıt"
+    ],
+    "created_at": "2026-11-03T22:30:22.952185+00:00"
+  },
+  {
+    "slug": "kozmik-akin",
+    "name": "Kozmik Akın",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/kozmik-akin",
+    "download_url": null,
+    "download_file": null,
+    "updated_at": "",
+    "cover": "kozmik-akin-oyun.png",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "changelog": [
+      {
+        "version": "1.1",
+        "date": "2026-11-04",
+        "text": "50 bölüm, 6 patron tasarımı, 2 yeni gemi, yeni düşmanlar, ses ayarları, klavye kontrol düzeltmesi."
+      },
+      {
+        "version": "1.0",
+        "date": "2026-11-02",
+        "text": "İlk sürüm."
+      }
+    ],
+    "version": "1.1",
+    "tagline": "Yukarıdan inen düşman dalgalarını vur, gemini geliştir, 4 dev patronu yen",
+    "desc": "Galaxy Attack tarzı, tamamen özgün bir uzay nişancı oyunu. 50 bölümlük seferde on sektörü geç, her beşinci bölümde dev bir patronla yüzleş. Düşürdüğün ganimetle silahını yükselt, kalkan ve bomba topla; kazandığın kredilerle hangarda 7 farklı gemi satın al ve 8 kalıcı geliştirmeyle gemini güçlendir. Bitmeyen dalgalar için Sonsuz Akın modu da var. Fare, dokunmatik veya klavye ile oynanır.",
+    "tags": [
+      "Tarayıcı",
+      "Uzay",
+      "Nişancı",
+      "Geliştirmeli"
+    ],
+    "features": [
+      "50 bölüm, 10 sektör ve 10 patron (6 tasarım, her birinin 3 aşaması var)",
+      "7 gemi: dengeli, hızlı, dayanıklı, zırh delici, güdümlü, hayalet ve süpernova",
+      "8 kalıcı geliştirme: güç, ateş hızı, zırh, mıknatıs, bomba, drone, başlangıç silahı, kredi",
+      "Oyun içinde silah seviyesi 8'e kadar, kalkan, bomba, hızlı ateş ve can ganimetleri",
+      "Kombo çarpanı, yıldız derecelendirmesi, Sonsuz Akın modu",
+      "Ses, müzik ve efekt ayarları; fare, dokunmatik ve klavye desteği; otomatik kayıt"
+    ],
+    "created_at": "2026-11-03T22:30:22.952234+00:00"
+  },
+  {
+    "name": "Kozmik Akın",
+    "kind": "oyun",
+    "status": "download",
+    "tagline": "",
+    "desc": "Savaş oyunu yaptım sizce nasıl.",
+    "tags": [],
+    "features": [],
+    "changelog": [],
+    "version": "1.0",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "cover": "kozmik-akin-2-auto.png",
+    "gallery": [],
+    "play_url": "/oyna/kozmik-akin-2",
+    "download_url": null,
+    "download_file": "KozmikAkin_1.zip",
+    "updated_at": "",
+    "slug": "kozmik-akin-2",
+    "created_at": "2026-11-03T22:36:00.171243+00:00"
   }
 ]
