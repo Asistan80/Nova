@@ -394,7 +394,53 @@ SEED_KA = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA]
+SEED_AG = {
+    "slug": "alt-gecit",
+    "name": "Alt Geçit",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/alt-gecit",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "alt-gecit-oyun.png",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-02",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "tagline": "Terk edilmiş bir alt geçitte her şey normalse ilerle, bir şey yanlışsa geri dön. 8 katı doğru geç.",
+    "desc": "Sonsuz görünen bir metro alt geçidinde tek bir kural var: koridorda bir tuhaflık fark ettiysen geri dön, fark etmediysen yürümeye devam et. Doğru kararla kat sayacı artar, yanlış kararla sıfırlanır. 29 farklı anomali var: bazısı gözle görülür, bazısı yalnızca kulakla anlaşılır. Oyun seni adınla tanır, bazı anlarda sana oyun oynar, yürümeyi bırakırsan arkandan biri gelir. Üç gizli eşyayı bulursan gerçek çıkışa ulaşırsın; bulamazsan döngü başlar.",
+    "tags": [
+        "Tarayıcı",
+        "Korku",
+        "Anomali",
+        "Atmosferik"
+    ],
+    "features": [
+        "29 anomali: görsel ve ses; her anomali keşfedilince Anomali Defteri'ne işlenir",
+        "Yürümeyi bırakırsan ya da yanlış karar verirsen seni bulan takipçi ve ani sürprizler",
+        "Oyun seni adınla çağırır; dördüncü duvarı yıkan olaylar",
+        "3 gizli eşya, 3 farklı son (Döngü, Çıkış, Kusursuz Çıkış)",
+        "Kulaklıkla oynanması önerilir; ana ses, ortam ve efekt ayarları",
+        "Klavye, fare ve dokunmatik desteği"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG]
 
 
 def _empty(v):
