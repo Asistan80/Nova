@@ -1455,7 +1455,7 @@
     "publish_at": null,
     "play_url": "/oyna/kayip-kaset",
     "download_url": null,
-    "download_file": null,
+    "download_file": "KayipKaset.zip",
     "updated_at": "",
     "cover": "kayip-kaset-oyun.png",
     "gallery": [
@@ -1466,11 +1466,7 @@
       "ekran-5.jpg"
     ],
     "changelog": [
-      {
-        "version": "1.0",
-        "date": "2026-11-02",
-        "text": "İlk sürüm."
-      }
+      "{'version': '1.0', 'date': '2026-11-02', 'text': 'İlk sürüm.'}"
     ],
     "version": "1.0",
     "tagline": "Terk edilmiş sanatoryumda kasetleri topla: kamera bakarken hareket etmeyen şey seni arıyor",
