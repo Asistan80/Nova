@@ -1524,7 +1524,7 @@
     "publish_at": null,
     "play_url": "/oyna/pera-kosku-cinayeti",
     "download_url": null,
-    "download_file": null,
+    "download_file": "PeraKoskuCinayeti.zip",
     "updated_at": "",
     "cover": "pera-kosku-cinayeti-oyun.png",
     "gallery": [
@@ -1535,11 +1535,7 @@
       "ekran-5.jpg"
     ],
     "changelog": [
-      {
-        "version": "1.0",
-        "date": "2026-11-02",
-        "text": "İlk sürüm."
-      }
+      "{'version': '1.0', 'date': '2026-11-02', 'text': 'İlk sürüm.'}"
     ],
     "version": "1.0",
     "tagline": "Kar fırtınasında kapalı kalan köşkte bir cinayet: beş şüpheli, tek katil, sabaha kadar vaktin var",
