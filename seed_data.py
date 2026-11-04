@@ -440,7 +440,52 @@ SEED_AG = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG]
+SEED_SV = {
+    "slug": "son-vardiya",
+    "name": "SON VARDİYA",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/son-vardiya",
+    "download_url": None,
+    "updated_at": "",
+    "cover": "son-vardiya-oyun.png",
+    "tagline": "Terk edilmiş hastanede gece nöbeti: kameralar, kilitli odalar ve kaybolan hastalar",
+    "desc": "Kuzey Kanat'ın gece bekçisi Kerem'sin. Güvenlik kameralarını izle, anahtarları ve şifreleri bul, kilitli odaları aç; koridorlarda seni bekleyen Beyaz Hemşire'den saklan. Sandığın güvenli anlar da güvenli değil. Dört farklı final var.",
+    "tags": [
+        "Godot",
+        "3B",
+        "Korku",
+        "Hastane"
+    ],
+    "features": [
+        "Terk edilmiş hastane: zemin kat ve bodrum",
+        "Güvenlik kamerası monitörü",
+        "Kovalayan düşman, dolaplarda saklanma, fener ile geri püskürtme",
+        "Beklenmedik ve çeşitli korkutmalar",
+        "22 not, bulmacalar, 4 farklı final (biri gizli)"
+    ],
+    "changelog": [
+        {
+            "version": "1.0",
+            "date": "2026-11-05",
+            "text": "İlk sürüm."
+        }
+    ],
+    "version": "1.0",
+    "download_file": "SonVardiya_Windows.zip",
+    "gallery": [
+        "ekran-1.jpg",
+        "ekran-2.jpg",
+        "ekran-3.jpg",
+        "ekran-4.jpg",
+        "ekran-5.jpg"
+    ]
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV]
 
 
 def _empty(v):
