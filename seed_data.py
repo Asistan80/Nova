@@ -471,10 +471,15 @@ SEED_SV = {
         {
             "version": "1.1",
             "date": "2026-11-05",
+            "text": "Güvenlik kamerası düzeltildi (E tuşu çakışması, 8. kamera), yazılar doğru yere ve ölçüye alındı, dolap ve sandalyelerin içinden geçme giderildi, sesler yumuşatıldı; kayıt/Devam Et ve kat haritası (M) eklendi."
+        },
+        {
+            "version": "1.0",
+            "date": "2026-11-05",
             "text": "İlk sürüm."
         }
     ],
-    "version": "1.0",
+    "version": "1.1",
     "download_file": "SonVardiya_Windows.zip",
     "gallery": [
         "ekran-1.jpg",
