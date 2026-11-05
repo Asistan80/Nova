@@ -469,7 +469,7 @@ SEED_SV = {
     ],
     "changelog": [
         {
-            "version": "1.0",
+            "version": "1.1",
             "date": "2026-11-05",
             "text": "İlk sürüm."
         }
