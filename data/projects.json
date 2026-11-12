@@ -1678,5 +1678,88 @@
       "ekran-5.jpg"
     ],
     "created_at": "2026-11-05T10:00:22.409529+00:00"
+  },
+  {
+    "slug": "otomat-fabrika",
+    "name": "Otomat Fabrika",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/otomat-fabrika",
+    "download_url": null,
+    "updated_at": "",
+    "cover": "otomat-fabrika-oyun.png",
+    "tagline": "Bantları döşe, makineleri diz, otomatları dolduran fabrikanı büyüt",
+    "desc": "Izgara üzerine bant ve makine yerleştirerek hammaddeyi ürüne çeviren, otomatlarda satan bir fabrika idle oyunu. Hammadde madenlerinden telefon, konsol ve drone zincirlerine kadar uzanan üretim hatları kur; filtre, köprü, depo ve paketleyici ile hatlarını düzenle. Ar-Ge ağacı, müşteri siparişleri, olaylar, şablon kopyala/yapıştır, \"Yeni Çağ\" ve \"Galaktik Çağ\" prestijleri ve çevrimdışı kazanç var.",
+    "tags": [
+      "Godot",
+      "Fabrika",
+      "Idle",
+      "Strateji"
+    ],
+    "features": [
+      "Izgara tabanlı bant ve makine yerleştirme",
+      "Petrol, altın, kristal dahil yeni hammaddeler ve ürün zincirleri",
+      "Filtre, köprü, depo, paketleyici, hızlı bant",
+      "Lüks otomat, müşteri siparişleri ve rastgele olaylar",
+      "Ar-Ge ağacı, başarımlar, görevler",
+      "İki prestij katmanı: Yeni Çağ ve Galaktik Çağ",
+      "Şablon kopyala/yapıştır, çevrimdışı kazanç"
+    ],
+    "changelog": [],
+    "version": "2.0",
+    "download_file": "OtomatFabrika_v2_Windows.zip",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "created_at": "2026-11-11T23:03:17.100883+00:00"
+  },
+  {
+    "slug": "sonsuz-maden",
+    "name": "Sonsuz Maden",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/sonsuz-maden",
+    "download_url": null,
+    "updated_at": "",
+    "cover": "sonsuz-maden-oyun.png",
+    "tagline": "Tıkla, kaz, makineleri kur; derinlere indikçe maden değişir",
+    "desc": "Tıkla-kaz ve otomasyon karışımı bir idle madencilik oyunu. 16 farklı katmanda gittikçe zorlaşan bloklar, her 10 katta bir çeşitli boss'lar, 14 makine, efsane kazmalar, yumurtadan çıkan evcil hayvanlar, cevher eritme ve zanaat, günlük/haftalık meydan okumalar ve iki katmanlı prestij (Kadim Öz ve Kozmik) seni bekliyor. Çevrimdışıyken de kazanırsın.",
+    "tags": [
+      "Godot",
+      "Idle",
+      "Maden",
+      "Clicker"
+    ],
+    "features": [
+      "16 katman, her biri kendi görünümü ve efektiyle",
+      "Beş farklı boss türü",
+      "14 otomasyon makinesi, efsane kazmalar",
+      "8 evcil hayvan, yumurta ve seviye sistemi",
+      "Cevher eritme, malzemeler ve zanaat",
+      "Günlük ve haftalık meydan okuma",
+      "Kadim Öz ve Kozmik prestij, çevrimdışı kazanç"
+    ],
+    "changelog": [],
+    "version": "2.0",
+    "download_file": "SonsuzMaden_v2_Windows.zip",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg",
+      "ekran-6.jpg"
+    ],
+    "created_at": "2026-11-11T23:03:17.100883+00:00"
   }
 ]

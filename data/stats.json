@@ -1,6 +1,8 @@
 {
-  "visits": 0,
-  "visits_by_day": {},
+  "visits": 4,
+  "visits_by_day": {
+    "2026-11-12": 4
+  },
   "plays": {},
   "downloads": {},
   "likes": {},
