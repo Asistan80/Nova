@@ -1761,5 +1761,53 @@
       "ekran-6.jpg"
     ],
     "created_at": "2026-11-11T23:03:17.100883+00:00"
+  },
+  {
+    "slug": "buz-kulesi",
+    "name": "Buz Kulesi",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/buz-kulesi",
+    "download_url": null,
+    "updated_at": "",
+    "cover": "buz-kulesi-oyun.png",
+    "tagline": "Icy Tower tarzı dikey zıplama: kombo yap, bölgeleri geç, tehlikelerden kaç",
+    "desc": "Platformdan platforma zıplayarak sonsuz kuleye tırman. Kat atlayarak kombo yap, yıldız efektleriyle puanını katla. Her 50 katta ortam, platform tipleri ve müzik değişir; her 100 katta MEGA bölge ödülü var. Her bölgenin kendi düşmanı seni bekliyor: buz sarkıtı, arı, meteor, ateş topu, akrep, zehirli deniz anası, fırtına bulutu ve dron. Arı, akrep ve dronun üstüne zıplayıp onları ezebilirsin. 8 karakterden birini seç; dördünün havada kullandığı özel bir yeteneği var. İki oyunculu modda aynı kulede yarış: düşen elenir, son kalan kazanır.",
+    "tags": [
+      "Godot",
+      "Platform",
+      "Kombo",
+      "2 Oyunculu"
+    ],
+    "features": [
+      "Combo sistemi ve yıldız efektleri",
+      "8 bölge/tema: her 50 katta değişen ortam, platform tipleri ve müzik; 100'de MEGA bölge",
+      "Kaygan, yaylı, hareketli ve çöken platformlar",
+      "8 bölgeye özel tehlike; bazılarının üstüne zıplayarak ezebilirsin",
+      "8 karakter: çift zıplama, gölge atılışı, ateş nefesi ve süzülme yetenekleri",
+      "Güçlendirmeler: süper zıplama, kalkan, yavaşlatma, mıknatıs, roket",
+      "İki oyunculu yarış modu (aynı klavyede)",
+      "Skor tablosu, kodla üretilmiş ses ve müzik; klavye ve dokunmatik desteği"
+    ],
+    "changelog": [
+      {
+        "version": "3.0",
+        "date": "2026-11-10",
+        "text": "Bölgeye özel tehlikeler, 2 oyunculu mod, 4 yeni yetenekli karakter."
+      }
+    ],
+    "version": "3.0",
+    "download_file": "BuzKulesi_v3_Windows.zip",
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "created_at": "2026-11-12T05:00:00+00:00"
   }
 ]
