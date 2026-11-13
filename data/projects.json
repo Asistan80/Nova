@@ -1809,5 +1809,46 @@
       "ekran-5.jpg"
     ],
     "created_at": "2026-11-12T05:00:00+00:00"
+  },
+  {
+    "slug": "sisli-pinar-koyu",
+    "name": "Sisli Pınar Köyü",
+    "kind": "oyun",
+    "status": "playable",
+    "published": true,
+    "youtube_url": "",
+    "publish_at": null,
+    "play_url": "/oyna/sisli-pinar-koyu",
+    "download_url": null,
+    "updated_at": "",
+    "cover": "sisli-pinar-koyu-oyun.png",
+    "tagline": "3D köyde görev yap, balık tut, define ara; geceleyin pınarı uyandır",
+    "desc": "Sisin içinde kalmış bir Anadolu köyünde geçen, tarayıcıda oynanan 3D hayat ve macera oyunu. Köylülerle konuş, dostluk kur, görevleri tamamla ve dört pınar damlasını topla; sonra geceleyin pınarı uyandırıp sisi dağıt. Kendi evini süsle, pınarda balık tut, parlayan topraklarda define ara, bakkaldan alışveriş yap, yağmurda yürü ve pınar uyanınca köy şenliğinde havai fişekleri izle. Gece-gündüz döngüsü, yaşayan köylüler ve kaydedilen ilerleme var.",
+    "tags": [
+      "Three.js",
+      "3D",
+      "Köy",
+      "Macera"
+    ],
+    "features": [
+      "Üç boyutlu, gece-gündüz döngülü ve sisli köy dünyası",
+      "8 köylü: günlük rutinleri, kalp seviyeleri, hediyeler ve sırlar",
+      "4 ana görev + 4 yan görev, bilmece ve başarımlar",
+      "Balık tutma, define kazma, mantar toplama, bakkal ve altın ekonomisi",
+      "Kendi evin: yatak, semaver, koleksiyon rafı ve satın alınabilir dekorlar",
+      "Yağmur, gök gürültüsü ve pınar uyanınca şenlik havai fişekleri",
+      "Fotoğraf modu, otomatik kayıt, klavye/fare ve mobil dokunmatik kontrol"
+    ],
+    "changelog": [],
+    "version": "1.0",
+    "download_file": null,
+    "gallery": [
+      "ekran-1.jpg",
+      "ekran-2.jpg",
+      "ekran-3.jpg",
+      "ekran-4.jpg",
+      "ekran-5.jpg"
+    ],
+    "created_at": "2026-11-13T22:09:04.422117+00:00"
   }
 ]

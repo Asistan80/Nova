@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Sisli Pınar Köyü · 3D köy oyunu</title>
+<meta name="description" content="Yapay zekâlı 3D köy oyunu: köylülerle konuş, görevleri yap, dört pınar damlasını topla ve sisi dağıt. Tarayıcıda oynanır.">
+<meta name="theme-color" content="#0b1a22">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏘️</text></svg>">
+<link rel="stylesheet" href="koy/koy.css">
+<script>window.KOY_STATIC=true;window.KOY_API="";</script>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="intro" class="screen">
+  <div class="card intro">
+    <div class="logo">🏘️</div>
+    <h1>Sisli Pınar Köyü</h1>
+    <p class="sub">Köyün pınarı uykuya daldı, sis her yeri sardı. Köylülerin dertlerine derman ol, dört pınar damlasını topla ve geceleyin pınarı uyandır.</p>
+    <label class="lbl">Adın ne?<input id="iName" maxlength="16" placeholder="Misafir" autocomplete="off"></label>
+    <div class="row"><button class="btn" id="iStart">🌫️ Yeni oyun</button><button class="btn ghost" id="iCont" hidden>▶️ Devam et</button></div>
+    <ul class="how"><li>🕹️ <b>WASD</b> yürü · <b>Shift</b> koş · <b>Boşluk</b> zıpla</li><li>🗣️ <b>E</b> konuş / kaz / olta · <b>J</b> günlük · <b>F</b> foto · <b>P</b> menü</li><li>🎣 Balık tut, ⛏️ define ara, 🏠 evini süsle, 🛒 bakkaldan alışveriş yap</li><li>📱 Mobilde sol joystick + sağ tarafı sürükle</li><li>🤖 Köylülerle sohbet hazır diyaloglarla çalışır.</li></ul>
+    <a class="back" href="/">← Derin Murnova Dünyası</a>
+  </div>
+</div>
+
+<div id="hud" hidden class="ui">
+  <div class="top"><div class="pill" id="clock"></div><div class="pill obj" id="obj"></div></div>
+  <canvas id="mini" width="130" height="130"></canvas>
+  <div id="inv"></div>
+  <div class="btns"><button id="btnP" class="rb" title="Fotoğraf (F)">📷</button><button id="btnJ" class="rb" title="Günlük">📖</button><button id="btnM" class="rb" title="Menü">⏸️</button></div>
+  <div id="prompt" hidden></div>
+  <div id="fishUI" hidden></div>
+  <div id="joy"><i id="knob"></i></div>
+  <button id="btnE" class="act">E</button><button id="btnJump" class="act jump">⤒</button>
+</div>
+
+<div id="dlg" class="ui" hidden>
+  <div class="dh"><span id="dEmoji"></span><b id="dName"></b><span id="dHearts"></span></div>
+  <div id="dText"></div>
+  <form id="dForm" hidden><input id="dIn" maxlength="160" placeholder="Bir şey yaz..." autocomplete="off"><button class="btn sm">Gönder</button></form>
+  <div id="dNote"></div>
+  <div id="dChoices"></div>
+</div>
+
+<div id="journal" class="screen" hidden><div class="card panel"><div id="jBody"></div><button class="btn" id="jClose">Kapat</button></div></div>
+<div id="menu" class="screen" hidden><div class="card panel"><div id="mBody"></div></div></div>
+<div id="end" class="screen" hidden><div class="card panel"><div id="eBody"></div></div></div>
+<div id="cine"></div>
+<div id="fade"></div>
+<div id="toast"></div>
+<noscript><p style="color:#fff;padding:20px">Bu oyun için JavaScript gerekir.</p></noscript>
+<script>
+function toast(m){var t=document.getElementById('toast');if(!t)return;var d=document.createElement('div');d.textContent=m;t.appendChild(d);setTimeout(function(){d.classList.add('out');},2600);setTimeout(function(){d.remove();},3200);while(t.children.length>4)t.firstChild.remove();}
+window.toast=toast;
+addEventListener('error',function(e){var b=document.getElementById('iStart');if(b&&!window.__koy)toast('Oyun yüklenemedi: tarayıcın WebGL desteklemiyor olabilir.');});
+</script>
+<script type="module" src="koy/main.js"></script>
+</body>
+</html>
