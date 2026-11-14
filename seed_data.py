@@ -490,7 +490,40 @@ SEED_SV = {
     ]
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV]
+SEED_RW = {
+    "slug": "runway",
+    "name": "Runway",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/runway",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "runway-oyun.png",
+    "tagline": "Bekçiden kaç: sokaklardan vagon çatılarına, çatılardan limana",
+    "desc": "Bir bekçi peşinde. Altınları ve ödülleri topla, engelleri aş, yakalanma. Yedi farklı bölgede koş: gece sokağı, depo, hareket halindeki trenlerin çatısı, çukurlu çatılar, park, buharlı istasyon ve vinçli liman. Vagonlara zıpla, aralarını atla, çukurların üstünden geç, asılı tabelaların altından kay.",
+    "tags": ["Tarayıcı", "Koşu", "Canvas", "Dokunmatik"],
+    "features": [
+        "7 bölge: sokak, depo, tren üstü, çatılar, park, istasyon ve liman",
+        "Vagon çatılarında koşu, vagon aralarını atlama ve VAGON TURU bonusu",
+        "Çukurlar, buhar bacaları, sallanan vinç kancaları, forkliftler",
+        "Kıl payı bonusu, kombo, hediye kutuları ve 4 güçlendirici",
+        "Dükkan: 7 kalıcı yükseltme, 4 karakter, görevler ve 10 başarım",
+        "Günlük hediye, alıştırma için bölge seçimi, elmasla devam etme",
+        "Kodla üretilmiş ses ve müzik, klavye ve dokunmatik destek, otomatik kayıt",
+    ],
+    "changelog": [
+        {"version": "2.0", "date": "2026-11-15", "text": "Tren üstü, çatılar, istasyon ve liman bölgeleri; vagon çatısı ve çukur fiziği; kıl payı, vagon turu, başarımlar, günlük hediye ve bölge seçimi eklendi."},
+        {"version": "1.0", "date": "2026-11-14", "text": "İlk sürüm."},
+    ],
+    "version": "2.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW]
 
 
 def _empty(v):
