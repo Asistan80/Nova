@@ -523,7 +523,38 @@ SEED_RW = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW]
+SEED_AM = {
+    "slug": "altin-madenci",
+    "name": "Altın Madenci",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/altin-madenci",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "altin-madenci-oyun.png",
+    "tagline": "Kancayı salla, altını yakala, süre dolmadan hedefi tuttur",
+    "desc": "Klasik altın yakalama oyunu, beş farklı madende: altın madeni, kristal mağarası, lav madeni, buz mağarası ve asteroit kuşağı. Sallanan kancayı doğru anda fırlat, altın ve elmasları çek, taşlardan ve TNT'den kaçın. Her seviyeden sonra dükkandan eşya al, yıldızlarla kalıcı yükseltmeler aç.",
+    "tags": ["Tarayıcı", "Arcade", "Canvas", "Dokunmatik"],
+    "features": [
+        "5 ortam: altın madeni, kristal mağarası, lav madeni, buz mağarası, asteroit kuşağı",
+        "Altın, taş, elmas, kristal, keseler, geodlar, buz küpleri, domuz ve köstebekler",
+        "TNT zincir patlaması, dinamitle ağır yükü patlatma, fışkıran lav",
+        "Her seviye sonrası dükkan: güç içeceği, yonca, taş kitabı, elmas cilası, kum saati, dev kanca",
+        "Atölye: 6 kalıcı yükseltme, 4 madenci, 8 başarım, günlük hediye",
+        "Kodla üretilmiş ses ve müzik, klavye ve dokunmatik destek, otomatik kayıt",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM]
 
 
 def _empty(v):
