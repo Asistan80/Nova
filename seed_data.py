@@ -679,7 +679,39 @@ SEED_KC = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC]
+SEED_FA = {
+    "slug": "foto-album",
+    "name": "Foto Albüm",
+    "kind": "uygulama",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/foto-album",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "foto-album-oyun.png",
+    "tagline": "Fotoğraflarını sakla, albümle, düzenle: eski usul foto organizatörü",
+    "desc": "Eskiden popüler olan fotoğraf düzenleme ve saklama programlarının tarayıcıya uyarlanmış hali. Fotoğraflarını ekle, tarihe göre otomatik gruplansın, albüm ve etiketlerle düzenle. Kırp, düzelt, tek tuşla otomatik iyileştir, 18 efektle oyna, kolaj yap, slayt gösterisi izle. Her şey yalnızca tarayıcında saklanır, hiçbir dosya internete yüklenmez.",
+    "tags": ["Tarayıcı", "Fotoğraf", "Nostalji", "Canvas"],
+    "features": [
+        "Sürükle-bırak ile fotoğraf veya klasör ekleme, aylara göre otomatik gruplama",
+        "Albümler, etiketler, yıldız, arama ve sıralama, çoklu seçim",
+        "Şanslıyım (otomatik düzelt), otomatik kontrast ve renk, döndür, eğim düzelt, oranlı kırpma",
+        "Dolgu ışığı, vurgu/gölge, sıcaklık, doygunluk, keskinlik ayarları ve histogram",
+        "18 efekt: sepya, film, eski foto, dramatik, ışıltı, vinyet ve daha fazlası, şiddet ayarlı",
+        "Geri al/yinele, karşılaştır, kopya veya üzerine kaydet (orijinal saklanır)",
+        "8 yerleşimli kolaj yapıcı, slayt gösterisi, PNG/JPG indirme",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA]
 
 
 def _empty(v):
