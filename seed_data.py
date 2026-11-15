@@ -554,7 +554,38 @@ SEED_AM = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM]
+SEED_DK = {
+    "slug": "derin-kazi",
+    "name": "Derin Kazı",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/derin-kazi",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "derin-kazi-oyun.png",
+    "tagline": "Matkaplı kapsülünle yeraltına in, cevher kaz, yüzeyde sat ve geliştir",
+    "desc": "Yeraltına doğru kat kat kazdığın bir maden oyunu. Kapsülünle toprağı, kili, kayayı, magmayı ve kristal katmanlarını kaz; bakırdan elmasa ve çekirdek kristaline kadar cevher topla. Yakıtın bitmeden yüzeye dön, İstasyon'da sat, kapsülünü geliştir ve daha derine in. Derine indikçe hava kararır, lav, gaz ve sert kaya yolunu keser.",
+    "tags": ["Tarayıcı", "Kazı", "Canvas", "Dokunmatik"],
+    "features": [
+        "1450 m derinlik, 6 katman: toprak, kil, kaya, magma, kristal ve çekirdek",
+        "8 cevher türü: bakır, demir, gümüş, altın, zümrüt, yakut, elmas, çekirdek kristali",
+        "Mağaralar, lav gölleri, patlayan gaz keseleri ve kırılmaz sert kaya",
+        "İstasyon: cevher satışı (günlük talep bonusu), yakıt, tamir, 6 yükseltme, dinamit, ışınlayıcı, tamir kiti",
+        "Derinlikle artan karanlık, far yükseltmesi, düşme ve lav hasarı, kurtarma ekibi",
+        "11 başarım, rekor sefer listesi, otomatik kayıt, kodla üretilmiş ses ve müzik, klavye ve dokunmatik destek",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK]
 
 
 def _empty(v):
