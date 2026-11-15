@@ -616,7 +616,38 @@ SEED_KAL = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL]
+SEED_MP = {
+    "slug": "maden-patronu",
+    "name": "Maden Patronu",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/maden-patronu",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "maden-patronu-oyun.png",
+    "tagline": "Maden imparatorluğunu kur: katlar aç, yönetici tut, yeni madene geç",
+    "desc": "Idle Miner Tycoon tarzı bir maden imparatorluğu oyunu. Madenciler cevher çıkarır, asansör yukarı taşır, depo satar. Yeni katlar aç, yönetici işe al, seviye bonuslarıyla üretimi katla. Yeterince zengin olunca yeni bir maden dünyası açıp yatırımcılarla daha da büyü.",
+    "tags": ["Tarayıcı", "Idle", "Tycoon", "Canvas"],
+    "features": [
+        "Madenci katı, asansör ve depo zinciri, darboğaz uyarıları",
+        "30 kata kadar maden, yönetici, ×1/×10/×100/MAX yükseltme, seviye 10, 25, 50, 100 çarpan bonusları",
+        "Yeni maden (prestij): yatırımcılar ve 4 farklı dünya (kömür, altın, kristal, Mars)",
+        "Çevrimdışı kazanç (8 saate kadar), altın vagon, günlük hediye, süper nakit",
+        "Gelir ×2, hız ×2 ve nakit paketi güç artışları, 11 başarım, istatistikler",
+        "Kodla üretilmiş ses ve müzik, otomatik kayıt, mobil uyumlu",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP]
 
 
 def _empty(v):
