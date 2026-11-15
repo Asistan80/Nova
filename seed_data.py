@@ -647,7 +647,39 @@ SEED_MP = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP]
+SEED_KC = {
+    "slug": "klasik-calar",
+    "name": "Klasik Çalar",
+    "kind": "uygulama",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/klasik-calar",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "klasik-calar-oyun.png",
+    "tagline": "Eski usul müzik çalar: 10 bantlı ekolayzır, çalma listesi, görselleştirme",
+    "desc": "Nostaljik masaüstü müzik çalarların tarayıcıya uyarlanmış hali. Kendi müzik dosyalarını veya klasörünü ekle, çalma listesi kur, 10 bantlı ekolayzırla sesi ayarla, 4 görselleştirme moduyla izle. Dosyalar yalnızca tarayıcında saklanır, internete yüklenmez.",
+    "tags": ["Tarayıcı", "Müzik", "Nostalji", "Web Audio"],
+    "features": [
+        "Sürüklenebilir pencereler: çalar, ekolayzır, çalma listesi, görselleştirme",
+        "10 bantlı ekolayzır + ön yükseltici, hazır ayarlar ve kendi ayarını kaydetme",
+        "MP3, WAV, OGG, M4A, FLAC dosyası veya klasör ekleme, ID3 etiket okuma, sürükle-bırak",
+        "Çalma listesi: karıştır, tekrar, sırala, listeyi kaydet; dosyalar tarayıcıda kalıcı",
+        "Çubuklar, osiloskop, halka ve plazma görselleştirmesi, tam ekran",
+        "4 kaplama (klasik, buz, ateş, neon), hız ayarı, uyku zamanlayıcısı, klavye kısayolları",
+        "Bilgisayarında dosya yoksa 4 kodla üretilmiş demo parça",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC]
 
 
 def _empty(v):
