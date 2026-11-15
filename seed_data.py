@@ -585,7 +585,38 @@ SEED_DK = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK]
+SEED_KAL = {
+    "slug": "kara-altin",
+    "name": "Kara Altın",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/kara-altin",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "kara-altin-oyun.png",
+    "tagline": "1901'de petrol kralı ol: toprak al, sondaj kur, rakipleri geride bırak",
+    "desc": "Vahşi batıda geçen petrol ekonomisi oyunu. Parselleri etüt ettirip petrol ara, arazi satın al, sondaj kur ve pompa ile depoyu geliştir. Fiyat dalgalanır, savaş, kriz, grev ve yangınlar yaşanır. Üç rakip şirketle yarışıp süre bittiğinde en yüksek servete ulaşmaya çalış.",
+    "tags": ["Tarayıcı", "Strateji", "Ekonomi", "Canvas"],
+    "features": [
+        "3 harita (Teksas, Oklahoma, Kaliforniya), 3 zorluk, 1-3 yıllık oyun süresi",
+        "Gizli petrol yatakları: etüt, komşu parsel ipuçları ve komşu sondajların petrolü emmesi",
+        "Dalgalanan petrol fiyatı, savaş, kriz, grev, yangın, yeni keşif ve petrol hücumu olayları",
+        "Sondaj, 3 pompa seviyesi, depolar, otomatik satış ya da bekletip fiyat yükselince satma",
+        "Banka ve borç, şirket ofisinde nakliye, jeolog ve sigorta geliştirmeleri",
+        "3 yapay zekâ rakip şirket, servet sıralaması, 9 başarım, rekor listesi ve otomatik kayıt",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-15", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL]
 
 
 def _empty(v):
