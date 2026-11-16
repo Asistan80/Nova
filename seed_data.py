@@ -743,7 +743,37 @@ SEED_YY = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA, SEED_YY]
+SEED_MJ = {
+    "slug": "mesajci",
+    "name": "Mesajcı",
+    "kind": "uygulama",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/mesajci",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "mesajci-oyun.png",
+    "tagline": "Eski usul anlık mesajlaşma: kişi listesi, titreme, ifadeler",
+    "desc": "Eskiden herkesin kullandığı anlık mesajlaşma programlarının tarayıcıya uyarlanmış hali. Kişi listende arkadaşlar, aile ve iş grupları var; durumları (çevrimiçi, meşgul, uzakta) değişiyor, kişiler sana kendiliğinden yazıyor. Sohbet pencereleri taşınabilir, ifadeler ve titreme gönderebilirsin. Kişiler bilgisayar tarafından yönetilen karakterlerdir; sohbetler yalnızca tarayıcında saklanır.",
+    "tags": ["Tarayıcı", "Nostalji", "Sohbet", "Web Audio"],
+    "features": [
+        "Takma ad, avatar, durum ve kişisel mesaj düzenleme",
+        "Gruplu kişi listesi, durum değişimleri ve çevrimiçi bildirimi",
+        "Çoklu sohbet penceresi, yazıyor göstergesi, okunmamış sayacı",
+        "İfade seçici, otomatik ifadeye çevirme (:) <3), titreme gönderme",
+        "Sohbet geçmişi tarayıcıda saklanır, sesli bildirimler",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-16", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA, SEED_YY, SEED_MJ]
 
 
 def _empty(v):
