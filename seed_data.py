@@ -711,7 +711,39 @@ SEED_FA = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA]
+SEED_YY = {
+    "slug": "yeni-yasam",
+    "name": "Yeni Yaşam",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/yeni-yasam",
+    "download_url": None,
+    "download_file": None,
+    "updated_at": "",
+    "cover": "yeni-yasam-oyun.png",
+    "tagline": "Avatarını yarat, adayı gez, yerleşiklerle arkadaş ol, evini kur",
+    "desc": "Eskiden çok popüler olan sanal dünya oyunlarından esinlenen 3 boyutlu bir ada yaşamı. Kendi avatarını tasarla, yürü, koş, uç, otur, dans et. Adadaki yerleşiklerle sohbet et, arkadaş ol, hediye ver. Altın topla, parsel satın al, mağazadan mobilya alıp evini döşe. Gece gündüz döngüsü ve kulüpte müzik var. Not: yerleşikler bilgisayar tarafından yönetilen karakterlerdir, gerçek oyunculu çok oyunculu mod yoktur.",
+    "tags": ["Tarayıcı", "3D", "Sanal Dünya", "Sosyal", "Three.js"],
+    "features": [
+        "Detaylı avatar oluşturucu: ten, saç, kıyafet, aksesuar, boy",
+        "3 boyutlu ada: meydan, kafe, kulüp, mağaza, plaj, konut alanı",
+        "Yürü, koş, zıpla, uç (F), otur, el salla, dans et, alkışla",
+        "8 yerleşikle sohbet, özel mesaj, hediye, arkadaşlık seviyeleri",
+        "Altın topla, kulüpte dans ederek kazan, parsel satın al",
+        "10 çeşit mobilya, yapı modu ile evini döşe, otomatik kayıt",
+        "Gece gündüz döngüsü, kulüpte müzik, harita, mobil dokunmatik kontrol",
+    ],
+    "changelog": [
+        {"version": "1.0", "date": "2026-11-16", "text": "İlk sürüm."},
+    ],
+    "version": "1.0",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA, SEED_YY]
 
 
 def _empty(v):
