@@ -773,7 +773,39 @@ SEED_MJ = {
     "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg"],
 }
 
-SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA, SEED_YY, SEED_MJ]
+SEED_PALMIYE = {
+    "slug": "palmiye-korfezi",
+    "name": "Palmiye Körfezi",
+    "kind": "oyun",
+    "status": "playable",
+    "published": True,
+    "youtube_url": "",
+    "publish_at": None,
+    "play_url": "/oyna/palmiye-korfezi",
+    "download_url": None,
+    "download_file": "PalmiyeKorfezi_Windows.zip",
+    "updated_at": "",
+    "cover": "palmiye-korfezi-oyun.png",
+    "tagline": "Hicivli, güneşli, kaos dolu açık dünya: araç sür, görev yap, timsahlara dikkat et",
+    "desc": "GTA tarzından esinlenen, yukarıdan bakışlı hicivli bir açık dünya oyunu. Palmiye Körfezi'nde 8 bölgeli bir adayı keşfet: araç ve jet ski sür, polisten kaç, 14 hikâye görevini bitir, balık tut, kumar oyna, hazine ara, garip olayları videoya çekip viral ol. Tüm görseller ve sesler kodla üretilmiştir; şiddet çizgi film seviyesindedir.",
+    "tags": ["Godot", "Açık dünya", "Hiciv", "Aksiyon"],
+    "features": [
+        "8 bölgeli ada: şehir merkezi, plaj, liman, bataklık ve daha fazlası",
+        "15 araç türü: araba, motosiklet, jet ski, tekne, dondurma kamyonu ve daha fazlası",
+        "14 hikâye görevi, yarışlar ve büyük karnaval finali",
+        "Polis kovalamacası, aranma yıldızları, nitro",
+        "Balık tutma, mini golf, dans yarışması, slot, hazine avı, taksi ve kargo işleri",
+        "Rastgele olaylar ve viral video çekimi (C tuşu), başarımlar",
+        "4 radyo istasyonu, gece-gündüz ve hava durumu, otomatik kayıt",
+    ],
+    "changelog": [
+        {"version": "1.1", "date": "2026-11-26", "text": "Açılış hızlandı, ana menü siyah ekran hatası giderildi."},
+    ],
+    "version": "1.1",
+    "gallery": ["ekran-1.jpg", "ekran-2.jpg", "ekran-3.jpg", "ekran-4.jpg", "ekran-5.jpg", "ekran-6.jpg"],
+}
+
+SEEDS = [TAKIMADA, OMUR, GECE, FENER, TELSIZ, KAYIP, SAATCI, SEED_PK, SEED_KA, SEED_AG, SEED_SV, SEED_RW, SEED_AM, SEED_DK, SEED_KAL, SEED_MP, SEED_KC, SEED_FA, SEED_YY, SEED_MJ, SEED_PALMIYE]
 
 
 def _empty(v):
